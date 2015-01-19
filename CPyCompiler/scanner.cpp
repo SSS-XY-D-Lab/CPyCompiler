@@ -97,28 +97,142 @@ namespace token
 			throw("Invalid Number");
 	}
 
+	namespace ops
+	{
+		std::string op2Str(opType op)
+		{
+			static opItem opMap[] = {
+				opType::ERROR, "ERROR",
+				opType::SUB_LEFT, "SUB_LEFT",
+				opType::SUB_RIGHT, "SUB_RIGHT",
+				opType::BRACKET_LEFT, "BRACKET_LEFT",
+				opType::BRACKET_RIGHT, "BRACKET_RIGHT",
+				opType::OBJ_MEMBER, "OBJ_MEMBER",
+				opType::PTR_MEMBER, "PTR_MEMBER",
+				opType::POSI, "POSI",
+				opType::NEGA, "NEGA",
+				opType::INC, "INC",
+				opType::DEC, "DEC",
+				opType::REF, "REF",
+				opType::DEREF, "DEREF",
+				opType::NOT, "NOT",
+				opType::LGNOT, "LGNOT",
+				opType::DIV, "DIV",
+				opType::MUL, "MUL",
+				opType::MOD, "MOD",
+				opType::ADD, "ADD",
+				opType::SUB, "SUB",
+				opType::SHL, "SHL",
+				opType::SHR, "SHR",
+				opType::BIG, "BIG",
+				opType::BIGEQU, "BIGEQU",
+				opType::LES, "LES",
+				opType::LESEQU, "LESEQU",
+				opType::EQU, "EQU",
+				opType::NEQU, "NEQU",
+				opType::AND, "AND",
+				opType::XOR, "XOR",
+				opType::BOR, "BOR",
+				opType::LGAND, "LGAND",
+				opType::LGOR, "LGOR",
+				opType::ASSIGN, "ASSIGN",
+				opType::MODASS, "MODASS",
+				opType::DIVASS, "DIVASS",
+				opType::MULASS, "MULASS",
+				opType::ADDASS, "ADDASS",
+				opType::SUBASS, "SUBASS",
+				opType::SHLASS, "SHLASS",
+				opType::SHRASS, "SHRASS",
+				opType::ANDASS, "ANDASS",
+				opType::XORASS, "XORASS",
+				opType::BORASS, "BORASS",
+				opType::COMMA, "COMMA", };
+			for (int i = 0; i < 45; i++)
+				if (op == opMap[i].val)
+					return opMap[i].str;
+			return "";
+		}
+	}
+
+	namespace keywords
+	{
+		std::string kw2Str(keywords kw)
+		{
+			static keywordItem keywordMap[] =
+			{
+				"sint", keywords::SINT,
+				"s8", keywords::S8,
+				"s16", keywords::S16,
+				"s32", keywords::S32,
+				"s64", keywords::S64,
+				"uint", keywords::UINT,
+				"u8", keywords::U8,
+				"u16", keywords::U16,
+				"u32", keywords::U32,
+				"u64", keywords::U64,
+				"void", keywords::VOID,
+				"const", keywords::CONST,
+				"dim", keywords::DIM,
+				"end", keywords::END,
+				"function", keywords::FUNCTION,
+				"return", keywords::RETURN,
+			};
+			for (int i = 0; i < 27; i++)
+				if (kw == keywordMap[i].val)
+					return keywordMap[i].str;
+			return "";
+		}
+
+		keywords str2Kw(std::string str)
+		{
+			static keywordItem keywordMap[] =
+			{
+				"sint", keywords::SINT,
+				"s8", keywords::S8,
+				"s16", keywords::S16,
+				"s32", keywords::S32,
+				"s64", keywords::S64,
+				"uint", keywords::UINT,
+				"u8", keywords::U8,
+				"u16", keywords::U16,
+				"u32", keywords::U32,
+				"u64", keywords::U64,
+				"void", keywords::VOID,
+				"const", keywords::CONST,
+				"dim", keywords::DIM,
+				"end", keywords::END,
+				"function", keywords::FUNCTION,
+				"return", keywords::RETURN,
+				"byte", keywords::S8,
+				"char", keywords::S8,
+				"dword", keywords::S32,
+				"int", keywords::SINT,
+				"llong", keywords::S64,
+				"long", keywords::S32,
+				"qword", keywords::S64,
+				"short", keywords::S16,
+				"ubyte", keywords::U8,
+				"uchar", keywords::U8,
+				"udword", keywords::U32,
+				"ullong", keywords::U64,
+				"ulong", keywords::U32,
+				"uqword", keywords::U64,
+				"ushort", keywords::U16,
+				"uword", keywords::U16,
+				"word", keywords::S16,
+			};
+			for (int i = 0; i < 27; i++)
+				if (str == keywordMap[i].str)
+					return keywordMap[i].val;
+			return keywords::ERROR;
+		}
+	}
+
 	keyword::keyword(std::string _keyword)
 	{
-		static keywords::keywordItem keywordMap[] =
-		{
-			"sint", keywords::SINT,
-			"s8", keywords::S8,
-			"s16", keywords::S16,
-			"s32", keywords::S32,
-			"s64", keywords::S64,
-			"uint", keywords::UINT,
-			"u8", keywords::U8,
-			"u16", keywords::U16,
-			"u32", keywords::U32,
-			"u64", keywords::U64,
-		};
-		for (int i = 0; i < 27; i++)
-			if (_keyword == keywordMap[i].str)
-			{
-				word = keywordMap[i].val;
-				return;
-			}
-		throw(new NotAKeyWord);
+		word = keywords::str2Kw(_keyword);
+		if (word == keywords::keywords::ERROR)
+			throw(NotAKeyWord());
 	}
 }
 
@@ -211,8 +325,18 @@ tokenList scanner(std::string str)
 					tList.push_back(new token::op(token::ops::opType::MULASS));
 				else
 				{
-					tList.push_back(new token::op(token::ops::opType::MUL));
 					p--;
+					switch (tList.back()->getType())
+					{
+						case token::type::ID:
+						case token::type::NUMBER:
+						case token::type::CHARA:
+						case token::type::STR:
+							tList.push_back(new token::op(token::ops::opType::MUL));
+							break;
+						default:
+							tList.push_back(new token::op(token::ops::opType::DEREF));
+					}
 				}
 				break;
 			case '/':
@@ -265,13 +389,33 @@ tokenList scanner(std::string str)
 						tList.push_back(new token::op(token::ops::opType::LGAND));
 					else
 					{
-						tList.push_back(new token::op(token::ops::opType::AND));
+						switch (tList.back()->getType())
+						{
+							case token::type::ID:
+							case token::type::NUMBER:
+							case token::type::CHARA:
+							case token::type::STR:
+								tList.push_back(new token::op(token::ops::opType::AND));
+								break;
+							default:
+								tList.push_back(new token::op(token::ops::opType::REF));
+						}
 						p--;
 					}
 				}
 				else
 				{
-					tList.push_back(new token::op(token::ops::opType::AND));
+					switch (tList.back()->getType())
+					{
+						case token::type::ID:
+						case token::type::NUMBER:
+						case token::type::CHARA:
+						case token::type::STR:
+							tList.push_back(new token::op(token::ops::opType::AND));
+							break;
+						default:
+							tList.push_back(new token::op(token::ops::opType::REF));
+					}
 					p--;
 				}
 				break;
@@ -407,6 +551,8 @@ tokenList scanner(std::string str)
 				tList.push_back(new token::str(_str));
 				break;
 			}
+			case ' ':
+				break;
 			default:
 				if (isalpha(*p) || (*p) == '_')
 				{
@@ -533,6 +679,8 @@ tokenList scanner(std::string str)
 					throw(p);
 				}
 		}
+		if (p == pEnd)
+			break;
 	}
 	return tList;
 }
