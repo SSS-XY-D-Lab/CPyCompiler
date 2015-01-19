@@ -250,6 +250,7 @@ tokenList scanner(std::string str)
 		switch (*p)
 		{
 			case '#':
+				p = pEnd;
 				break;
 			case '(':
 				tList.push_back(new token::op(token::ops::opType::BRACKET_LEFT));
