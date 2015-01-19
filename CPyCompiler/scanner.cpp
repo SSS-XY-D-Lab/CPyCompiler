@@ -277,7 +277,7 @@ tokenList scanner(std::string str)
 						tList.push_back(new token::op(token::ops::opType::ADDASS));
 					else if (*p == '+')
 						tList.push_back(new token::op(token::ops::opType::INC));
-					else if (isxdigit(*p))
+					else if (isdigit(*p))
 					{
 						p--;
 						goto number_process;
@@ -682,5 +682,6 @@ tokenList scanner(std::string str)
 		if (p == pEnd)
 			break;
 	}
+	tList.push_back(new token::delim);
 	return tList;
 }
