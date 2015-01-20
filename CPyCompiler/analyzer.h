@@ -56,7 +56,7 @@ namespace stnode
 
 	namespace op
 	{
-		enum opType{
+		enum ops{
 			ERROR,
 			SUB_LEFT, SUB_RIGHT, BRACKET_LEFT, BRACKET_RIGHT, OBJ_MEMBER, PTR_MEMBER,
 			POSI, NEGA, INC, DEC, REF, DEREF, NOT, LGNOT,
@@ -70,11 +70,38 @@ namespace stnode
 			COMMA
 		};
 
+		enum opType{
+			_ERROR, SINGLE, DOUBLE, TRIPLE
+		};
+
 		class op :public stnode
 		{
 		public:
-
+			op(ops _opVal){ opVal = _opVal; };
+			ops opVal;
 			type getType(){ return type::OP; };
+			virtual opType getOpType(){ return opType::_ERROR; };
+		};
+
+		class opSingle :public op
+		{
+		public:
+			stnode *arg1;
+			opType getOpType(){ return opType::SINGLE; };
+		};
+
+		class opDouble :public op
+		{
+		public:
+			stnode *arg1, *arg2;
+			opType getOpType(){ return opType::DOUBLE; };
+		};
+		
+		class opTriple :public op
+		{
+		public:
+			stnode *arg1, *arg2, *arg3;
+			opType getOpType(){ return opType::TRIPLE; };
 		};
 	}
 }

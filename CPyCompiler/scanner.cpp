@@ -681,7 +681,11 @@ tokenList scanner(std::string str)
 				}
 				else
 				{
-					throw(p);
+					std::string::iterator pItr, pEnd = str.end();
+					int i = 0;
+					for (pItr = str.begin(); pItr != pEnd && pItr != p; pItr++)
+						i++;
+					throw(i);
 				}
 		}
 		if (p == pEnd)
