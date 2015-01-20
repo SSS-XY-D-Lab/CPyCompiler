@@ -77,6 +77,14 @@ namespace token
 			ASSIGN, MODASS, DIVASS, MULASS, ADDASS, SUBASS, SHLASS, SHRASS, ANDASS, XORASS, BORASS,
 			COMMA
 		};
+
+		struct opItem
+		{
+			opType val;
+			std::string str;
+		};
+
+		std::string op2Str(opType op);
 	}
 
 	class op :public token
@@ -97,13 +105,16 @@ namespace token
 
 	namespace keywords
 	{
-		enum keywords{ SINT, S8, S16, S32, S64, UINT, U8, U16, U32, U64 };
+		enum keywords{ ERROR, SINT, S8, S16, S32, S64, UINT, U8, U16, U32, U64, VOID, CONST, DIM, END, FUNCTION, RETURN };
 
 		struct keywordItem
 		{
 			std::string str;
 			keywords val;
 		};
+
+		std::string kw2Str(keywords kw);
+		keywords str2Kw(std::string str);
 	}
 
 	class keyword :public token
