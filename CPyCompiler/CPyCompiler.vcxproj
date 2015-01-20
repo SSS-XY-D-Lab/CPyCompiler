@@ -76,10 +76,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="analyzer.h" />
     <ClInclude Include="scanner.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="analyzer.cpp" />
     <ClCompile Include="CPyCompiler.cpp" />
     <ClCompile Include="scanner.cpp" />
     <ClCompile Include="stdafx.cpp">
