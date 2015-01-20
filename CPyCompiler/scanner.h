@@ -105,7 +105,7 @@ namespace token
 
 	namespace keywords
 	{
-		enum keywords{ ERROR, SINT, S8, S16, S32, S64, UINT, U8, U16, U32, U64, VOID, CONST, DIM, END, FUNCTION, RETURN };
+		enum keywords{ ERROR, SINT, S8, S16, S32, S64, UINT, U8, U16, U32, U64, VOID, CONST, DIM, END, FUNCTION, RETURN, IF, ELSE };
 
 		struct keywordItem
 		{

@@ -176,6 +176,8 @@ namespace token
 				"end", keywords::END,
 				"function", keywords::FUNCTION,
 				"return", keywords::RETURN,
+				"if", keywords::IF,
+				"else", keywords::ELSE,
 			};
 			for (int i = 0; i < 27; i++)
 				if (kw == keywordMap[i].val)
@@ -203,6 +205,8 @@ namespace token
 				"end", keywords::END,
 				"function", keywords::FUNCTION,
 				"return", keywords::RETURN,
+				"if", keywords::IF,
+				"else", keywords::ELSE,
 				"byte", keywords::S8,
 				"char", keywords::S8,
 				"dword", keywords::S32,
