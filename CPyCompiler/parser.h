@@ -131,4 +131,6 @@ namespace stnode
 	};
 }
 
+int parser(tokenList *tList, stTree *sTree);
+
 #endif

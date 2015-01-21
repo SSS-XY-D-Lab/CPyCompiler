@@ -8,11 +8,24 @@ using namespace std;
 int main(int argc, char* argv[])
 {
 	string str;
-	getline(cin, str, '\n');
 	tokenList ret;
-	try
+	int pos = -1;
+	getline(cin, str, '\n');
+	while (str != "")
 	{
-		ret = scanner(str);
+		pos = scanner(&str, &ret);
+		if (pos != -1)
+		{
+			cout << str << endl;
+			for (; pos > 0; pos--)
+				cout << ' ';
+			cout << '^' << endl;
+			break;
+		}
+		getline(cin, str, '\n');
+	}
+	if (pos == -1)
+	{
 		tokenList::const_iterator p, pEnd = ret.cend();
 		for (p = ret.cbegin(); p != pEnd; p++)
 		{
@@ -61,13 +74,6 @@ int main(int argc, char* argv[])
 				}
 			}
 		}
-	}
-	catch (int pos)
-	{
-		cout << str << endl;
-		for (; pos > 0; pos--)
-			cout << ' ';
-		cout << '^' << endl;
 	}
 	system("pause");
 	return 0;

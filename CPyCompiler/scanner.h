@@ -136,6 +136,6 @@ namespace token
 }
 typedef std::list < token::token* > tokenList;
 
-tokenList scanner(std::string str);
+int scanner(std::string *str, tokenList *tList);
 
 #endif
