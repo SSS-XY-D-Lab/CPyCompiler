@@ -7,18 +7,20 @@
 
 namespace stnode
 {
-	enum type{ ERROR, NUMBER, CHARA, STR, ID, OP };
+	enum type{ ERROR, NUMBER, CHARA, STR, ID, OP, FUNC, CALL, IF };
 
 	class stnode
 	{
 	public:
 		virtual type getType() { return type::ERROR; };
 	};
+}
 
-	namespace numbers
-	{
-		enum numType{ ERROR, SINT, S8, S16, S32, S64, UINT, U8, U16, U32, U64 };
-	}
+typedef std::list<stnode::stnode> stTree;
+
+namespace stnode
+{
+	enum varType{ _ERROR, SINT, S8, S16, S32, S64, UINT, U8, U16, U32, U64, SINT_PTR, S8_PTR, S16_PTR, S32_PTR, S64_PTR, UINT_PTR, U8_PTR, U16_PTR, U32_PTR, U64_PTR };
 
 	class number:public stnode
 	{
@@ -26,7 +28,6 @@ namespace stnode
 		number(long long _val){ val = _val; };
 		long long val;
 		type getType() { return type::NUMBER; };
-		virtual numbers::numType getNumType(){ return numbers::ERROR; };
 	};
 
 	class chara :public stnode
@@ -49,8 +50,9 @@ namespace stnode
 	class id :public stnode
 	{
 	public:
-		id(std::string _str){ str = _str; };
-		std::string str;
+		id(std::string _name, varType _type = varType::_ERROR){ name = _name; dtype = _type; };
+		std::string name;
+		varType dtype;
 		type getType() { return type::ID; };
 	};
 
@@ -104,6 +106,29 @@ namespace stnode
 			opType getOpType(){ return opType::TRIPLE; };
 		};
 	}
+
+	class func :public stnode
+	{
+	public:
+		std::list<id> args;
+		stTree block;
+		type getType(){ return type::FUNC; };
+	};
+
+	class call :public stnode
+	{
+	public:
+		std::list<stnode> args;
+		type getType(){ return type::CALL; };
+	};
+
+	class ifelse :public stnode
+	{
+	public:
+		stnode exp;
+		stTree blockTrue, blockFalse;
+		type getType(){ return type::IF; };
+	};
 }
 
 #endif
