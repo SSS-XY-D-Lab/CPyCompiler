@@ -97,12 +97,6 @@ namespace token
 		type getType() { return type::OP; };
 	};
 
-	
-	class NotAKeyWord :public std::exception {
-	public:
-		const char* what(){ return "This word is not a key word"; }
-	};
-
 	namespace keywords
 	{
 		enum keywords{ ERROR, SINT, S8, S16, S32, S64, UINT, U8, U16, U32, U64, VOID, CONST, DIM, END, FUNCTION, RETURN, IF, ELSE };
@@ -121,7 +115,6 @@ namespace token
 	{
 	public:
 		//keyword(){};
-		keyword(std::string);
 		keyword(keywords::keywords _word){ word = _word; };
 		keywords::keywords word;
 		type getType() { return type::KEYWORD; };

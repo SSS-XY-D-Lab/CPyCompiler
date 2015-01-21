@@ -231,13 +231,6 @@ namespace token
 			return keywords::ERROR;
 		}
 	}
-
-	keyword::keyword(std::string _keyword)
-	{
-		word = keywords::str2Kw(_keyword);
-		if (word == keywords::keywords::ERROR)
-			throw(NotAKeyWord());
-	}
 }
 
 bool isOCTDigit(char a)
@@ -288,8 +281,23 @@ int scanner(std::string *str, tokenList *tList)
 					}
 					else
 					{
-						tList->push_back(new token::op(token::ops::opType::ADD));
 						p--;
+						if (tList->empty())
+							tList->push_back(new token::op(token::ops::opType::POSI));
+						else
+						{
+							switch (tList->back()->getType())
+							{
+								case token::type::ID:
+								case token::type::NUMBER:
+								case token::type::CHARA:
+								case token::type::STR:
+									tList->push_back(new token::op(token::ops::opType::ADD));
+									break;
+								default:
+									tList->push_back(new token::op(token::ops::opType::POSI));
+							}
+						}
 					}
 				}
 				else
@@ -313,8 +321,23 @@ int scanner(std::string *str, tokenList *tList)
 					}
 					else
 					{
-						tList->push_back(new token::op(token::ops::opType::SUB));
 						p--;
+						if (tList->empty())
+							tList->push_back(new token::op(token::ops::opType::NEGA));
+						else
+						{
+							switch (tList->back()->getType())
+							{
+								case token::type::ID:
+								case token::type::NUMBER:
+								case token::type::CHARA:
+								case token::type::STR:
+									tList->push_back(new token::op(token::ops::opType::SUB));
+									break;
+								default:
+									tList->push_back(new token::op(token::ops::opType::NEGA));
+							}
+						}
 					}
 				}
 				else
@@ -579,14 +602,11 @@ int scanner(std::string *str, tokenList *tList)
 					std::string token;
 					for (; p != pEnd && (isalnum(*p) || (*p) == '_'); p++)
 						token.push_back(*p);
-					try
-					{
-						tList->push_back(new token::keyword(token));
-					}
-					catch (token::NotAKeyWord)
-					{
+					token::keywords::keywords kw = token::keywords::str2Kw(token);
+					if (kw == token::keywords::keywords::ERROR)
 						tList->push_back(new token::id(token));
-					}
+					else
+						tList->push_back(new token::keyword(kw));
 					p--;
 				}
 				else if (isdigit(*p))
