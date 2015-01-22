@@ -77,23 +77,28 @@ int parser(tokenList &tList, stTree *sTree)
 				ptr = NULL;
 				break;
 			case token::type::KEYWORD:
+			{
 				token::keyword *kw = dynamic_cast<token::keyword *>(first);
+				bool isConst = false;
 				switch (kw->word)
 				{
+					case token::keywords::keywords::CONST:
+						isConst = true;
 					case token::keywords::keywords::DIM:
 					{
-						stnode::alloc *allocPtr = new stnode::alloc();
-						nextToken(delete allocPtr;)
+						stnode::alloc *allocPtr = new stnode::alloc(isConst);
+						nextToken(delete allocPtr;);
 						first = *p;
 						if (first->getType() == token::type::KEYWORD)
 						{
-							token::keyword *type = dynamic_cast<token::keyword *>(*p);
-							nextToken(delete allocPtr;)
+							//type
+							token::keyword *type = dynamic_cast<token::keyword *>(first);
+							nextToken(delete allocPtr;);
 							bool isPtr = false;
 							if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::DEREF)
 							{
 								isPtr = true;
-								nextToken(delete allocPtr;)
+								nextToken(delete allocPtr;);
 							}
 							stnode::varType varType = getVarType(type->word);
 							if (varType == stnode::varType::_ERROR)
@@ -106,37 +111,41 @@ int parser(tokenList &tList, stTree *sTree)
 							long long subCount = 1;
 							for (; p != pEnd && (*p)->getType() != token::type::DELIM;)
 							{
+								//name
 								varName = dynamic_cast<token::id *>(*p);
 								if (varName == NULL)
 								{
 									delete allocPtr;
 									return errPtr;
 								}
-								nextToken(delete allocPtr;)
+								nextToken(delete allocPtr;);
 								subCount = 0;
 								if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::SUB_LEFT)
 								{
-									nextToken(delete allocPtr;)
+									//array
+									nextToken(delete allocPtr;);
 									if ((*p)->getType() != token::type::NUMBER)
 									{
 										delete allocPtr;
 										return errPtr;
 									}
 									subCount = dynamic_cast<token::number *>(*p)->val;
-									nextToken(delete allocPtr;)
+									nextToken(delete allocPtr;);
 									if ((*p)->getType() != token::type::OP || dynamic_cast<token::op *>(*p)->opType != token::ops::opType::SUB_RIGHT)
 									{
 										delete allocPtr;
 										return errPtr;
 									}
-									nextToken(delete allocPtr;)
+									nextToken(delete allocPtr;);
 								}
 								newVar = new stnode::id(varName->str, varType, subCount);
 								if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::ASSIGN)
 								{
-									nextToken(delete allocPtr; delete newVar;)
+									//init val
+									nextToken(delete allocPtr; delete newVar;);
 									if (subCount == 0)
 									{
+										//init var
 										if ((*p)->getType() != token::type::NUMBER)
 										{
 											delete allocPtr;
@@ -146,17 +155,18 @@ int parser(tokenList &tList, stTree *sTree)
 										long long *initVal = new long long;
 										*initVal = dynamic_cast<token::number *>(*p)->val;
 										allocPtr->var.push_back(stnode::allocUnit(newVar, initVal));
-										nextToken(delete allocPtr; delete newVar;)
+										nextToken(delete allocPtr; delete newVar;);
 									}
 									else
 									{
+										//init array
 										if ((*p)->getType() != token::type::OP || dynamic_cast<token::op *>(*p)->opType != token::ops::opType::BRACE_LEFT)
 										{
 											delete allocPtr;
 											delete newVar;
 											return errPtr;
 										}
-										nextToken(delete allocPtr; delete newVar;)
+										nextToken(delete allocPtr; delete newVar;);
 										long long *initVal = new long long[subCount];
 										long long i;
 										for (i = 0; p != pEnd && i < subCount; p++, errPtr++, i++)
@@ -169,7 +179,7 @@ int parser(tokenList &tList, stTree *sTree)
 												return errPtr;
 											}
 											initVal[i] = dynamic_cast<token::number *>(*p)->val;
-											nextToken(delete allocPtr; delete newVar; delete[] initVal;)
+											nextToken(delete allocPtr; delete newVar; delete[] initVal;);
 											if ((*p)->getType() != token::type::OP || dynamic_cast<token::op *>(*p)->opType != token::ops::opType::COMMA)
 											{
 												delete allocPtr;
@@ -197,9 +207,6 @@ int parser(tokenList &tList, stTree *sTree)
 						}
 						break;
 					}
-					case token::keywords::keywords::CONST:
-
-						break;
 					case token::keywords::keywords::FUNCTION:
 
 						break;
@@ -208,6 +215,7 @@ int parser(tokenList &tList, stTree *sTree)
 						break;
 				}
 				break;
+			}
 		}
 		if (ptr != NULL)
 			sTree->push_back(ptr);

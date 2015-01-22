@@ -7,7 +7,7 @@
 
 namespace stnode
 {
-	enum type{ ERROR, NUMBER, CHARA, STR, ID, OP, FUNC, CALL, IF, ALLOC };
+	enum type{ ERROR, NUMBER, CHARA, STR, ID, OP, FUNC, CALL, IF, ALLOC, CONST };
 
 	class stnode
 	{
@@ -143,8 +143,10 @@ namespace stnode
 	class alloc :public stnode
 	{
 	public:
+		alloc(bool _readOnly){ readOnly = _readOnly; };
 		~alloc();
 		std::list<allocUnit> var;
+		bool readOnly;
 		type getType(){ return type::ALLOC; };
 	};
 }
