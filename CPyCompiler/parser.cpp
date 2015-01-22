@@ -63,6 +63,118 @@ stnode::varType getVarType(token::keywords::keywords kw, bool isPtr = false)
 	return varType;
 }
 
+int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p, int &errPtr)
+{
+	tokenList::iterator pEnd = tList.end();
+	nextToken(;);
+	if ((*p)->getType() == token::type::KEYWORD)
+	{
+		//type
+		token::keyword *type = dynamic_cast<token::keyword *>(*p);
+		nextToken(;);
+		bool isPtr = false;
+		if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::DEREF)
+		{
+			isPtr = true;
+			nextToken(;);
+		}
+		stnode::varType varType = getVarType(type->word);
+		if (varType == stnode::varType::_ERROR)
+			return errPtr;
+		stnode::id *newVar = NULL;
+		token::id *varName = NULL;
+		long long subCount = 1;
+		for (; p != pEnd && (*p)->getType() != token::type::DELIM;)
+		{
+			//name
+			varName = dynamic_cast<token::id *>(*p);
+			if (varName == NULL)
+				return errPtr;
+			nextToken(;);
+			subCount = 0;
+			if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::SUB_LEFT)
+			{
+				//array
+				nextToken(;);
+				if ((*p)->getType() != token::type::NUMBER)
+					return errPtr;
+				subCount = dynamic_cast<token::number *>(*p)->val;
+				nextToken(;);
+				if ((*p)->getType() != token::type::OP || dynamic_cast<token::op *>(*p)->opType != token::ops::opType::SUB_RIGHT)
+					return errPtr;
+				nextToken(;);
+			}
+			newVar = new stnode::id(varName->str, varType, subCount);
+			if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::ASSIGN)
+			{
+				//init val
+				nextToken(delete newVar;);
+				if (subCount == 0)
+				{
+					//init var
+					if ((*p)->getType() != token::type::NUMBER)
+					{
+						delete newVar;
+						return errPtr;
+					}
+					long long *initVal = new long long;
+					*initVal = dynamic_cast<token::number *>(*p)->val;
+					allocPtr->var.push_back(stnode::allocUnit(newVar, initVal));
+					nextToken(delete newVar;);
+				}
+				else
+				{
+					//init array
+					if ((*p)->getType() != token::type::OP || dynamic_cast<token::op *>(*p)->opType != token::ops::opType::BRACE_LEFT)
+					{
+						delete newVar;
+						return errPtr;
+					}
+					nextToken(delete newVar;);
+					long long *initVal = new long long[subCount];
+					long long i;
+					for (i = 0; p != pEnd && i < subCount; p++, errPtr++, i++)
+					{
+						if ((*p)->getType() != token::type::NUMBER)
+						{
+							delete newVar; delete[] initVal; return errPtr;
+						}
+						initVal[i] = dynamic_cast<token::number *>(*p)->val;
+						nextToken(delete newVar; delete[] initVal;);
+						if ((*p)->getType() != token::type::OP)
+						{
+							delete newVar; delete[] initVal; return errPtr;
+						}
+						else
+						{
+							token::ops::opType type = dynamic_cast<token::op *>(*p)->opType;
+							if (type == token::ops::opType::BRACE_RIGHT)
+							{
+								nextToken(delete newVar; delete[] initVal;);
+								break;
+							}
+							else if (type != token::ops::opType::COMMA)
+							{
+								delete newVar; delete[] initVal; return errPtr;
+							}
+						}
+					}
+					allocPtr->var.push_back(stnode::allocUnit(newVar, initVal));
+				}
+			}
+			else
+				allocPtr->var.push_back(stnode::allocUnit(newVar));
+		}
+		if (p == pEnd)
+			return errPtr;
+	}
+	else
+	{
+		return errPtr;
+	}
+	return -1;
+}
+
 int parser(tokenList &tList, stTree *sTree)
 {
 	stnode::stnode *ptr = NULL;
@@ -79,132 +191,30 @@ int parser(tokenList &tList, stTree *sTree)
 			case token::type::KEYWORD:
 			{
 				token::keyword *kw = dynamic_cast<token::keyword *>(first);
-				bool isConst = false;
 				switch (kw->word)
 				{
 					case token::keywords::keywords::CONST:
-						isConst = true;
+					{
+						stnode::alloc *allocPtr = new stnode::alloc(true);
+						int err = parser_dim(tList, allocPtr, p, errPtr);
+						if (err != -1)
+						{
+							delete allocPtr;
+							return err;
+						}
+						ptr = allocPtr;
+						break;
+					}
 					case token::keywords::keywords::DIM:
 					{
-						stnode::alloc *allocPtr = new stnode::alloc(isConst);
-						nextToken(delete allocPtr;);
-						first = *p;
-						if (first->getType() == token::type::KEYWORD)
+						stnode::alloc *allocPtr = new stnode::alloc(false);
+						int err = parser_dim(tList, allocPtr, p, errPtr);
+						if (err != -1)
 						{
-							//type
-							token::keyword *type = dynamic_cast<token::keyword *>(first);
-							nextToken(delete allocPtr;);
-							bool isPtr = false;
-							if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::DEREF)
-							{
-								isPtr = true;
-								nextToken(delete allocPtr;);
-							}
-							stnode::varType varType = getVarType(type->word);
-							if (varType == stnode::varType::_ERROR)
-							{
-								delete allocPtr;
-								return errPtr;
-							}
-							stnode::id *newVar = NULL;
-							token::id *varName = NULL;
-							long long subCount = 1;
-							for (; p != pEnd && (*p)->getType() != token::type::DELIM;)
-							{
-								//name
-								varName = dynamic_cast<token::id *>(*p);
-								if (varName == NULL)
-								{
-									delete allocPtr;
-									return errPtr;
-								}
-								nextToken(delete allocPtr;);
-								subCount = 0;
-								if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::SUB_LEFT)
-								{
-									//array
-									nextToken(delete allocPtr;);
-									if ((*p)->getType() != token::type::NUMBER)
-									{
-										delete allocPtr;
-										return errPtr;
-									}
-									subCount = dynamic_cast<token::number *>(*p)->val;
-									nextToken(delete allocPtr;);
-									if ((*p)->getType() != token::type::OP || dynamic_cast<token::op *>(*p)->opType != token::ops::opType::SUB_RIGHT)
-									{
-										delete allocPtr;
-										return errPtr;
-									}
-									nextToken(delete allocPtr;);
-								}
-								newVar = new stnode::id(varName->str, varType, subCount);
-								if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::ASSIGN)
-								{
-									//init val
-									nextToken(delete allocPtr; delete newVar;);
-									if (subCount == 0)
-									{
-										//init var
-										if ((*p)->getType() != token::type::NUMBER)
-										{
-											delete allocPtr;
-											delete newVar;
-											return errPtr;
-										}
-										long long *initVal = new long long;
-										*initVal = dynamic_cast<token::number *>(*p)->val;
-										allocPtr->var.push_back(stnode::allocUnit(newVar, initVal));
-										nextToken(delete allocPtr; delete newVar;);
-									}
-									else
-									{
-										//init array
-										if ((*p)->getType() != token::type::OP || dynamic_cast<token::op *>(*p)->opType != token::ops::opType::BRACE_LEFT)
-										{
-											delete allocPtr;
-											delete newVar;
-											return errPtr;
-										}
-										nextToken(delete allocPtr; delete newVar;);
-										long long *initVal = new long long[subCount];
-										long long i;
-										for (i = 0; p != pEnd && i < subCount; p++, errPtr++, i++)
-										{
-											if ((*p)->getType() != token::type::NUMBER)
-											{
-												delete allocPtr;
-												delete newVar;
-												delete[] initVal;
-												return errPtr;
-											}
-											initVal[i] = dynamic_cast<token::number *>(*p)->val;
-											nextToken(delete allocPtr; delete newVar; delete[] initVal;);
-											if ((*p)->getType() != token::type::OP || dynamic_cast<token::op *>(*p)->opType != token::ops::opType::COMMA)
-											{
-												delete allocPtr;
-												delete newVar;
-												delete[] initVal;
-												return errPtr;
-											}
-										}
-										allocPtr->var.push_back(stnode::allocUnit(newVar, initVal));
-									}
-								}
-								else
-									allocPtr->var.push_back(stnode::allocUnit(newVar));
-							}
-							if (p == pEnd)
-							{
-								delete allocPtr;
-								return errPtr;
-							}
-							ptr = allocPtr;
+							delete allocPtr;
+							return err;
 						}
-						else
-						{
-							return errPtr;
-						}
+						ptr = allocPtr;
 						break;
 					}
 					case token::keywords::keywords::FUNCTION:

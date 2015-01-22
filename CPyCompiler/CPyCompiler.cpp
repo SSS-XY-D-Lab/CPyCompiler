@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
 			cout << '^' << endl;
 			break;
 		}
-		*/
+		//*/
 		getline(cin, str, '\n');
 	}
 	if (pos == -1)
