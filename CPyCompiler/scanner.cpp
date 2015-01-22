@@ -238,7 +238,7 @@ bool isOCTDigit(char a)
 	return a >= '0' && a <= '7';
 }
 
-int scanner(std::string *str, tokenList *tList)
+int scanner(std::string *str, tokenList *tList, int lineN)
 {
 	std::string::iterator p, pEnd = str->end();
 	for (p = str->begin(); p != pEnd; p++)
@@ -247,6 +247,9 @@ int scanner(std::string *str, tokenList *tList)
 		{
 			case '#':
 				p = pEnd;
+				break;
+			case ';':
+				tList->push_back(new token::delim(-1));
 				break;
 			case '(':
 				tList->push_back(new token::op(token::ops::opType::BRACKET_LEFT));
@@ -259,6 +262,12 @@ int scanner(std::string *str, tokenList *tList)
 				break;
 			case ']':
 				tList->push_back(new token::op(token::ops::opType::SUB_RIGHT));
+				break;
+			case '{':
+				tList->push_back(new token::op(token::ops::opType::BRACE_LEFT));
+				break;
+			case '}':
+				tList->push_back(new token::op(token::ops::opType::BRACE_RIGHT));
 				break;
 			case ',':
 				tList->push_back(new token::op(token::ops::opType::COMMA));
@@ -550,9 +559,6 @@ int scanner(std::string *str, tokenList *tList)
 					p--;
 				}
 				break;
-			case ';':
-				tList->push_back(new token::delim());
-				break;
 			case '\'':
 			{
 				p++;
@@ -595,6 +601,7 @@ int scanner(std::string *str, tokenList *tList)
 				break;
 			}
 			case ' ':
+			case '\t':
 				break;
 			default:
 				if (isalpha(*p) || (*p) == '_')
@@ -624,12 +631,15 @@ int scanner(std::string *str, tokenList *tList)
 					{
 						token.push_back(*p);
 						p++;
-						ary = 8;
-						if (tolower(*p) == 'x')
+						if (p != pEnd)
 						{
-							token.push_back(*p);
-							p++;
-							ary = 16;
+							ary = 8;
+							if (tolower(*p) == 'x')
+							{
+								token.push_back(*p);
+								p++;
+								ary = 16;
+							}
 						}
 					}
 					switch (ary)
@@ -726,6 +736,6 @@ int scanner(std::string *str, tokenList *tList)
 		if (p == pEnd)
 			break;
 	}
-	tList->push_back(new token::delim);
+	tList->push_back(new token::delim(lineN));
 	return -1;
 }

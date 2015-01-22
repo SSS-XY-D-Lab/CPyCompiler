@@ -66,7 +66,8 @@ namespace token
 	{
 		enum opType{
 			ERROR,
-			SUB_LEFT, SUB_RIGHT, BRACKET_LEFT, BRACKET_RIGHT, OBJ_MEMBER, PTR_MEMBER,
+			COMMA, SUB_LEFT, SUB_RIGHT, BRACKET_LEFT, BRACKET_RIGHT, BRACE_LEFT, BRACE_RIGHT, 
+			OBJ_MEMBER, PTR_MEMBER,
 			POSI, NEGA, INC, DEC, REF, DEREF, NOT, LGNOT,
 			DIV, MUL, MOD,
 			ADD, SUB,
@@ -75,7 +76,6 @@ namespace token
 			EQU, NEQU,
 			AND, XOR, BOR, LGAND, LGOR,
 			ASSIGN, MODASS, DIVASS, MULASS, ADDASS, SUBASS, SHLASS, SHRASS, ANDASS, XORASS, BORASS,
-			COMMA
 		};
 
 		struct opItem
@@ -123,12 +123,13 @@ namespace token
 	class delim :public token
 	{
 	public:
-		delim(){};
+		delim(int _lineN){ lineN = _lineN; };
+		int lineN;
 		type getType() { return type::DELIM; };
 	};
 }
 typedef std::list < token::token* > tokenList;
 
-int scanner(std::string *str, tokenList *tList);
+int scanner(std::string *str, tokenList *tList, int lineN);
 
 #endif

@@ -7,7 +7,7 @@
 
 namespace stnode
 {
-	enum type{ ERROR, NUMBER, CHARA, STR, ID, OP, FUNC, CALL, IF };
+	enum type{ ERROR, NUMBER, CHARA, STR, ID, OP, FUNC, CALL, IF, ALLOC };
 
 	class stnode
 	{
@@ -16,7 +16,7 @@ namespace stnode
 	};
 }
 
-typedef std::list<stnode::stnode> stTree;
+typedef std::list<stnode::stnode*> stTree;
 
 namespace stnode
 {
@@ -50,9 +50,10 @@ namespace stnode
 	class id :public stnode
 	{
 	public:
-		id(std::string _name, varType _type = varType::_ERROR){ name = _name; dtype = _type; };
+		id(std::string _name, varType _type = varType::_ERROR, long long _subCount = 0){ name = _name; dtype = _type; subCount = _subCount; };
 		std::string name;
 		varType dtype;
+		long long subCount;
 		type getType() { return type::ID; };
 	};
 
@@ -129,8 +130,25 @@ namespace stnode
 		stTree blockTrue, blockFalse;
 		type getType(){ return type::IF; };
 	};
+
+	struct allocUnit
+	{
+		allocUnit(id* _var){ var = _var; init = false; };
+		allocUnit(id* _var, long long *_val){ var = _var; init = true; val = _val; };
+		id *var;
+		bool init;
+		long long *val;
+	};
+
+	class alloc :public stnode
+	{
+	public:
+		~alloc();
+		std::list<allocUnit> var;
+		type getType(){ return type::ALLOC; };
+	};
 }
 
-int parser(tokenList *tList, stTree *sTree);
+int parser(tokenList &tList, stTree *sTree);
 
 #endif

@@ -3,17 +3,20 @@
 
 #include "stdafx.h"
 #include "scanner.h"
+#include "parser.h"
 using namespace std;
 
 int main(int argc, char* argv[])
 {
 	string str;
 	tokenList ret;
+	stTree ret2;
 	int pos = -1;
+	int lineN = 1;
 	getline(cin, str, '\n');
 	while (str != "")
 	{
-		pos = scanner(&str, &ret);
+		pos = scanner(&str, &ret, lineN);
 		if (pos != -1)
 		{
 			cout << str << endl;
@@ -22,6 +25,17 @@ int main(int argc, char* argv[])
 			cout << '^' << endl;
 			break;
 		}
+		/*
+		pos = parser(ret, &ret2);
+		if (pos != -1)
+		{
+			cout << str << endl;
+			for (; pos > 0; pos--)
+				cout << ' ';
+			cout << '^' << endl;
+			break;
+		}
+		*/
 		getline(cin, str, '\n');
 	}
 	if (pos == -1)
