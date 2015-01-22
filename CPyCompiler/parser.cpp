@@ -57,6 +57,9 @@ stnode::varType getVarType(token::keywords::keywords kw, bool isPtr = false)
 		case token::keywords::U64:
 			varType = (isPtr ? stnode::varType::U64_PTR : stnode::varType::U64);
 			break;
+		case token::keywords::VOID:
+			varType = (isPtr ? stnode::varType::VOID_PTR : stnode::varType::VOID);
+			break;
 		default:
 			varType = stnode::varType::_ERROR;
 	}
@@ -79,12 +82,12 @@ int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p
 			nextToken(;);
 		}
 		stnode::varType varType = getVarType(type->word);
-		if (varType == stnode::varType::_ERROR)
+		if (varType == stnode::varType::_ERROR || varType == stnode::varType::VOID)
 			return errPtr;
 		stnode::id *newVar = NULL;
 		token::id *varName = NULL;
 		long long subCount = 1;
-		for (; p != pEnd && (*p)->getType() != token::type::DELIM;)
+		for (; p != pEnd;)
 		{
 			//name
 			varName = dynamic_cast<token::id *>(*p);
@@ -164,6 +167,10 @@ int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p
 			}
 			else
 				allocPtr->var.push_back(stnode::allocUnit(newVar));
+			if ((*p)->getType() == token::type::DELIM)
+				break;
+			else if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::COMMA)
+				nextToken(;);
 		}
 		if (p == pEnd)
 			return errPtr;
@@ -175,11 +182,26 @@ int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p
 	return -1;
 }
 
-int parser(tokenList &tList, stTree *sTree)
+int parser_exp(tokenList &tList, stnode::stnode **root, tokenList::iterator &p, int &errPtr)
+{
+	return -1;
+}
+
+struct lvlInfo
+{
+	lvlInfo(stTree *_sTree, stnode::stnode *_ptr){ sTree = _sTree; ptr = _ptr; }
+	stTree *sTree;
+	stnode::stnode *ptr;
+};
+
+int parser(tokenList &tList, stTree *_sTree, bool inFunc)
 {
 	stnode::stnode *ptr = NULL;
+	std::list<lvlInfo>sTreeStk;
+	sTreeStk.push_back(lvlInfo(_sTree, new stnode::stnode));
 	tokenList::iterator p, pEnd = tList.end();
 	int errPtr = 0;
+	bool allowFunc = true;
 	for (p = tList.begin(); p != pEnd; p++, errPtr++)
 	{
 		token::token *first = *p;
@@ -218,17 +240,159 @@ int parser(tokenList &tList, stTree *sTree)
 						break;
 					}
 					case token::keywords::keywords::FUNCTION:
-
+						if (allowFunc)
+						{
+							stnode::func *funcPtr = new stnode::func;
+							nextToken(delete funcPtr;);
+							if ((*p)->getType() != token::type::KEYWORD)
+							{
+								delete funcPtr;
+								return errPtr;
+							}
+							token::keyword *type = dynamic_cast<token::keyword *>(*p);
+							nextToken(delete funcPtr;);
+							bool isPtr = false;
+							if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::DEREF)
+							{
+								isPtr = true;
+								nextToken(delete funcPtr;)
+							}
+							stnode::varType varType = getVarType(type->word);
+							if (varType == stnode::varType::_ERROR)
+							{
+								delete funcPtr;
+								return errPtr - (isPtr ? 2 : 1);
+							}
+							funcPtr->retType = varType;
+							if ((*p)->getType() != token::type::ID)
+							{
+								delete funcPtr;
+								return errPtr;
+							}
+							funcPtr->name = dynamic_cast<token::id *>(*p)->str;
+							nextToken(;);
+							if ((*p)->getType() != token::type::OP || dynamic_cast<token::op *>(*p)->opType != token::ops::opType::BRACKET_LEFT)
+							{
+								delete funcPtr;
+								return errPtr;
+							}
+							nextToken(;);
+							if ((*p)->getType() != token::type::KEYWORD)
+							{
+								delete funcPtr;
+								return errPtr;
+							}
+							if (dynamic_cast<token::keyword *>(*p)->word != token::keywords::keywords::VOID)
+							{
+								stnode::id *newVar;
+								std::string varName;
+								for (; p != pEnd;)
+								{
+									type = dynamic_cast<token::keyword *>(*p);
+									nextToken(delete funcPtr;);
+									bool isPtr = false;
+									if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::DEREF)
+									{
+										isPtr = true;
+										nextToken(delete funcPtr;)
+									}
+									varType = getVarType(type->word);
+									if (varType == stnode::varType::_ERROR || varType == stnode::varType::VOID)
+									{
+										delete funcPtr;
+										return errPtr - (isPtr ? 2 : 1);
+									}
+									if ((*p)->getType() != token::type::ID)
+									{
+										delete funcPtr;
+										return errPtr;
+									}
+									varName = dynamic_cast<token::id *>(*p)->str;
+									nextToken(delete funcPtr;)
+									newVar = new stnode::id(varName, varType);
+									funcPtr->args.push_back(newVar);
+									if ((*p)->getType() == token::type::DELIM)
+									{
+										delete funcPtr;
+										return errPtr;
+									}
+									else if ((*p)->getType() == token::type::OP)
+									{
+										token::ops::opType opType = dynamic_cast<token::op *>(*p)->opType;
+										if (opType == token::ops::opType::COMMA)
+										{
+											nextToken(delete funcPtr;);
+										}
+										else if (opType == token::ops::opType::BRACKET_RIGHT)
+											break;
+									}
+								}
+							}
+							funcPtr->block = NULL;
+							stTree *block = new stTree;
+							sTreeStk.push_back(lvlInfo(block, funcPtr));
+							allowFunc = false;
+						}
+						else
+						{
+							return errPtr;
+						}
 						break;
 					case token::keywords::keywords::IF:
-
+					{
+						stTree *block = new stTree;
+						stnode::ifelse *ifPtr = new stnode::ifelse;
+						ifPtr->blockTrue = NULL;
+						ifPtr->blockFalse = NULL;
+						sTreeStk.push_back(lvlInfo(block, ifPtr));
 						break;
+					}
+					case token::keywords::keywords::ELSE:
+					{
+						stTree *block = new stTree;
+						lvlInfo info = sTreeStk.back();
+						if (info.ptr->getType() != stnode::type::IF)
+						{
+							delete block;
+							return errPtr;
+						}
+						stnode::ifelse *ifPtr = dynamic_cast<stnode::ifelse *>(info.ptr);
+						ifPtr->blockTrue = info.sTree;
+						break;
+					}
+					case token::keywords::keywords::END:
+					{
+						lvlInfo info = sTreeStk.back();
+						sTreeStk.pop_back();
+						switch (info.ptr->getType())
+						{
+							case stnode::type::ERROR:
+								return errPtr;
+							case stnode::type::IF:
+							{
+								stnode::ifelse *ifPtr = dynamic_cast<stnode::ifelse *>(info.ptr);
+								if (ifPtr->blockTrue == NULL)
+									ifPtr->blockTrue = info.sTree;
+								else
+									ifPtr->blockFalse = info.sTree;
+								ptr = ifPtr;
+							}
+							case stnode::type::FUNC:
+							{
+								stnode::func *funcPtr = dynamic_cast<stnode::func *>(info.ptr);
+								funcPtr->block = info.sTree;
+								ptr = funcPtr;
+								allowFunc = true;
+							}
+						}
+						break;
+					}
 				}
 				break;
 			}
 		}
 		if (ptr != NULL)
-			sTree->push_back(ptr);
+			sTreeStk.back().sTree->push_back(ptr);
 	}
 	return -1;
 }

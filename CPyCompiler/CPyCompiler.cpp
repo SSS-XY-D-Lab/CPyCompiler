@@ -25,18 +25,15 @@ int main(int argc, char* argv[])
 			cout << '^' << endl;
 			break;
 		}
-		/*
-		pos = parser(ret, &ret2);
-		if (pos != -1)
-		{
-			cout << str << endl;
-			for (; pos > 0; pos--)
-				cout << ' ';
-			cout << '^' << endl;
-			break;
-		}
-		//*/
 		getline(cin, str, '\n');
+	}
+	int pos2 = parser(ret, &ret2);
+	if (pos2 != -1)
+	{
+		cout << str << endl;
+		for (; pos2 > 0; pos2--)
+			cout << ' ';
+		cout << '^' << endl;
 	}
 	if (pos == -1)
 	{

@@ -20,7 +20,7 @@ typedef std::list<stnode::stnode*> stTree;
 
 namespace stnode
 {
-	enum varType{ _ERROR, SINT, S8, S16, S32, S64, UINT, U8, U16, U32, U64, SINT_PTR, S8_PTR, S16_PTR, S32_PTR, S64_PTR, UINT_PTR, U8_PTR, U16_PTR, U32_PTR, U64_PTR };
+	enum varType{ _ERROR, VOID, VOID_PTR, SINT, S8, S16, S32, S64, UINT, U8, U16, U32, U64, SINT_PTR, S8_PTR, S16_PTR, S32_PTR, S64_PTR, UINT_PTR, U8_PTR, U16_PTR, U32_PTR, U64_PTR };
 
 	class number:public stnode
 	{
@@ -111,8 +111,10 @@ namespace stnode
 	class func :public stnode
 	{
 	public:
-		std::list<id> args;
-		stTree block;
+		std::string name;
+		std::list<id *> args;
+		varType retType;
+		stTree *block;
 		type getType(){ return type::FUNC; };
 	};
 
@@ -127,7 +129,7 @@ namespace stnode
 	{
 	public:
 		stnode exp;
-		stTree blockTrue, blockFalse;
+		stTree *blockTrue, *blockFalse;
 		type getType(){ return type::IF; };
 	};
 
@@ -151,6 +153,6 @@ namespace stnode
 	};
 }
 
-int parser(tokenList &tList, stTree *sTree);
+int parser(tokenList &tList, stTree *sTree, bool inFunc = false);
 
 #endif
