@@ -319,9 +319,6 @@ int getOpLvl(token::ops::opType op)
 		case token::ops::opType::BORASS:
 			newOP = stnode::op::ops::BORASS;
 			break;
-		case token::ops::opType::ARRAY_SUB:
-			newOP = stnode::op::ops::ARRAY_SUB;
-			break;
 		default:
 			return -1;
 	}
@@ -449,9 +446,6 @@ stnode::op::op *getOp(token::ops::opType op)
 			break;
 		case token::ops::opType::BORASS:
 			newOP = stnode::op::ops::BORASS;
-			break;
-		case token::ops::opType::ARRAY_SUB:
-			newOP = stnode::op::ops::ARRAY_SUB;
 			break;
 		default:
 			return NULL;
