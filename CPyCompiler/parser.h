@@ -61,8 +61,10 @@ namespace stnode
 	{
 		enum ops{
 			ERROR,
-			SUB_LEFT, SUB_RIGHT, BRACKET_LEFT, BRACKET_RIGHT, OBJ_MEMBER, PTR_MEMBER,
-			POSI, NEGA, INC, DEC, REF, DEREF, NOT, LGNOT,
+			COMMA, SUB_LEFT, SUB_RIGHT, BRACKET_LEFT, BRACKET_RIGHT, ARRAY_SUB,
+			CAST, OBJ_MEMBER, PTR_MEMBER,
+			POSI, NEGA, INC, DEC, INC_POST, DEC_POST, INC_PRE, DEC_PRE, 
+			REF, DEREF, NOT, LGNOT,
 			DIV, MUL, MOD,
 			ADD, SUB,
 			SHL, SHR,
@@ -70,7 +72,6 @@ namespace stnode
 			EQU, NEQU,
 			AND, XOR, BOR, LGAND, LGOR,
 			ASSIGN, MODASS, DIVASS, MULASS, ADDASS, SUBASS, SHLASS, SHRASS, ANDASS, XORASS, BORASS,
-			COMMA
 		};
 
 		enum opType{
@@ -80,8 +81,10 @@ namespace stnode
 		class op :public stnode
 		{
 		public:
+			op(){ opVal = ops::ERROR; };
 			op(ops _opVal){ opVal = _opVal; };
 			ops opVal;
+			int lvl;
 			type getType(){ return type::OP; };
 			virtual opType getOpType(){ return opType::_ERROR; };
 		};
@@ -89,6 +92,7 @@ namespace stnode
 		class opSingle :public op
 		{
 		public:
+			opSingle(ops _opVal, int _lvl){ opVal = _opVal; lvl = _lvl; arg1 = NULL; };
 			stnode *arg1;
 			opType getOpType(){ return opType::SINGLE; };
 		};
@@ -96,6 +100,7 @@ namespace stnode
 		class opDouble :public op
 		{
 		public:
+			opDouble(ops _opVal, int _lvl){ opVal = _opVal; lvl = _lvl; arg1 = NULL; arg2 = NULL; };
 			stnode *arg1, *arg2;
 			opType getOpType(){ return opType::DOUBLE; };
 		};
@@ -103,9 +108,18 @@ namespace stnode
 		class opTriple :public op
 		{
 		public:
+			opTriple(ops _opVal, int _lvl){ opVal = _opVal; lvl = _lvl; arg1 = NULL; arg2 = NULL; arg3 = NULL; };
 			stnode *arg1, *arg2, *arg3;
 			opType getOpType(){ return opType::TRIPLE; };
 		};
+
+		struct opItem
+		{
+			ops val;
+			std::string str;
+		};
+
+		std::string op2Str(ops op);
 	}
 
 	class func :public stnode
@@ -121,14 +135,14 @@ namespace stnode
 	class call :public stnode
 	{
 	public:
-		std::list<stnode> args;
+		std::list<stnode *> args;
 		type getType(){ return type::CALL; };
 	};
 
 	class ifelse :public stnode
 	{
 	public:
-		stnode exp;
+		stnode *exp;
 		stTree *blockTrue, *blockFalse;
 		type getType(){ return type::IF; };
 	};

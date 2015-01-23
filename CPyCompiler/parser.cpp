@@ -6,6 +6,69 @@
 
 namespace stnode
 {
+	namespace op
+	{
+		std::string op2Str(ops op)
+		{
+			static opItem opMap[] = {
+				ops::ERROR, "ERROR",
+				ops::COMMA, "COMMA",
+				ops::SUB_LEFT, "SUB_LEFT",
+				ops::SUB_RIGHT, "SUB_RIGHT",
+				ops::BRACKET_LEFT, "BRACKET_LEFT",
+				ops::BRACKET_RIGHT, "BRACKET_RIGHT",
+				ops::ARRAY_SUB, "ARRAY_SUB",
+				ops::CAST, "CAST",
+				ops::OBJ_MEMBER, "OBJ_MEMBER",
+				ops::PTR_MEMBER, "PTR_MEMBER",
+				ops::POSI, "POSI",
+				ops::NEGA, "NEGA",
+				ops::INC, "INC",
+				ops::DEC, "DEC",
+				ops::INC_POST, "INC_POST",
+				ops::DEC_POST, "DEC_POST",
+				ops::INC_PRE, "INC_PRE",
+				ops::DEC_PRE, "DEC_PRE",
+				ops::REF, "REF",
+				ops::DEREF, "DEREF",
+				ops::NOT, "NOT",
+				ops::LGNOT, "LGNOT",
+				ops::DIV, "DIV",
+				ops::MUL, "MUL",
+				ops::MOD, "MOD",
+				ops::ADD, "ADD",
+				ops::SUB, "SUB",
+				ops::SHL, "SHL",
+				ops::SHR, "SHR",
+				ops::BIG, "BIG",
+				ops::BIGEQU, "BIGEQU",
+				ops::LES, "LES",
+				ops::LESEQU, "LESEQU",
+				ops::EQU, "EQU",
+				ops::NEQU, "NEQU",
+				ops::AND, "AND",
+				ops::XOR, "XOR",
+				ops::BOR, "BOR",
+				ops::LGAND, "LGAND",
+				ops::LGOR, "LGOR",
+				ops::ASSIGN, "ASSIGN",
+				ops::MODASS, "MODASS",
+				ops::DIVASS, "DIVASS",
+				ops::MULASS, "MULASS",
+				ops::ADDASS, "ADDASS",
+				ops::SUBASS, "SUBASS",
+				ops::SHLASS, "SHLASS",
+				ops::SHRASS, "SHRASS",
+				ops::ANDASS, "ANDASS",
+				ops::XORASS, "XORASS",
+				ops::BORASS, "BORASS", };
+			for (int i = 0; i < 51; i++)
+				if (op == opMap[i].val)
+					return opMap[i].str;
+			return "";
+		}
+	}
+
 	alloc::~alloc()
 	{
 		std::list<allocUnit>::iterator p, pEnd = var.end();
@@ -64,6 +127,386 @@ stnode::varType getVarType(token::keywords::keywords kw, bool isPtr = false)
 			varType = stnode::varType::_ERROR;
 	}
 	return varType;
+}
+
+int getOpLvl(stnode::op::ops op)
+{
+	switch (op)
+	{
+		case stnode::op::ops::INC:
+		case stnode::op::ops::DEC:
+		case stnode::op::ops::INC_POST:
+		case stnode::op::ops::DEC_POST:
+		case stnode::op::ops::ARRAY_SUB:
+		case stnode::op::ops::OBJ_MEMBER:
+		case stnode::op::ops::PTR_MEMBER:
+			return 1;
+		case stnode::op::ops::INC_PRE:
+		case stnode::op::ops::DEC_PRE:
+		case stnode::op::ops::NOT:
+		case stnode::op::ops::LGNOT:
+		case stnode::op::ops::POSI:
+		case stnode::op::ops::NEGA:
+		case stnode::op::ops::REF:
+		case stnode::op::ops::DEREF:
+		case stnode::op::ops::CAST:
+			return 2;
+		case stnode::op::ops::DIV:
+		case stnode::op::ops::MUL:
+		case stnode::op::ops::MOD:
+			return 3;
+		case stnode::op::ops::ADD:
+		case stnode::op::ops::SUB:
+			return 4;
+		case stnode::op::ops::SHL:
+		case stnode::op::ops::SHR:
+			return 5;
+		case stnode::op::ops::BIG:
+		case stnode::op::ops::BIGEQU:
+		case stnode::op::ops::LES:
+		case stnode::op::ops::LESEQU:
+			return 6;
+		case stnode::op::ops::EQU:
+		case stnode::op::ops::NEQU:
+			return 7;
+		case stnode::op::ops::AND:
+			return 8;
+		case stnode::op::ops::XOR:
+			return 9;
+		case stnode::op::ops::BOR:
+			return 10;
+		case stnode::op::ops::LGAND:
+			return 11;
+		case stnode::op::ops::LGOR:
+			return 12;
+		case stnode::op::ops::ASSIGN:
+		case stnode::op::ops::MODASS:
+		case stnode::op::ops::DIVASS:
+		case stnode::op::ops::MULASS:
+		case stnode::op::ops::ADDASS:
+		case stnode::op::ops::SUBASS:
+		case stnode::op::ops::SHLASS:
+		case stnode::op::ops::SHRASS:
+		case stnode::op::ops::ANDASS:
+		case stnode::op::ops::XORASS:
+		case stnode::op::ops::BORASS:
+			return 13;
+		case stnode::op::ops::COMMA:
+			return 14;
+	}
+	return -1;
+}
+
+int getOpLvl(token::ops::opType op)
+{
+	stnode::op::ops newOP;
+	switch (op)
+	{
+		case token::ops::opType::OBJ_MEMBER:
+			newOP = stnode::op::ops::OBJ_MEMBER;
+			break;
+		case token::ops::opType::PTR_MEMBER:
+			newOP = stnode::op::ops::PTR_MEMBER;
+			break;
+		case token::ops::opType::POSI:
+			newOP = stnode::op::ops::POSI;
+			break;
+		case token::ops::opType::NEGA:
+			newOP = stnode::op::ops::NEGA;
+			break;
+		case token::ops::opType::INC:
+			newOP = stnode::op::ops::INC;
+			break;
+		case token::ops::opType::DEC:
+			newOP = stnode::op::ops::DEC;
+			break;
+		case token::ops::opType::REF:
+			newOP = stnode::op::ops::REF;
+			break;
+		case token::ops::opType::DEREF:
+			newOP = stnode::op::ops::DEREF;
+			break;
+		case token::ops::opType::NOT:
+			newOP = stnode::op::ops::NOT;
+			break;
+		case token::ops::opType::LGNOT:
+			newOP = stnode::op::ops::LGNOT;
+			break;
+		case token::ops::opType::DIV:
+			newOP = stnode::op::ops::DIV;
+			break;
+		case token::ops::opType::MUL:
+			newOP = stnode::op::ops::MUL;
+			break;
+		case token::ops::opType::MOD:
+			newOP = stnode::op::ops::MOD;
+			break;
+		case token::ops::opType::ADD:
+			newOP = stnode::op::ops::ADD;
+			break;
+		case token::ops::opType::SUB:
+			newOP = stnode::op::ops::SUB;
+			break;
+		case token::ops::opType::SHL:
+			newOP = stnode::op::ops::SHL;
+			break;
+		case token::ops::opType::SHR:
+			newOP = stnode::op::ops::SHR;
+			break;
+		case token::ops::opType::BIG:
+			newOP = stnode::op::ops::BIG;
+			break;
+		case token::ops::opType::BIGEQU:
+			newOP = stnode::op::ops::BIGEQU;
+			break;
+		case token::ops::opType::LES:
+			newOP = stnode::op::ops::LES;
+			break;
+		case token::ops::opType::LESEQU:
+			newOP = stnode::op::ops::LESEQU;
+			break;
+		case token::ops::opType::EQU:
+			newOP = stnode::op::ops::EQU;
+			break;
+		case token::ops::opType::NEQU:
+			newOP = stnode::op::ops::NEQU;
+			break;
+		case token::ops::opType::AND:
+			newOP = stnode::op::ops::AND;
+			break;
+		case token::ops::opType::XOR:
+			newOP = stnode::op::ops::XOR;
+			break;
+		case token::ops::opType::BOR:
+			newOP = stnode::op::ops::BOR;
+			break;
+		case token::ops::opType::LGAND:
+			newOP = stnode::op::ops::LGAND;
+			break;
+		case token::ops::opType::LGOR:
+			newOP = stnode::op::ops::LGOR;
+			break;
+		case token::ops::opType::ASSIGN:
+			newOP = stnode::op::ops::ASSIGN;
+			break;
+		case token::ops::opType::MODASS:
+			newOP = stnode::op::ops::MODASS;
+			break;
+		case token::ops::opType::DIVASS:
+			newOP = stnode::op::ops::DIVASS;
+			break;
+		case token::ops::opType::MULASS:
+			newOP = stnode::op::ops::MULASS;
+			break;
+		case token::ops::opType::ADDASS:
+			newOP = stnode::op::ops::ADDASS;
+			break;
+		case token::ops::opType::SUBASS:
+			newOP = stnode::op::ops::SUBASS;
+			break;
+		case token::ops::opType::SHLASS:
+			newOP = stnode::op::ops::SHLASS;
+			break;
+		case token::ops::opType::SHRASS:
+			newOP = stnode::op::ops::SHRASS;
+			break;
+		case token::ops::opType::ANDASS:
+			newOP = stnode::op::ops::ANDASS;
+			break;
+		case token::ops::opType::XORASS:
+			newOP = stnode::op::ops::XORASS;
+			break;
+		case token::ops::opType::BORASS:
+			newOP = stnode::op::ops::BORASS;
+			break;
+		case token::ops::opType::ARRAY_SUB:
+			newOP = stnode::op::ops::ARRAY_SUB;
+			break;
+		default:
+			return -1;
+	}
+	return getOpLvl(newOP);
+}
+
+stnode::op::op *getOp(token::ops::opType op)
+{
+	stnode::op::ops newOP;
+	switch (op)
+	{
+		case token::ops::opType::OBJ_MEMBER:
+			newOP = stnode::op::ops::OBJ_MEMBER;
+			break;
+		case token::ops::opType::PTR_MEMBER:
+			newOP = stnode::op::ops::PTR_MEMBER;
+			break;
+		case token::ops::opType::POSI:
+			newOP = stnode::op::ops::POSI;
+			break;
+		case token::ops::opType::NEGA:
+			newOP = stnode::op::ops::NEGA;
+			break;
+		case token::ops::opType::INC:
+			newOP = stnode::op::ops::INC;
+			break;
+		case token::ops::opType::DEC:
+			newOP = stnode::op::ops::DEC;
+			break;
+		case token::ops::opType::REF:
+			newOP = stnode::op::ops::REF;
+			break;
+		case token::ops::opType::DEREF:
+			newOP = stnode::op::ops::DEREF;
+			break;
+		case token::ops::opType::NOT:
+			newOP = stnode::op::ops::NOT;
+			break;
+		case token::ops::opType::LGNOT:
+			newOP = stnode::op::ops::LGNOT;
+			break;
+		case token::ops::opType::DIV:
+			newOP = stnode::op::ops::DIV;
+			break;
+		case token::ops::opType::MUL:
+			newOP = stnode::op::ops::MUL;
+			break;
+		case token::ops::opType::MOD:
+			newOP = stnode::op::ops::MOD;
+			break;
+		case token::ops::opType::ADD:
+			newOP = stnode::op::ops::ADD;
+			break;
+		case token::ops::opType::SUB:
+			newOP = stnode::op::ops::SUB;
+			break;
+		case token::ops::opType::SHL:
+			newOP = stnode::op::ops::SHL;
+			break;
+		case token::ops::opType::SHR:
+			newOP = stnode::op::ops::SHR;
+			break;
+		case token::ops::opType::BIG:
+			newOP = stnode::op::ops::BIG;
+			break;
+		case token::ops::opType::BIGEQU:
+			newOP = stnode::op::ops::BIGEQU;
+			break;
+		case token::ops::opType::LES:
+			newOP = stnode::op::ops::LES;
+			break;
+		case token::ops::opType::LESEQU:
+			newOP = stnode::op::ops::LESEQU;
+			break;
+		case token::ops::opType::EQU:
+			newOP = stnode::op::ops::EQU;
+			break;
+		case token::ops::opType::NEQU:
+			newOP = stnode::op::ops::NEQU;
+			break;
+		case token::ops::opType::AND:
+			newOP = stnode::op::ops::AND;
+			break;
+		case token::ops::opType::XOR:
+			newOP = stnode::op::ops::XOR;
+			break;
+		case token::ops::opType::BOR:
+			newOP = stnode::op::ops::BOR;
+			break;
+		case token::ops::opType::LGAND:
+			newOP = stnode::op::ops::LGAND;
+			break;
+		case token::ops::opType::LGOR:
+			newOP = stnode::op::ops::LGOR;
+			break;
+		case token::ops::opType::ASSIGN:
+			newOP = stnode::op::ops::ASSIGN;
+			break;
+		case token::ops::opType::MODASS:
+			newOP = stnode::op::ops::MODASS;
+			break;
+		case token::ops::opType::DIVASS:
+			newOP = stnode::op::ops::DIVASS;
+			break;
+		case token::ops::opType::MULASS:
+			newOP = stnode::op::ops::MULASS;
+			break;
+		case token::ops::opType::ADDASS:
+			newOP = stnode::op::ops::ADDASS;
+			break;
+		case token::ops::opType::SUBASS:
+			newOP = stnode::op::ops::SUBASS;
+			break;
+		case token::ops::opType::SHLASS:
+			newOP = stnode::op::ops::SHLASS;
+			break;
+		case token::ops::opType::SHRASS:
+			newOP = stnode::op::ops::SHRASS;
+			break;
+		case token::ops::opType::ANDASS:
+			newOP = stnode::op::ops::ANDASS;
+			break;
+		case token::ops::opType::XORASS:
+			newOP = stnode::op::ops::XORASS;
+			break;
+		case token::ops::opType::BORASS:
+			newOP = stnode::op::ops::BORASS;
+			break;
+		case token::ops::opType::ARRAY_SUB:
+			newOP = stnode::op::ops::ARRAY_SUB;
+			break;
+		default:
+			return NULL;
+	}
+	stnode::op::op *opPtr;
+	switch (newOP)
+	{
+		case stnode::op::ops::INC:
+		case stnode::op::ops::DEC:
+		case stnode::op::ops::NOT:
+		case stnode::op::ops::LGNOT:
+		case stnode::op::ops::POSI:
+		case stnode::op::ops::NEGA:
+		case stnode::op::ops::REF:
+		case stnode::op::ops::DEREF:
+			opPtr = new stnode::op::opSingle(newOP, getOpLvl(newOP));
+			break;
+		case stnode::op::ops::ARRAY_SUB:
+		case stnode::op::ops::OBJ_MEMBER:
+		case stnode::op::ops::PTR_MEMBER:
+		case stnode::op::ops::DIV:
+		case stnode::op::ops::MUL:
+		case stnode::op::ops::MOD:
+		case stnode::op::ops::ADD:
+		case stnode::op::ops::SUB:
+		case stnode::op::ops::SHL:
+		case stnode::op::ops::SHR:
+		case stnode::op::ops::BIG:
+		case stnode::op::ops::BIGEQU:
+		case stnode::op::ops::LES:
+		case stnode::op::ops::LESEQU:
+		case stnode::op::ops::EQU:
+		case stnode::op::ops::NEQU:
+		case stnode::op::ops::AND:
+		case stnode::op::ops::XOR:
+		case stnode::op::ops::BOR:
+		case stnode::op::ops::LGAND:
+		case stnode::op::ops::LGOR:
+		case stnode::op::ops::ASSIGN:
+		case stnode::op::ops::MODASS:
+		case stnode::op::ops::DIVASS:
+		case stnode::op::ops::MULASS:
+		case stnode::op::ops::ADDASS:
+		case stnode::op::ops::SUBASS:
+		case stnode::op::ops::SHLASS:
+		case stnode::op::ops::SHRASS:
+		case stnode::op::ops::ANDASS:
+		case stnode::op::ops::XORASS:
+		case stnode::op::ops::BORASS:
+			opPtr = new stnode::op::opDouble(newOP, getOpLvl(newOP));
+			break;
+		default:
+			return NULL;
+	}
+	return opPtr;
 }
 
 int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p, int &errPtr)
@@ -134,7 +577,7 @@ int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p
 						return errPtr;
 					}
 					nextToken(delete newVar;);
-					long long *initVal = new long long[subCount];
+					long long *initVal = new long long[static_cast<unsigned int>(subCount)];
 					long long i;
 					for (i = 0; p != pEnd && i < subCount; p++, errPtr++, i++)
 					{
@@ -184,6 +627,9 @@ int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p
 
 int parser_exp(tokenList &tList, stnode::stnode **root, tokenList::iterator &p, int &errPtr)
 {
+	tokenList::iterator pEnd = tList.end();
+	std::list<stnode::stnode *> nstk;
+	
 	return -1;
 }
 
@@ -340,11 +786,15 @@ int parser(tokenList &tList, stTree *_sTree, bool inFunc)
 						break;
 					case token::keywords::keywords::IF:
 					{
-						stTree *block = new stTree;
+						stnode::stnode *exp;
+						int err = parser_exp(tList, &exp, p, errPtr);
+						if (err != -1)
+							return err;
 						stnode::ifelse *ifPtr = new stnode::ifelse;
+						ifPtr->exp = exp;
 						ifPtr->blockTrue = NULL;
 						ifPtr->blockFalse = NULL;
-						sTreeStk.push_back(lvlInfo(block, ifPtr));
+						sTreeStk.push_back(lvlInfo(new stTree, ifPtr));
 						break;
 					}
 					case token::keywords::keywords::ELSE:
@@ -387,8 +837,18 @@ int parser(tokenList &tList, stTree *_sTree, bool inFunc)
 						}
 						break;
 					}
+					default:
+						return errPtr;
 				}
 				break;
+			}
+			default:
+			{
+				stnode::stnode *ptrExp = NULL;
+				int err = parser_exp(tList, &ptrExp, p, errPtr);
+				if (err != -1)
+					return err;
+				ptr = ptrExp;
 			}
 		}
 		if (ptr != NULL)
