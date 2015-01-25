@@ -396,7 +396,6 @@ int parser_exp(tokenList &tList, stnode::stnode **root, tokenList::iterator &p, 
 int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p, int &errPtr)
 {
 	tokenList::iterator pEnd = tList.end();
-	nextToken(;);
 	if ((*p)->getType() == token::type::KEYWORD)
 	{
 		//type
@@ -539,6 +538,7 @@ int parser(tokenList &tList, stTree *_sTree)
 				{
 					case token::keywords::keywords::CONST:
 					{
+						nextToken(;);
 						stnode::alloc *allocPtr = new stnode::alloc(true);
 						int err = parser_dim(tList, allocPtr, p, errPtr);
 						if (err != -1)
@@ -551,6 +551,7 @@ int parser(tokenList &tList, stTree *_sTree)
 					}
 					case token::keywords::keywords::DIM:
 					{
+						nextToken(;);
 						stnode::alloc *allocPtr = new stnode::alloc(false);
 						int err = parser_dim(tList, allocPtr, p, errPtr);
 						if (err != -1)
@@ -663,6 +664,7 @@ int parser(tokenList &tList, stTree *_sTree)
 					case token::keywords::keywords::IF:
 					{
 						stnode::stnode *exp;
+						nextToken(;);
 						int err = parser_exp(tList, &exp, p, errPtr);
 						if (err != -1)
 							return err;
@@ -675,6 +677,7 @@ int parser(tokenList &tList, stTree *_sTree)
 					}
 					case token::keywords::keywords::ELSE:
 					{
+						nextToken(;);
 						stTree *block = new stTree;
 						lvlInfo info = sTreeStk.back();
 						if (info.ptr->getType() != stnode::type::IF)
@@ -688,6 +691,7 @@ int parser(tokenList &tList, stTree *_sTree)
 					}
 					case token::keywords::keywords::END:
 					{
+						nextToken(;);
 						lvlInfo info = sTreeStk.back();
 						sTreeStk.pop_back();
 						switch (info.ptr->getType())
@@ -702,6 +706,7 @@ int parser(tokenList &tList, stTree *_sTree)
 								else
 									ifPtr->blockFalse = info.sTree;
 								ptr = ifPtr;
+								break;
 							}
 							case stnode::type::FUNC:
 							{
@@ -709,6 +714,7 @@ int parser(tokenList &tList, stTree *_sTree)
 								funcPtr->block = info.sTree;
 								ptr = funcPtr;
 								allowFunc = true;
+								break;
 							}
 						}
 						break;
