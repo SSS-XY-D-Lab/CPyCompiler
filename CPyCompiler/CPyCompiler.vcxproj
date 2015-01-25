@@ -83,6 +83,7 @@
   <ItemGroup>
     <ClCompile Include="parser.cpp" />
     <ClCompile Include="CPyCompiler.cpp" />
+    <ClCompile Include="parser_yacc.cpp" />
     <ClCompile Include="scanner.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

@@ -6,12 +6,6 @@
 #include <string>
 #include <sstream>
 
-typedef unsigned short int USHORT;
-typedef unsigned int UINT;
-typedef unsigned long ULONG;
-typedef unsigned long long ULONGLONG;
-typedef unsigned char BYTE;
-
 namespace token
 {
 	enum type{ ERROR, NUMBER, CHARA, STR, ID, OP, KEYWORD, DELIM };
@@ -66,9 +60,9 @@ namespace token
 	{
 		enum opType{
 			ERROR,
-			COMMA, SUB_LEFT, SUB_RIGHT, BRACKET_LEFT, BRACKET_RIGHT, 
-			BRACE_LEFT, BRACE_RIGHT, 
-			OBJ_MEMBER, PTR_MEMBER,
+			COMMA, SUB_LEFT, SUB_RIGHT, BRACKET_LEFT, BRACKET_RIGHT,
+			BRACE_LEFT, BRACE_RIGHT,
+			MEMBER,
 			POSI, NEGA, INC, DEC, REF, DEREF, NOT, LGNOT,
 			DIV, MUL, MOD,
 			ADD, SUB,
@@ -77,6 +71,7 @@ namespace token
 			EQU, NEQU,
 			AND, XOR, BOR, LGAND, LGOR,
 			ASSIGN, MODASS, DIVASS, MULASS, ADDASS, SUBASS, SHLASS, SHRASS, ANDASS, XORASS, BORASS,
+			QMARK, COLON
 		};
 
 		struct opItem

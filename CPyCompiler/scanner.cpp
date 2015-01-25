@@ -107,8 +107,7 @@ namespace token
 				opType::SUB_RIGHT, "SUB_RIGHT",
 				opType::BRACKET_LEFT, "BRACKET_LEFT",
 				opType::BRACKET_RIGHT, "BRACKET_RIGHT",
-				opType::OBJ_MEMBER, "OBJ_MEMBER",
-				opType::PTR_MEMBER, "PTR_MEMBER",
+				opType::MEMBER, "MEMBER",
 				opType::BRACE_LEFT, "BRACE_LEFT",
 				opType::BRACE_RIGHT, "BRACE_RIGHT",
 				opType::POSI, "POSI",
@@ -148,7 +147,10 @@ namespace token
 				opType::ANDASS, "ANDASS",
 				opType::XORASS, "XORASS",
 				opType::BORASS, "BORASS",
-				opType::COMMA, "COMMA", };
+				opType::COMMA, "COMMA", 
+				opType::QMARK, "QUESTION MARK",
+				opType::COLON, "COLON",
+			};
 			for (int i = 0; i < 48; i++)
 				if (op == opMap[i].val)
 					return opMap[i].str;
@@ -273,6 +275,9 @@ int scanner(std::string *str, tokenList *tList, int lineN)
 				break;
 			case ',':
 				tList->push_back(new token::op(token::ops::opType::COMMA));
+				break;
+			case '.':
+				tList->push_back(new token::op(token::ops::opType::MEMBER));
 				break;
 			case '~':
 				tList->push_back(new token::op(token::ops::opType::NOT));
