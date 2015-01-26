@@ -5,7 +5,7 @@
 #define prevToken p--; errPtr--
 
 stnode::stnode *yacc_result;
-stTree::iterator yacc_p, yacc_pEnd;
+tokenList::iterator yacc_p, yacc_pEnd;
 char *yacc_err;
 int yyparse();
 
@@ -255,7 +255,7 @@ stnode::op::op *getOp(token::ops::opType op)
 		case token::ops::opType::COMMA:
 			newOP = stnode::op::ops::COMMA;
 			break;
-		case token::ops::opType::SUB_LEFT: 
+		case token::ops::opType::SUB_LEFT:
 			newOP = stnode::op::ops::SUB_LEFT;
 			break;
 		case token::ops::opType::SUB_RIGHT:
@@ -322,70 +322,65 @@ stnode::op::op *getOp(token::ops::opType op)
 	return opPtr;
 }
 
-int parser_exp_f(stTree &sList, stTree &ret, stTree::iterator &p, stTree::iterator pEnd, int &errPtr)
+stnode::stnode *getNode(token::token *tk)
 {
-	
-	return -1;
+	stnode::stnode *ret = NULL;
+	switch (tk->getType())
+	{
+		case token::type::ID:
+		{
+			token::id* tok = dynamic_cast<token::id*>(tk);
+			ret = new stnode::id(tok->str);
+			break;
+		}
+		case token::type::CHARA:
+		{
+			token::chara* tok = dynamic_cast<token::chara*>(tk);
+			ret = new stnode::chara(tok->ch);
+			break;
+		}
+		case token::type::STR:
+		{
+			token::str* tok = dynamic_cast<token::str*>(tk);
+			ret = new stnode::str(tok->strr);
+			break;
+		}
+		case token::type::OP:
+		{
+			token::op* tok = dynamic_cast<token::op*>(tk);
+			ret = getOp(tok->opType);
+			break;
+		}
+		case token::type::NUMBER:
+		{
+			token::number* tok = dynamic_cast<token::number*>(tk);
+			ret = new stnode::number(tok->val);
+			break;
+		}
+		case token::type::KEYWORD:
+		{
+			token::keyword* tok = dynamic_cast<token::keyword*>(tk);
+			stnode::varType type = getVarType(tok->word);
+			if (type == stnode::varType::_ERROR)
+				return NULL;
+			ret = new stnode::vartype(type);
+			break;
+		}
+	}
+	return ret;
 }
 
 int parser_exp(tokenList &tList, stnode::stnode **root, tokenList::iterator &p, int &errPtr)
 {
-	tokenList::iterator pEnd = tList.end();
-	stTree sList1;
-	for (; p != pEnd && (*p)->getType() != token::type::DELIM;)
-	{
-		switch ((*p)->getType())
-		{
-			case token::type::ID:
-			{
-				token::id* tk = dynamic_cast<token::id*>(*p);
-				sList1.push_back(new stnode::id(tk->str));
-				break;
-			}
-			case token::type::CHARA:
-			{
-				token::chara* tk = dynamic_cast<token::chara*>(*p);
-				sList1.push_back(new stnode::chara(tk->ch));
-				break;
-			}
-			case token::type::STR:
-			{
-				token::str* tk = dynamic_cast<token::str*>(*p);
-				sList1.push_back(new stnode::str(tk->strr));
-				break;
-			}
-			case token::type::OP:
-			{
-				token::op* tk = dynamic_cast<token::op*>(*p);
-				stnode::op::op *ret = getOp(tk->opType);
-				if (ret == NULL)
-					return errPtr;
-				sList1.push_back(getOp(tk->opType));
-				break;
-			}
-			case token::type::NUMBER:
-			{
-				token::number* tk = dynamic_cast<token::number*>(*p);
-				sList1.push_back(new stnode::number(tk->val));
-				break;
-			}
-			case token::type::KEYWORD:
-			{
-				token::keyword* tk = dynamic_cast<token::keyword*>(*p);
-				stnode::varType type = getVarType(tk->word);
-				if (type == stnode::varType::_ERROR)
-					return errPtr;
-				sList1.push_back(new stnode::vartype(type));
-				break;
-			}
-		}
-		nextToken(;);
-	}
-	sList1.push_back(new stnode::delim);
+	tokenList::iterator pBeg = p, pEnd = tList.end();
+	for (; p != pEnd; p++)
+		if ((*p)->getType() == token::type::DELIM)
+			break;
+	p++;
 	yacc_result = NULL;
 	yacc_err = NULL;
-	yacc_p = sList1.begin();
-	yacc_pEnd = sList1.end();
+	yacc_p = pBeg;
+	yacc_pEnd = p;
 	yyparse();
 	if (yacc_err != NULL)
 		return 0;
@@ -407,7 +402,7 @@ int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p
 			isPtr = true;
 			nextToken(;);
 		}
-		stnode::varType varType = getVarType(type->word);
+		stnode::varType varType = getVarType(type->word, isPtr);
 		if (varType == stnode::varType::_ERROR || varType == stnode::varType::VOID)
 			return errPtr;
 		stnode::id *newVar = NULL;
@@ -441,13 +436,8 @@ int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p
 				if (subCount == 0)
 				{
 					//init var
-					if ((*p)->getType() != token::type::NUMBER)
-					{
-						delete newVar;
-						return errPtr;
-					}
-					long long *initVal = new long long;
-					*initVal = dynamic_cast<token::number *>(*p)->val;
+					stnode::stnode **initVal = new stnode::stnode*; 
+					*initVal = getNode(*p);
 					allocPtr->var.push_back(stnode::allocUnit(newVar, initVal));
 					nextToken(delete newVar;);
 				}
@@ -460,15 +450,11 @@ int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p
 						return errPtr;
 					}
 					nextToken(delete newVar;);
-					long long *initVal = new long long[static_cast<unsigned int>(subCount)];
+					stnode::stnode **initVal = new stnode::stnode*[static_cast<unsigned int>(subCount)];
 					long long i;
 					for (i = 0; p != pEnd && i < subCount; p++, errPtr++, i++)
 					{
-						if ((*p)->getType() != token::type::NUMBER)
-						{
-							delete newVar; delete[] initVal; return errPtr;
-						}
-						initVal[i] = dynamic_cast<token::number *>(*p)->val;
+						initVal[i] = getNode(*p);
 						nextToken(delete newVar; delete[] initVal;);
 						if ((*p)->getType() != token::type::OP)
 						{
@@ -523,12 +509,13 @@ int parser(tokenList &tList, stTree *_sTree)
 	tokenList::iterator p, pEnd = tList.end();
 	int errPtr = 0;
 	bool allowFunc = true;
-	for (p = tList.begin(); p != pEnd; p++, errPtr++)
+	for (p = tList.begin(); p != pEnd;)
 	{
 		token::token *first = *p;
 		switch (first->getType())
 		{
 			case token::type::DELIM:
+				p++; errPtr++;
 				ptr = NULL;
 				break;
 			case token::type::KEYWORD:
@@ -580,7 +567,7 @@ int parser(tokenList &tList, stTree *_sTree)
 								isPtr = true;
 								nextToken(delete funcPtr;)
 							}
-							stnode::varType varType = getVarType(type->word);
+							stnode::varType varType = getVarType(type->word, isPtr);
 							if (varType == stnode::varType::_ERROR)
 							{
 								delete funcPtr;
@@ -619,7 +606,7 @@ int parser(tokenList &tList, stTree *_sTree)
 										isPtr = true;
 										nextToken(delete funcPtr;)
 									}
-									varType = getVarType(type->word);
+									varType = getVarType(type->word, isPtr);
 									if (varType == stnode::varType::_ERROR || varType == stnode::varType::VOID)
 									{
 										delete funcPtr;
@@ -647,7 +634,10 @@ int parser(tokenList &tList, stTree *_sTree)
 											nextToken(delete funcPtr;);
 										}
 										else if (opType == token::ops::opType::BRACKET_RIGHT)
+										{
+											nextToken(delete funcPtr;);
 											break;
+										}
 									}
 								}
 							}
@@ -661,6 +651,26 @@ int parser(tokenList &tList, stTree *_sTree)
 							return errPtr;
 						}
 						break;
+					case token::keywords::keywords::RETURN:
+					{
+						nextToken(;);
+						stnode::ret *retPtr = new stnode::ret;
+						if ((*p)->getType() == token::type::DELIM)
+						{
+							retPtr->retVal = NULL;
+							p++; errPtr++;
+						}
+						else
+						{
+							stnode::stnode *exp;
+							int err = parser_exp(tList, &exp, p, errPtr);
+							if (err != -1)
+								return err;
+							retPtr->retVal = exp;
+						}
+						ptr = retPtr;
+						break;
+					}
 					case token::keywords::keywords::IF:
 					{
 						stnode::stnode *exp;
@@ -691,7 +701,7 @@ int parser(tokenList &tList, stTree *_sTree)
 					}
 					case token::keywords::keywords::END:
 					{
-						nextToken(;);
+						p++; errPtr++;
 						lvlInfo info = sTreeStk.back();
 						sTreeStk.pop_back();
 						switch (info.ptr->getType())

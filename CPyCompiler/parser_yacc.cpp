@@ -70,6 +70,8 @@ USER NAME SPACE" below.  */
 int yylex();
 void yyerror(char *);
 
+
+
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
 #   define YY_NULLPTR nullptr
@@ -495,16 +497,16 @@ static const yytype_uint8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-	0, 11, 11, 12, 13, 14, 15, 16, 17, 18,
-	19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
-	29, 30, 31, 32, 34, 35, 36, 37, 38, 40,
-	41, 42, 43, 44, 45, 46, 48, 49, 50, 51,
-	52, 53, 54, 55, 56, 58, 59, 61, 62, 63,
-	64, 66, 67, 68, 70, 71, 72, 74, 75, 76,
-	77, 78, 80, 81, 82, 84, 85, 87, 88, 90,
-	91, 93, 94, 96, 97, 99, 100, 102, 103, 104,
-	105, 106, 107, 108, 109, 110, 111, 112, 113, 115,
-	116, 118
+	0, 13, 13, 14, 15, 16, 17, 18, 19, 20,
+	21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+	31, 32, 33, 34, 36, 37, 38, 39, 40, 42,
+	43, 44, 45, 46, 47, 48, 50, 51, 52, 53,
+	54, 55, 56, 57, 58, 60, 61, 63, 64, 65,
+	66, 68, 69, 70, 72, 73, 74, 76, 77, 78,
+	79, 80, 82, 83, 84, 86, 87, 89, 90, 92,
+	93, 95, 96, 98, 99, 101, 102, 104, 105, 106,
+	107, 108, 109, 110, 111, 112, 113, 114, 115, 117,
+	118, 120
 };
 #endif
 
@@ -1387,271 +1389,271 @@ yyreduce:
 	{
 		case 30:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::ARRAY_SUB, (yyvsp[-3]), (yyvsp[-1])); }
+		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::ARRAY_SUB, (yyvsp[-3]), (yyvsp[-1])); delete (yyvsp[-2]); delete (yyvsp[0]); }
 
 		break;
 
 		case 31:
 
-		{ (yyval) = new stnode::call((yyvsp[-2])); }
+		{ (yyval) = new stnode::call((yyvsp[-2])); delete (yyvsp[-1]); delete (yyvsp[0]); }
 
 		break;
 
 		case 32:
 
-		{ (yyval) = new stnode::call((yyvsp[-3]), (yyvsp[-1])); }
+		{ (yyval) = new stnode::call((yyvsp[-3]), (yyvsp[-1])); delete (yyvsp[-2]); delete (yyvsp[0]); }
 
 		break;
 
 		case 33:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::MEMBER, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 34:
 
-		{ (yyval) = new stnode::op::opSingle(stnode::op::ops::INC_POST, (yyvsp[-1])); }
+		{ stnode::op::opSingle *op = dynamic_cast<stnode::op::opSingle*>((yyvsp[0])); op->arg1 = (yyvsp[-1]); (yyval) = op; }
 
 		break;
 
 		case 35:
 
-		{ (yyval) = new stnode::op::opSingle(stnode::op::ops::DEC_POST, (yyvsp[-1])); }
+		{ stnode::op::opSingle *op = dynamic_cast<stnode::op::opSingle*>((yyvsp[0])); op->arg1 = (yyvsp[-1]); (yyval) = op; }
 
 		break;
 
 		case 37:
 
-		{ (yyval) = new stnode::op::opSingle(stnode::op::ops::INC_PRE, (yyvsp[-1])); }
+		{ stnode::op::opSingle *op = dynamic_cast<stnode::op::opSingle*>((yyvsp[-1])); op->arg1 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 38:
 
-		{ (yyval) = new stnode::op::opSingle(stnode::op::ops::DEC_PRE, (yyvsp[-1])); }
+		{ stnode::op::opSingle *op = dynamic_cast<stnode::op::opSingle*>((yyvsp[-1])); op->arg1 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 39:
 
-		{ (yyval) = new stnode::op::opSingle(stnode::op::ops::REF, (yyvsp[-1])); }
+		{ stnode::op::opSingle *op = dynamic_cast<stnode::op::opSingle*>((yyvsp[-1])); op->arg1 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 40:
 
-		{ (yyval) = new stnode::op::opSingle(stnode::op::ops::DEREF, (yyvsp[-1])); }
+		{ stnode::op::opSingle *op = dynamic_cast<stnode::op::opSingle*>((yyvsp[-1])); op->arg1 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 41:
 
-		{ (yyval) = new stnode::op::opSingle(stnode::op::ops::POSI, (yyvsp[-1])); }
+		{ stnode::op::opSingle *op = dynamic_cast<stnode::op::opSingle*>((yyvsp[-1])); op->arg1 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 42:
 
-		{ (yyval) = new stnode::op::opSingle(stnode::op::ops::NEGA, (yyvsp[-1])); }
+		{ stnode::op::opSingle *op = dynamic_cast<stnode::op::opSingle*>((yyvsp[-1])); op->arg1 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 43:
 
-		{ (yyval) = new stnode::op::opSingle(stnode::op::ops::NOT, (yyvsp[-1])); }
+		{ stnode::op::opSingle *op = dynamic_cast<stnode::op::opSingle*>((yyvsp[-1])); op->arg1 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 44:
 
-		{ (yyval) = new stnode::op::opSingle(stnode::op::ops::LGNOT, (yyvsp[-1])); }
+		{ stnode::op::opSingle *op = dynamic_cast<stnode::op::opSingle*>((yyvsp[-1])); op->arg1 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 46:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::CAST, (yyvsp[-3]), (yyvsp[-1])); }
+		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::CAST, (yyvsp[-2]), (yyvsp[0])); delete (yyvsp[-3]); delete (yyvsp[-1]); }
 
 		break;
 
 		case 48:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::MUL, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 49:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::DIV, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 50:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::MOD, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 52:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::ADD, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 53:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::SUB, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 55:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::SHL, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 56:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::SHR, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 58:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::BIG, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 59:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::BIGEQU, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 60:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::LES, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 61:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::LESEQU, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 63:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::EQU, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 64:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::NEQU, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 66:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::AND, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 68:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::XOR, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 70:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::BOR, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 72:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::LGAND, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 74:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::LGOR, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 76:
 
-		{ (yyval) = new stnode::op::opTriple(stnode::op::ops::COLONEXP, (yyvsp[-4]), (yyvsp[-2]), (yyvsp[0])); }
+		{ (yyval) = new stnode::op::opTriple(stnode::op::ops::COLONEXP, (yyvsp[-4]), (yyvsp[-2]), (yyvsp[0])); delete (yyvsp[-3]); delete (yyvsp[-1]); }
 
 		break;
 
 		case 78:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::ASSIGN, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 79:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::MODASS, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 80:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::DIVASS, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 81:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::MULASS, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 82:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::ADDASS, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 83:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::SUBASS, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 84:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::SHLASS, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 85:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::SHRASS, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 86:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::ANDASS, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 87:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::XORASS, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 88:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::BORASS, (yyvsp[-2]), (yyvsp[0])); }
+		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
@@ -1903,257 +1905,349 @@ int yylex()
 {
 	if (yacc_p == yacc_pEnd)
 		return -1;
-	yylval = *yacc_p;
-	int ret;
+	int ret = -1;
 	switch ((*yacc_p)->getType())
 	{
-		case stnode::type::ID:
+		case token::type::ID:
 		{
+			token::id* tk = dynamic_cast<token::id*>(*yacc_p);
+			yylval = new stnode::id(tk->str);
 			ret = ID;
 			break;
 		}
-		case stnode::type::CHARA:
+		case token::type::CHARA:
 		{
+			token::chara* tk = dynamic_cast<token::chara*>(*yacc_p);
+			yylval = new stnode::chara(tk->ch);
 			ret = CHARA;
 			break;
 		}
-		case stnode::type::STR:
+		case token::type::STR:
 		{
+			token::str* tk = dynamic_cast<token::str*>(*yacc_p);
+			yylval = new stnode::str(tk->strr);
 			ret = STR;
 			break;
 		}
-		case stnode::type::NUMBER:
+		case token::type::NUMBER:
 		{
+			token::number* tk = dynamic_cast<token::number*>(*yacc_p);
+			yylval = new stnode::number(tk->val);
 			ret = NUMBER;
 			break;
 		}
-		case stnode::type::DELIM:
+		case token::type::OP:
 		{
-			ret = DELIM;
-			break;
-		}
-		case stnode::type::OP:
-		{
-			stnode::op::op *tk = dynamic_cast<stnode::op::op *>(*yacc_p);
-			switch (tk->opVal)
+			token::op* tk = dynamic_cast<token::op*>(*yacc_p);
+			stnode::op::ops newOP;
+			switch (tk->opType)
 			{
-				case stnode::op::ops::COMMA:
+				case token::ops::opType::COMMA:
 					ret = COMMA;
+					newOP = stnode::op::ops::COMMA;
 					break;
-				case stnode::op::ops::SUB_LEFT:
+				case token::ops::opType::SUB_LEFT:
 					ret = SUB_LEFT;
+					newOP = stnode::op::ops::SUB_LEFT;
 					break;
-				case stnode::op::ops::SUB_RIGHT:
+				case token::ops::opType::SUB_RIGHT:
 					ret = SUB_RIGHT;
+					newOP = stnode::op::ops::SUB_RIGHT;
 					break;
-				case stnode::op::ops::BRACKET_LEFT:
+				case token::ops::opType::BRACKET_LEFT:
 					ret = BRACKET_LEFT;
+					newOP = stnode::op::ops::BRACKET_LEFT;
 					break;
-				case stnode::op::ops::BRACKET_RIGHT:
+				case token::ops::opType::BRACKET_RIGHT:
 					ret = BRACKET_RIGHT;
+					newOP = stnode::op::ops::BRACKET_RIGHT;
 					break;
-				case stnode::op::ops::MEMBER:
+				case token::ops::opType::MEMBER:
 					ret = MEMBER;
+					newOP = stnode::op::ops::MEMBER;
 					break;
-				case stnode::op::ops::POSI:
+				case token::ops::opType::POSI:
 					ret = POSI;
+					newOP = stnode::op::ops::POSI;
 					break;
-				case stnode::op::ops::NEGA:
+				case token::ops::opType::NEGA:
 					ret = NEGA;
+					newOP = stnode::op::ops::NEGA;
 					break;
-				case stnode::op::ops::INC:
+				case token::ops::opType::INC:
 					ret = INC;
+					newOP = stnode::op::ops::INC;
 					break;
-				case stnode::op::ops::DEC:
+				case token::ops::opType::DEC:
 					ret = DEC;
+					newOP = stnode::op::ops::DEC;
 					break;
-				case stnode::op::ops::REF:
+				case token::ops::opType::REF:
 					ret = REF;
+					newOP = stnode::op::ops::REF;
 					break;
-				case stnode::op::ops::DEREF:
+				case token::ops::opType::DEREF:
 					ret = DEREF;
+					newOP = stnode::op::ops::DEREF;
 					break;
-				case stnode::op::ops::NOT:
+				case token::ops::opType::NOT:
 					ret = NOT;
+					newOP = stnode::op::ops::NOT;
 					break;
-				case stnode::op::ops::LGNOT:
+				case token::ops::opType::LGNOT:
 					ret = LGNOT;
+					newOP = stnode::op::ops::LGNOT;
 					break;
-				case stnode::op::ops::DIV:
+				case token::ops::opType::DIV:
 					ret = DIV;
+					newOP = stnode::op::ops::DIV;
 					break;
-				case stnode::op::ops::MUL:
+				case token::ops::opType::MUL:
 					ret = MUL;
+					newOP = stnode::op::ops::MUL;
 					break;
-				case stnode::op::ops::MOD:
+				case token::ops::opType::MOD:
 					ret = MOD;
+					newOP = stnode::op::ops::MOD;
 					break;
-				case stnode::op::ops::ADD:
+				case token::ops::opType::ADD:
 					ret = ADD;
+					newOP = stnode::op::ops::ADD;
 					break;
-				case stnode::op::ops::SUB:
+				case token::ops::opType::SUB:
 					ret = SUB;
+					newOP = stnode::op::ops::SUB;
 					break;
-				case stnode::op::ops::SHL:
+				case token::ops::opType::SHL:
 					ret = SHL;
+					newOP = stnode::op::ops::SHL;
 					break;
-				case stnode::op::ops::SHR:
+				case token::ops::opType::SHR:
 					ret = SHR;
+					newOP = stnode::op::ops::SHR;
 					break;
-				case stnode::op::ops::BIG:
+				case token::ops::opType::BIG:
 					ret = BIG;
+					newOP = stnode::op::ops::BIG;
 					break;
-				case stnode::op::ops::BIGEQU:
+				case token::ops::opType::BIGEQU:
 					ret = BIGEQU;
+					newOP = stnode::op::ops::BIGEQU;
 					break;
-				case stnode::op::ops::LES:
+				case token::ops::opType::LES:
 					ret = LES;
+					newOP = stnode::op::ops::LES;
 					break;
-				case stnode::op::ops::LESEQU:
+				case token::ops::opType::LESEQU:
 					ret = LESEQU;
+					newOP = stnode::op::ops::LESEQU;
 					break;
-				case stnode::op::ops::EQU:
+				case token::ops::opType::EQU:
 					ret = EQU;
+					newOP = stnode::op::ops::EQU;
 					break;
-				case stnode::op::ops::NEQU:
+				case token::ops::opType::NEQU:
 					ret = NEQU;
+					newOP = stnode::op::ops::NEQU;
 					break;
-				case stnode::op::ops::AND:
+				case token::ops::opType::AND:
 					ret = AND;
+					newOP = stnode::op::ops::AND;
 					break;
-				case stnode::op::ops::XOR:
+				case token::ops::opType::XOR:
 					ret = XOR;
+					newOP = stnode::op::ops::XOR;
 					break;
-				case stnode::op::ops::BOR:
+				case token::ops::opType::BOR:
 					ret = BOR;
+					newOP = stnode::op::ops::BOR;
 					break;
-				case stnode::op::ops::LGAND:
+				case token::ops::opType::LGAND:
 					ret = LGAND;
+					newOP = stnode::op::ops::LGAND;
 					break;
-				case stnode::op::ops::LGOR:
+				case token::ops::opType::LGOR:
 					ret = LGOR;
+					newOP = stnode::op::ops::LGOR;
 					break;
-				case stnode::op::ops::ASSIGN:
+				case token::ops::opType::ASSIGN:
 					ret = ASSIGN;
+					newOP = stnode::op::ops::ASSIGN;
 					break;
-				case stnode::op::ops::MODASS:
+				case token::ops::opType::MODASS:
 					ret = MODASS;
+					newOP = stnode::op::ops::MODASS;
 					break;
-				case stnode::op::ops::DIVASS:
+				case token::ops::opType::DIVASS:
 					ret = DIVASS;
+					newOP = stnode::op::ops::DIVASS;
 					break;
-				case stnode::op::ops::MULASS:
+				case token::ops::opType::MULASS:
 					ret = MULASS;
+					newOP = stnode::op::ops::MULASS;
 					break;
-				case stnode::op::ops::ADDASS:
+				case token::ops::opType::ADDASS:
 					ret = ADDASS;
+					newOP = stnode::op::ops::ADDASS;
 					break;
-				case stnode::op::ops::SUBASS:
+				case token::ops::opType::SUBASS:
 					ret = SUBASS;
+					newOP = stnode::op::ops::SUBASS;
 					break;
-				case stnode::op::ops::SHLASS:
+				case token::ops::opType::SHLASS:
 					ret = SHLASS;
+					newOP = stnode::op::ops::SHLASS;
 					break;
-				case stnode::op::ops::SHRASS:
+				case token::ops::opType::SHRASS:
 					ret = SHRASS;
+					newOP = stnode::op::ops::SHRASS;
 					break;
-				case stnode::op::ops::ANDASS:
+				case token::ops::opType::ANDASS:
 					ret = ANDASS;
+					newOP = stnode::op::ops::ANDASS;
 					break;
-				case stnode::op::ops::XORASS:
+				case token::ops::opType::XORASS:
 					ret = XORASS;
+					newOP = stnode::op::ops::XORASS;
 					break;
-				case stnode::op::ops::BORASS:
+				case token::ops::opType::BORASS:
 					ret = BORASS;
+					newOP = stnode::op::ops::BORASS;
 					break;
-				case stnode::op::ops::QMARK:
+				case token::ops::opType::QMARK:
 					ret = QMARK;
+					newOP = stnode::op::ops::QMARK;
 					break;
-				case stnode::op::ops::COLON:
+				case token::ops::opType::COLON:
 					ret = COLON;
+					newOP = stnode::op::ops::COLON;
 					break;
+				default:
+					yyerror("Illegal Token(OP)");
+					return -1;
 			}
-			break;
-		}
-		case stnode::type::TYPE:
-		{
-			stnode::vartype *tk = dynamic_cast<stnode::vartype *>(*yacc_p);
-			switch (tk->vtype)
+			stnode::op::op *opPtr;
+			switch (newOP)
 			{
-				case stnode::varType::VOID:
-					ret = VOID;
+				case stnode::op::ops::INC:
+				case stnode::op::ops::DEC:
+				case stnode::op::ops::NOT:
+				case stnode::op::ops::LGNOT:
+				case stnode::op::ops::POSI:
+				case stnode::op::ops::NEGA:
+				case stnode::op::ops::REF:
+				case stnode::op::ops::DEREF:
+					opPtr = new stnode::op::opSingle(newOP);
 					break;
-				case stnode::varType::VOID_PTR:
-					ret = VOID_PTR;
+				case stnode::op::ops::ARRAY_SUB:
+				case stnode::op::ops::MEMBER:
+				case stnode::op::ops::DIV:
+				case stnode::op::ops::MUL:
+				case stnode::op::ops::MOD:
+				case stnode::op::ops::ADD:
+				case stnode::op::ops::SUB:
+				case stnode::op::ops::SHL:
+				case stnode::op::ops::SHR:
+				case stnode::op::ops::BIG:
+				case stnode::op::ops::BIGEQU:
+				case stnode::op::ops::LES:
+				case stnode::op::ops::LESEQU:
+				case stnode::op::ops::EQU:
+				case stnode::op::ops::NEQU:
+				case stnode::op::ops::AND:
+				case stnode::op::ops::XOR:
+				case stnode::op::ops::BOR:
+				case stnode::op::ops::LGAND:
+				case stnode::op::ops::LGOR:
+				case stnode::op::ops::ASSIGN:
+				case stnode::op::ops::MODASS:
+				case stnode::op::ops::DIVASS:
+				case stnode::op::ops::MULASS:
+				case stnode::op::ops::ADDASS:
+				case stnode::op::ops::SUBASS:
+				case stnode::op::ops::SHLASS:
+				case stnode::op::ops::SHRASS:
+				case stnode::op::ops::ANDASS:
+				case stnode::op::ops::XORASS:
+				case stnode::op::ops::BORASS:
+					opPtr = new stnode::op::opDouble(newOP);
 					break;
-				case stnode::varType::SINT:
-					ret = SINT;
-					break;
-				case stnode::varType::S8:
-					ret = S8;
-					break;
-				case stnode::varType::S16:
-					ret = S16;
-					break;
-				case stnode::varType::S32:
-					ret = S32;
-					break;
-				case stnode::varType::S64:
-					ret = S64;
-					break;
-				case stnode::varType::UINT:
-					ret = UINT;
-					break;
-				case stnode::varType::U8:
-					ret = U8;
-					break;
-				case stnode::varType::U16:
-					ret = U16;
-					break;
-				case stnode::varType::U32:
-					ret = U32;
-					break;
-				case stnode::varType::U64:
-					ret = U64;
-					break;
-				case stnode::varType::SINT_PTR:
-					ret = SINT_PTR;
-					break;
-				case stnode::varType::S8_PTR:
-					ret = S8_PTR;
-					break;
-				case stnode::varType::S16_PTR:
-					ret = S16_PTR;
-					break;
-				case stnode::varType::S32_PTR:
-					ret = S32_PTR;
-					break;
-				case stnode::varType::S64_PTR:
-					ret = S64_PTR;
-					break;
-				case stnode::varType::UINT_PTR:
-					ret = UINT_PTR;
-					break;
-				case stnode::varType::U8_PTR:
-					ret = U8_PTR;
-					break;
-				case stnode::varType::U16_PTR:
-					ret = U16_PTR;
-					break;
-				case stnode::varType::U32_PTR:
-					ret = U32_PTR;
-					break;
-				case stnode::varType::U64_PTR:
-					ret = U64_PTR;
-					break;
+				default:
+					opPtr = new stnode::op::op(newOP);
 			}
+			yylval = opPtr;
 			break;
 		}
+		case token::type::KEYWORD:
+		{
+			token::keyword* tk = dynamic_cast<token::keyword*>(*yacc_p);
+			bool isPtr = false;
+			yacc_p++;
+			if (yacc_p == yacc_pEnd || (*yacc_p)->getType() != token::type::OP || dynamic_cast<token::op *>(*yacc_p)->opType != token::ops::opType::DEREF)
+				yacc_p--;
+			else
+				isPtr = true;
+			stnode::varType varType;
+			switch (tk->word)
+			{
+				case token::keywords::SINT:
+					if (isPtr){ varType = stnode::varType::SINT_PTR; ret = SINT_PTR; }
+					else{ varType = stnode::varType::SINT; ret = SINT; }
+					break;
+				case token::keywords::S8:
+					if (isPtr){ varType = stnode::varType::S8_PTR; ret = S8_PTR; }
+					else{ varType = stnode::varType::S8; ret = S8; }
+					break;
+				case token::keywords::S16:
+					if (isPtr){ varType = stnode::varType::S16_PTR; ret = S16_PTR; }
+					else{ varType = stnode::varType::S16; ret = S16; }
+					break;
+				case token::keywords::S32:
+					if (isPtr){ varType = stnode::varType::S32_PTR; ret = S32_PTR; }
+					else{ varType = stnode::varType::S32; ret = S32; }
+					break;
+				case token::keywords::S64:
+					if (isPtr){ varType = stnode::varType::S64_PTR; ret = S64_PTR; }
+					else{ varType = stnode::varType::S64; ret = S64; }
+					break;
+				case token::keywords::UINT:
+					if (isPtr){ varType = stnode::varType::UINT_PTR; ret = UINT_PTR; }
+					else{ varType = stnode::varType::UINT; ret = UINT; }
+					break;
+				case token::keywords::U8:
+					if (isPtr){ varType = stnode::varType::U8_PTR; ret = U8_PTR; }
+					else{ varType = stnode::varType::U8; ret = U8; }
+					break;
+				case token::keywords::U16:
+					if (isPtr){ varType = stnode::varType::U16_PTR; ret = U16_PTR; }
+					else{ varType = stnode::varType::U16; ret = U16; }
+					break;
+				case token::keywords::U32:
+					if (isPtr){ varType = stnode::varType::U32_PTR; ret = U32_PTR; }
+					else{ varType = stnode::varType::U32; ret = U32; }
+					break;
+				case token::keywords::U64:
+					if (isPtr){ varType = stnode::varType::U64_PTR; ret = U64_PTR; }
+					else{ varType = stnode::varType::U64; ret = U64; }
+					break;
+				case token::keywords::VOID:
+					if (isPtr){ varType = stnode::varType::VOID_PTR; ret = VOID_PTR; }
+					else{ varType = stnode::varType::VOID; ret = VOID; }
+					break;
+				default:
+					yyerror("Illegal Token(Keyword)");
+					return -1;
+			}
+			yylval = new stnode::vartype(varType);
+			break;
+		}
+		case token::type::DELIM:
+			yylval = new stnode::delim;
+			ret = DELIM;
 	}
 	yacc_p++;
 	return ret;
 }
-
 
 void yyerror(char *err)
 {

@@ -7,7 +7,7 @@
 
 namespace stnode
 {
-	enum type{ ERROR, TYPE, NUMBER, CHARA, STR, ID, OP, FUNC, CALL, IF, ALLOC, CONST, TREE, DELIM };
+	enum type{ ERROR, TYPE, NUMBER, CHARA, STR, ID, OP, FUNC, CALL, RETURN, IF, ALLOC, CONST, TREE, DELIM };
 
 	class stnode
 	{
@@ -148,6 +148,13 @@ namespace stnode
 		type getType(){ return type::CALL; };
 	};
 
+	class ret :public stnode
+	{
+	public:
+		stnode *retVal;
+		type getType(){ return type::RETURN; };
+	};
+
 	class ifelse :public stnode
 	{
 	public:
@@ -159,10 +166,10 @@ namespace stnode
 	struct allocUnit
 	{
 		allocUnit(id* _var){ var = _var; init = false; };
-		allocUnit(id* _var, long long *_val){ var = _var; init = true; val = _val; };
+		allocUnit(id* _var, stnode **_val){ var = _var; init = true; val = _val; };
 		id *var;
 		bool init;
-		long long *val;
+		stnode **val;
 	};
 
 	class alloc :public stnode
@@ -192,7 +199,7 @@ namespace stnode
 int parser(tokenList &tList, stTree *sTree);
 
 extern stnode::stnode *yacc_result;
-extern stTree::iterator yacc_p, yacc_pEnd;
+extern tokenList::iterator yacc_p, yacc_pEnd;
 extern char *yacc_err;
 int yyparse();
 
