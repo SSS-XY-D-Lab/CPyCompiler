@@ -4,6 +4,11 @@
 #define nextToken(x) p++; errPtr++; if (p == pEnd) { x return errPtr - 1; }
 #define prevToken p--; errPtr--
 
+stnode::stnode *yacc_result;
+tokenList::iterator yacc_p, yacc_pEnd;
+char *yacc_err;
+int yyparse();
+
 namespace stnode
 {
 	namespace op
@@ -19,8 +24,7 @@ namespace stnode
 				ops::BRACKET_RIGHT, "BRACKET_RIGHT",
 				ops::ARRAY_SUB, "ARRAY_SUB",
 				ops::CAST, "CAST",
-				ops::OBJ_MEMBER, "OBJ_MEMBER",
-				ops::PTR_MEMBER, "PTR_MEMBER",
+				ops::MEMBER, "MEMBER",
 				ops::POSI, "POSI",
 				ops::NEGA, "NEGA",
 				ops::INC, "INC",
@@ -129,212 +133,13 @@ stnode::varType getVarType(token::keywords::keywords kw, bool isPtr = false)
 	return varType;
 }
 
-int getOpLvl(stnode::op::ops op)
-{
-	switch (op)
-	{
-		case stnode::op::ops::INC:
-		case stnode::op::ops::DEC:
-		case stnode::op::ops::INC_POST:
-		case stnode::op::ops::DEC_POST:
-		case stnode::op::ops::ARRAY_SUB:
-		case stnode::op::ops::OBJ_MEMBER:
-		case stnode::op::ops::PTR_MEMBER:
-			return 1;
-		case stnode::op::ops::INC_PRE:
-		case stnode::op::ops::DEC_PRE:
-		case stnode::op::ops::NOT:
-		case stnode::op::ops::LGNOT:
-		case stnode::op::ops::POSI:
-		case stnode::op::ops::NEGA:
-		case stnode::op::ops::REF:
-		case stnode::op::ops::DEREF:
-		case stnode::op::ops::CAST:
-			return 2;
-		case stnode::op::ops::DIV:
-		case stnode::op::ops::MUL:
-		case stnode::op::ops::MOD:
-			return 3;
-		case stnode::op::ops::ADD:
-		case stnode::op::ops::SUB:
-			return 4;
-		case stnode::op::ops::SHL:
-		case stnode::op::ops::SHR:
-			return 5;
-		case stnode::op::ops::BIG:
-		case stnode::op::ops::BIGEQU:
-		case stnode::op::ops::LES:
-		case stnode::op::ops::LESEQU:
-			return 6;
-		case stnode::op::ops::EQU:
-		case stnode::op::ops::NEQU:
-			return 7;
-		case stnode::op::ops::AND:
-			return 8;
-		case stnode::op::ops::XOR:
-			return 9;
-		case stnode::op::ops::BOR:
-			return 10;
-		case stnode::op::ops::LGAND:
-			return 11;
-		case stnode::op::ops::LGOR:
-			return 12;
-		case stnode::op::ops::ASSIGN:
-		case stnode::op::ops::MODASS:
-		case stnode::op::ops::DIVASS:
-		case stnode::op::ops::MULASS:
-		case stnode::op::ops::ADDASS:
-		case stnode::op::ops::SUBASS:
-		case stnode::op::ops::SHLASS:
-		case stnode::op::ops::SHRASS:
-		case stnode::op::ops::ANDASS:
-		case stnode::op::ops::XORASS:
-		case stnode::op::ops::BORASS:
-			return 13;
-		case stnode::op::ops::COMMA:
-			return 14;
-	}
-	return -1;
-}
-
-int getOpLvl(token::ops::opType op)
-{
-	stnode::op::ops newOP;
-	switch (op)
-	{
-		case token::ops::opType::OBJ_MEMBER:
-			newOP = stnode::op::ops::OBJ_MEMBER;
-			break;
-		case token::ops::opType::PTR_MEMBER:
-			newOP = stnode::op::ops::PTR_MEMBER;
-			break;
-		case token::ops::opType::POSI:
-			newOP = stnode::op::ops::POSI;
-			break;
-		case token::ops::opType::NEGA:
-			newOP = stnode::op::ops::NEGA;
-			break;
-		case token::ops::opType::INC:
-			newOP = stnode::op::ops::INC;
-			break;
-		case token::ops::opType::DEC:
-			newOP = stnode::op::ops::DEC;
-			break;
-		case token::ops::opType::REF:
-			newOP = stnode::op::ops::REF;
-			break;
-		case token::ops::opType::DEREF:
-			newOP = stnode::op::ops::DEREF;
-			break;
-		case token::ops::opType::NOT:
-			newOP = stnode::op::ops::NOT;
-			break;
-		case token::ops::opType::LGNOT:
-			newOP = stnode::op::ops::LGNOT;
-			break;
-		case token::ops::opType::DIV:
-			newOP = stnode::op::ops::DIV;
-			break;
-		case token::ops::opType::MUL:
-			newOP = stnode::op::ops::MUL;
-			break;
-		case token::ops::opType::MOD:
-			newOP = stnode::op::ops::MOD;
-			break;
-		case token::ops::opType::ADD:
-			newOP = stnode::op::ops::ADD;
-			break;
-		case token::ops::opType::SUB:
-			newOP = stnode::op::ops::SUB;
-			break;
-		case token::ops::opType::SHL:
-			newOP = stnode::op::ops::SHL;
-			break;
-		case token::ops::opType::SHR:
-			newOP = stnode::op::ops::SHR;
-			break;
-		case token::ops::opType::BIG:
-			newOP = stnode::op::ops::BIG;
-			break;
-		case token::ops::opType::BIGEQU:
-			newOP = stnode::op::ops::BIGEQU;
-			break;
-		case token::ops::opType::LES:
-			newOP = stnode::op::ops::LES;
-			break;
-		case token::ops::opType::LESEQU:
-			newOP = stnode::op::ops::LESEQU;
-			break;
-		case token::ops::opType::EQU:
-			newOP = stnode::op::ops::EQU;
-			break;
-		case token::ops::opType::NEQU:
-			newOP = stnode::op::ops::NEQU;
-			break;
-		case token::ops::opType::AND:
-			newOP = stnode::op::ops::AND;
-			break;
-		case token::ops::opType::XOR:
-			newOP = stnode::op::ops::XOR;
-			break;
-		case token::ops::opType::BOR:
-			newOP = stnode::op::ops::BOR;
-			break;
-		case token::ops::opType::LGAND:
-			newOP = stnode::op::ops::LGAND;
-			break;
-		case token::ops::opType::LGOR:
-			newOP = stnode::op::ops::LGOR;
-			break;
-		case token::ops::opType::ASSIGN:
-			newOP = stnode::op::ops::ASSIGN;
-			break;
-		case token::ops::opType::MODASS:
-			newOP = stnode::op::ops::MODASS;
-			break;
-		case token::ops::opType::DIVASS:
-			newOP = stnode::op::ops::DIVASS;
-			break;
-		case token::ops::opType::MULASS:
-			newOP = stnode::op::ops::MULASS;
-			break;
-		case token::ops::opType::ADDASS:
-			newOP = stnode::op::ops::ADDASS;
-			break;
-		case token::ops::opType::SUBASS:
-			newOP = stnode::op::ops::SUBASS;
-			break;
-		case token::ops::opType::SHLASS:
-			newOP = stnode::op::ops::SHLASS;
-			break;
-		case token::ops::opType::SHRASS:
-			newOP = stnode::op::ops::SHRASS;
-			break;
-		case token::ops::opType::ANDASS:
-			newOP = stnode::op::ops::ANDASS;
-			break;
-		case token::ops::opType::XORASS:
-			newOP = stnode::op::ops::XORASS;
-			break;
-		case token::ops::opType::BORASS:
-			newOP = stnode::op::ops::BORASS;
-			break;
-		default:
-			return -1;
-	}
-	return getOpLvl(newOP);
-}
-
 stnode::op::op *getOp(token::ops::opType op)
 {
 	stnode::op::ops newOP;
 	switch (op)
 	{
-		case token::ops::opType::OBJ_MEMBER:
-			newOP = stnode::op::ops::OBJ_MEMBER;
-			break;
-		case token::ops::opType::PTR_MEMBER:
-			newOP = stnode::op::ops::PTR_MEMBER;
+		case token::ops::opType::MEMBER:
+			newOP = stnode::op::ops::MEMBER;
 			break;
 		case token::ops::opType::POSI:
 			newOP = stnode::op::ops::POSI;
@@ -446,6 +251,21 @@ stnode::op::op *getOp(token::ops::opType op)
 			break;
 		case token::ops::opType::BORASS:
 			newOP = stnode::op::ops::BORASS;
+			break;
+		case token::ops::opType::COMMA:
+			newOP = stnode::op::ops::COMMA;
+			break;
+		case token::ops::opType::SUB_LEFT:
+			newOP = stnode::op::ops::SUB_LEFT;
+			break;
+		case token::ops::opType::SUB_RIGHT:
+			newOP = stnode::op::ops::SUB_RIGHT;
+			break;
+		case token::ops::opType::BRACKET_LEFT:
+			newOP = stnode::op::ops::BRACKET_LEFT;
+			break;
+		case token::ops::opType::BRACKET_RIGHT:
+			newOP = stnode::op::ops::BRACKET_RIGHT;
 			break;
 		default:
 			return NULL;
@@ -461,11 +281,10 @@ stnode::op::op *getOp(token::ops::opType op)
 		case stnode::op::ops::NEGA:
 		case stnode::op::ops::REF:
 		case stnode::op::ops::DEREF:
-			opPtr = new stnode::op::opSingle(newOP, getOpLvl(newOP));
+			opPtr = new stnode::op::opSingle(newOP);
 			break;
 		case stnode::op::ops::ARRAY_SUB:
-		case stnode::op::ops::OBJ_MEMBER:
-		case stnode::op::ops::PTR_MEMBER:
+		case stnode::op::ops::MEMBER:
 		case stnode::op::ops::DIV:
 		case stnode::op::ops::MUL:
 		case stnode::op::ops::MOD:
@@ -495,18 +314,83 @@ stnode::op::op *getOp(token::ops::opType op)
 		case stnode::op::ops::ANDASS:
 		case stnode::op::ops::XORASS:
 		case stnode::op::ops::BORASS:
-			opPtr = new stnode::op::opDouble(newOP, getOpLvl(newOP));
+			opPtr = new stnode::op::opDouble(newOP);
 			break;
 		default:
-			return NULL;
+			opPtr = new stnode::op::op(newOP);
 	}
 	return opPtr;
+}
+
+stnode::stnode *getNode(token::token *tk)
+{
+	stnode::stnode *ret = NULL;
+	switch (tk->getType())
+	{
+		case token::type::ID:
+		{
+			token::id* tok = dynamic_cast<token::id*>(tk);
+			ret = new stnode::id(tok->str);
+			break;
+		}
+		case token::type::CHARA:
+		{
+			token::chara* tok = dynamic_cast<token::chara*>(tk);
+			ret = new stnode::chara(tok->ch);
+			break;
+		}
+		case token::type::STR:
+		{
+			token::str* tok = dynamic_cast<token::str*>(tk);
+			ret = new stnode::str(tok->strr);
+			break;
+		}
+		case token::type::OP:
+		{
+			token::op* tok = dynamic_cast<token::op*>(tk);
+			ret = getOp(tok->opType);
+			break;
+		}
+		case token::type::NUMBER:
+		{
+			token::number* tok = dynamic_cast<token::number*>(tk);
+			ret = new stnode::number(tok->val);
+			break;
+		}
+		case token::type::KEYWORD:
+		{
+			token::keyword* tok = dynamic_cast<token::keyword*>(tk);
+			stnode::varType type = getVarType(tok->word);
+			if (type == stnode::varType::_ERROR)
+				return NULL;
+			ret = new stnode::vartype(type);
+			break;
+		}
+	}
+	return ret;
+}
+
+int parser_exp(tokenList &tList, stnode::stnode **root, tokenList::iterator &p, int &errPtr)
+{
+	tokenList::iterator pBeg = p, pEnd = tList.end();
+	for (; p != pEnd; p++)
+		if ((*p)->getType() == token::type::DELIM)
+			break;
+	p++;
+	yacc_result = NULL;
+	yacc_err = NULL;
+	yacc_p = pBeg;
+	yacc_pEnd = p;
+	yyparse();
+	if (yacc_err != NULL)
+		return 0;
+	*root = yacc_result;
+	return -1;
 }
 
 int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p, int &errPtr)
 {
 	tokenList::iterator pEnd = tList.end();
-	nextToken(;);
 	if ((*p)->getType() == token::type::KEYWORD)
 	{
 		//type
@@ -518,7 +402,7 @@ int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p
 			isPtr = true;
 			nextToken(;);
 		}
-		stnode::varType varType = getVarType(type->word);
+		stnode::varType varType = getVarType(type->word, isPtr);
 		if (varType == stnode::varType::_ERROR || varType == stnode::varType::VOID)
 			return errPtr;
 		stnode::id *newVar = NULL;
@@ -552,13 +436,8 @@ int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p
 				if (subCount == 0)
 				{
 					//init var
-					if ((*p)->getType() != token::type::NUMBER)
-					{
-						delete newVar;
-						return errPtr;
-					}
-					long long *initVal = new long long;
-					*initVal = dynamic_cast<token::number *>(*p)->val;
+					stnode::stnode **initVal = new stnode::stnode*; 
+					*initVal = getNode(*p);
 					allocPtr->var.push_back(stnode::allocUnit(newVar, initVal));
 					nextToken(delete newVar;);
 				}
@@ -571,15 +450,11 @@ int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p
 						return errPtr;
 					}
 					nextToken(delete newVar;);
-					long long *initVal = new long long[static_cast<unsigned int>(subCount)];
+					stnode::stnode **initVal = new stnode::stnode*[static_cast<unsigned int>(subCount)];
 					long long i;
 					for (i = 0; p != pEnd && i < subCount; p++, errPtr++, i++)
 					{
-						if ((*p)->getType() != token::type::NUMBER)
-						{
-							delete newVar; delete[] initVal; return errPtr;
-						}
-						initVal[i] = dynamic_cast<token::number *>(*p)->val;
+						initVal[i] = getNode(*p);
 						nextToken(delete newVar; delete[] initVal;);
 						if ((*p)->getType() != token::type::OP)
 						{
@@ -619,14 +494,6 @@ int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p
 	return -1;
 }
 
-int parser_exp(tokenList &tList, stnode::stnode **root, tokenList::iterator &p, int &errPtr)
-{
-	tokenList::iterator pEnd = tList.end();
-	std::list<stnode::stnode *> nstk;
-	
-	return -1;
-}
-
 struct lvlInfo
 {
 	lvlInfo(stTree *_sTree, stnode::stnode *_ptr){ sTree = _sTree; ptr = _ptr; }
@@ -634,7 +501,7 @@ struct lvlInfo
 	stnode::stnode *ptr;
 };
 
-int parser(tokenList &tList, stTree *_sTree, bool inFunc)
+int parser(tokenList &tList, stTree *_sTree)
 {
 	stnode::stnode *ptr = NULL;
 	std::list<lvlInfo>sTreeStk;
@@ -642,12 +509,13 @@ int parser(tokenList &tList, stTree *_sTree, bool inFunc)
 	tokenList::iterator p, pEnd = tList.end();
 	int errPtr = 0;
 	bool allowFunc = true;
-	for (p = tList.begin(); p != pEnd; p++, errPtr++)
+	for (p = tList.begin(); p != pEnd;)
 	{
 		token::token *first = *p;
 		switch (first->getType())
 		{
 			case token::type::DELIM:
+				p++; errPtr++;
 				ptr = NULL;
 				break;
 			case token::type::KEYWORD:
@@ -657,6 +525,7 @@ int parser(tokenList &tList, stTree *_sTree, bool inFunc)
 				{
 					case token::keywords::keywords::CONST:
 					{
+						nextToken(;);
 						stnode::alloc *allocPtr = new stnode::alloc(true);
 						int err = parser_dim(tList, allocPtr, p, errPtr);
 						if (err != -1)
@@ -669,6 +538,7 @@ int parser(tokenList &tList, stTree *_sTree, bool inFunc)
 					}
 					case token::keywords::keywords::DIM:
 					{
+						nextToken(;);
 						stnode::alloc *allocPtr = new stnode::alloc(false);
 						int err = parser_dim(tList, allocPtr, p, errPtr);
 						if (err != -1)
@@ -697,7 +567,7 @@ int parser(tokenList &tList, stTree *_sTree, bool inFunc)
 								isPtr = true;
 								nextToken(delete funcPtr;)
 							}
-							stnode::varType varType = getVarType(type->word);
+							stnode::varType varType = getVarType(type->word, isPtr);
 							if (varType == stnode::varType::_ERROR)
 							{
 								delete funcPtr;
@@ -736,7 +606,7 @@ int parser(tokenList &tList, stTree *_sTree, bool inFunc)
 										isPtr = true;
 										nextToken(delete funcPtr;)
 									}
-									varType = getVarType(type->word);
+									varType = getVarType(type->word, isPtr);
 									if (varType == stnode::varType::_ERROR || varType == stnode::varType::VOID)
 									{
 										delete funcPtr;
@@ -764,7 +634,10 @@ int parser(tokenList &tList, stTree *_sTree, bool inFunc)
 											nextToken(delete funcPtr;);
 										}
 										else if (opType == token::ops::opType::BRACKET_RIGHT)
+										{
+											nextToken(delete funcPtr;);
 											break;
+										}
 									}
 								}
 							}
@@ -778,9 +651,30 @@ int parser(tokenList &tList, stTree *_sTree, bool inFunc)
 							return errPtr;
 						}
 						break;
+					case token::keywords::keywords::RETURN:
+					{
+						nextToken(;);
+						stnode::ret *retPtr = new stnode::ret;
+						if ((*p)->getType() == token::type::DELIM)
+						{
+							retPtr->retVal = NULL;
+							p++; errPtr++;
+						}
+						else
+						{
+							stnode::stnode *exp;
+							int err = parser_exp(tList, &exp, p, errPtr);
+							if (err != -1)
+								return err;
+							retPtr->retVal = exp;
+						}
+						ptr = retPtr;
+						break;
+					}
 					case token::keywords::keywords::IF:
 					{
 						stnode::stnode *exp;
+						nextToken(;);
 						int err = parser_exp(tList, &exp, p, errPtr);
 						if (err != -1)
 							return err;
@@ -793,6 +687,7 @@ int parser(tokenList &tList, stTree *_sTree, bool inFunc)
 					}
 					case token::keywords::keywords::ELSE:
 					{
+						nextToken(;);
 						stTree *block = new stTree;
 						lvlInfo info = sTreeStk.back();
 						if (info.ptr->getType() != stnode::type::IF)
@@ -806,6 +701,7 @@ int parser(tokenList &tList, stTree *_sTree, bool inFunc)
 					}
 					case token::keywords::keywords::END:
 					{
+						p++; errPtr++;
 						lvlInfo info = sTreeStk.back();
 						sTreeStk.pop_back();
 						switch (info.ptr->getType())
@@ -820,6 +716,7 @@ int parser(tokenList &tList, stTree *_sTree, bool inFunc)
 								else
 									ifPtr->blockFalse = info.sTree;
 								ptr = ifPtr;
+								break;
 							}
 							case stnode::type::FUNC:
 							{
@@ -827,6 +724,7 @@ int parser(tokenList &tList, stTree *_sTree, bool inFunc)
 								funcPtr->block = info.sTree;
 								ptr = funcPtr;
 								allowFunc = true;
+								break;
 							}
 						}
 						break;

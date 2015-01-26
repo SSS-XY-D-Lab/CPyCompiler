@@ -7,7 +7,7 @@
 
 namespace stnode
 {
-	enum type{ ERROR, NUMBER, CHARA, STR, ID, OP, FUNC, CALL, IF, ALLOC, CONST };
+	enum type{ ERROR, TYPE, NUMBER, CHARA, STR, ID, OP, FUNC, CALL, RETURN, IF, ALLOC, CONST, TREE, DELIM };
 
 	class stnode
 	{
@@ -21,6 +21,14 @@ typedef std::list<stnode::stnode*> stTree;
 namespace stnode
 {
 	enum varType{ _ERROR, VOID, VOID_PTR, SINT, S8, S16, S32, S64, UINT, U8, U16, U32, U64, SINT_PTR, S8_PTR, S16_PTR, S32_PTR, S64_PTR, UINT_PTR, U8_PTR, U16_PTR, U32_PTR, U64_PTR };
+
+	class vartype :public stnode
+	{
+	public:
+		vartype(varType _vtype){ vtype = _vtype; };
+		varType vtype;
+		type getType(){ return type::TYPE; };
+	};
 
 	class number:public stnode
 	{
@@ -61,8 +69,7 @@ namespace stnode
 	{
 		enum ops{
 			ERROR,
-			COMMA, SUB_LEFT, SUB_RIGHT, BRACKET_LEFT, BRACKET_RIGHT, ARRAY_SUB,
-			CAST, OBJ_MEMBER, PTR_MEMBER,
+			COMMA, SUB_LEFT, SUB_RIGHT, BRACKET_LEFT, BRACKET_RIGHT, ARRAY_SUB, MEMBER, CAST, 
 			POSI, NEGA, INC, DEC, INC_POST, DEC_POST, INC_PRE, DEC_PRE, 
 			REF, DEREF, NOT, LGNOT,
 			DIV, MUL, MOD,
@@ -72,6 +79,7 @@ namespace stnode
 			EQU, NEQU,
 			AND, XOR, BOR, LGAND, LGOR,
 			ASSIGN, MODASS, DIVASS, MULASS, ADDASS, SUBASS, SHLASS, SHRASS, ANDASS, XORASS, BORASS,
+			QMARK, COLON, COLONEXP
 		};
 
 		enum opType{
@@ -84,7 +92,6 @@ namespace stnode
 			op(){ opVal = ops::ERROR; };
 			op(ops _opVal){ opVal = _opVal; };
 			ops opVal;
-			int lvl;
 			type getType(){ return type::OP; };
 			virtual opType getOpType(){ return opType::_ERROR; };
 		};
@@ -92,7 +99,7 @@ namespace stnode
 		class opSingle :public op
 		{
 		public:
-			opSingle(ops _opVal, int _lvl){ opVal = _opVal; lvl = _lvl; arg1 = NULL; };
+			opSingle(ops _opVal, stnode *_arg1 = NULL){ opVal = _opVal; arg1 = _arg1; };
 			stnode *arg1;
 			opType getOpType(){ return opType::SINGLE; };
 		};
@@ -100,7 +107,7 @@ namespace stnode
 		class opDouble :public op
 		{
 		public:
-			opDouble(ops _opVal, int _lvl){ opVal = _opVal; lvl = _lvl; arg1 = NULL; arg2 = NULL; };
+			opDouble(ops _opVal, stnode *_arg1 = NULL, stnode *_arg2 = NULL){ opVal = _opVal; arg1 = _arg1; arg2 = _arg2; };
 			stnode *arg1, *arg2;
 			opType getOpType(){ return opType::DOUBLE; };
 		};
@@ -108,7 +115,7 @@ namespace stnode
 		class opTriple :public op
 		{
 		public:
-			opTriple(ops _opVal, int _lvl){ opVal = _opVal; lvl = _lvl; arg1 = NULL; arg2 = NULL; arg3 = NULL; };
+			opTriple(ops _opVal, stnode *_arg1 = NULL, stnode *_arg2 = NULL, stnode *_arg3 = NULL){ opVal = _opVal; arg1 = _arg1; arg2 = _arg2; arg3 = _arg3; };
 			stnode *arg1, *arg2, *arg3;
 			opType getOpType(){ return opType::TRIPLE; };
 		};
@@ -135,8 +142,17 @@ namespace stnode
 	class call :public stnode
 	{
 	public:
-		std::list<stnode *> args;
+		call(stnode *_id, stnode *_args = NULL){ id = _id; args = _args; };
+		stnode* id;
+		stnode* args;
 		type getType(){ return type::CALL; };
+	};
+
+	class ret :public stnode
+	{
+	public:
+		stnode *retVal;
+		type getType(){ return type::RETURN; };
 	};
 
 	class ifelse :public stnode
@@ -150,10 +166,10 @@ namespace stnode
 	struct allocUnit
 	{
 		allocUnit(id* _var){ var = _var; init = false; };
-		allocUnit(id* _var, long long *_val){ var = _var; init = true; val = _val; };
+		allocUnit(id* _var, stnode **_val){ var = _var; init = true; val = _val; };
 		id *var;
 		bool init;
-		long long *val;
+		stnode **val;
 	};
 
 	class alloc :public stnode
@@ -165,8 +181,26 @@ namespace stnode
 		bool readOnly;
 		type getType(){ return type::ALLOC; };
 	};
+
+	class expTree :public stnode
+	{
+	public:
+		expTree(stnode *_exp, stnode *_son){ exp = _exp; son = _son; };
+		stnode *exp, *son;
+		type getType(){ return type::TREE; };
+	};
+
+	class delim :public stnode
+	{
+		type getType(){ return type::DELIM; };
+	};
 }
 
-int parser(tokenList &tList, stTree *sTree, bool inFunc = false);
+int parser(tokenList &tList, stTree *sTree);
+
+extern stnode::stnode *yacc_result;
+extern tokenList::iterator yacc_p, yacc_pEnd;
+extern char *yacc_err;
+int yyparse();
 
 #endif

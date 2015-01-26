@@ -30,10 +30,7 @@ int main(int argc, char* argv[])
 	int pos2 = parser(ret, &ret2);
 	if (pos2 != -1)
 	{
-		cout << str << endl;
-		for (; pos2 > 0; pos2--)
-			cout << ' ';
-		cout << '^' << endl;
+		cout << pos2 << endl;
 	}
 	if (pos == -1)
 	{
