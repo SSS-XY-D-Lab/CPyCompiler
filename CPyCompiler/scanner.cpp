@@ -381,6 +381,22 @@ int scanner(std::string *str, tokenList *tList, int lineN)
 							case token::type::STR:
 								tList->push_back(new token::op(token::ops::opType::MUL));
 								break;
+							case token::type::OP:
+							{
+								token::op* op = dynamic_cast<token::op*>(tList->back());
+								switch (op->opType)
+								{
+									case token::ops::opType::SUB_RIGHT:
+									case token::ops::opType::BRACKET_RIGHT:
+									case token::ops::opType::INC:
+									case token::ops::opType::DEC:
+										tList->push_back(new token::op(token::ops::opType::MUL));
+										break;
+									default:
+										tList->push_back(new token::op(token::ops::opType::DEREF));
+								}
+								break;
+							}
 							default:
 								tList->push_back(new token::op(token::ops::opType::DEREF));
 						}
