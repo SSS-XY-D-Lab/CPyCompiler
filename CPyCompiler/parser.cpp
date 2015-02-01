@@ -15,7 +15,7 @@ namespace stnode
 	{
 		std::string op2Str(ops op)
 		{
-			static opItem opMap[] = {
+			static const opItem opMap[] = {
 				ops::ERROR, "ERROR",
 				ops::COMMA, "COMMA",
 				ops::ARRAY_SUB, "ARRAY_SUB",
@@ -77,9 +77,13 @@ namespace stnode
 			if (p->init)
 			{
 				if (p->var->subCount == 0)
-					delete p->val;
+					delete &p->val;
 				else
+				{
+					for (int i = p->var->subCount - 1; i >= 0; i--)
+						delete &(p->val[i]);
 					delete[] p->val;
+				}
 			}
 		}
 	}

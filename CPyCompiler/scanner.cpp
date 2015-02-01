@@ -5,7 +5,7 @@ namespace token
 {
 	int number::toNum(std::string str, long long &ret, int type)
 	{
-		static int numLevel[] = {
+		static const int numLevel[] = {
 			5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
 			4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 5, 5, 5, 5, 5, 5,
 			5, 5, 5, 5, 5, 5, 5, 5, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 3, 5, 5, 5, 5, 5, 5, 5,
@@ -101,7 +101,7 @@ namespace token
 	{
 		std::string op2Str(opType op)
 		{
-			static opItem opMap[] = {
+			static const opItem opMap[] = {
 				opType::ERROR, "ERROR",
 				opType::SUB_LEFT, "SUB_LEFT",
 				opType::SUB_RIGHT, "SUB_RIGHT",
@@ -162,7 +162,7 @@ namespace token
 	{
 		std::string kw2Str(keywords kw)
 		{
-			static keywordItem keywordMap[] =
+			static const keywordItem keywordMap[] =
 			{
 				"sint", keywords::SINT,
 				"s8", keywords::S8,
@@ -191,7 +191,7 @@ namespace token
 
 		keywords str2Kw(std::string str)
 		{
-			static keywordItem keywordMap[] =
+			static const keywordItem keywordMap[] =
 			{
 				"sint", keywords::SINT,
 				"s8", keywords::S8,
