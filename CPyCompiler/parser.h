@@ -12,6 +12,7 @@ namespace stnode
 	class stnode
 	{
 	public:
+		int line, pos;
 		virtual type getType() { return type::ERROR; };
 	};
 }

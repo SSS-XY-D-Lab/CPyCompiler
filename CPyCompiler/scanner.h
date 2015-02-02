@@ -13,6 +13,7 @@ namespace token
 	class token
 	{
 	public:
+		int pos;
 		virtual type getType() { return type::ERROR; };
 	};
 
