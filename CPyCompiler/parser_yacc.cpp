@@ -1395,19 +1395,19 @@ yyreduce:
 
 		case 30:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::ARRAY_SUB, (yyvsp[-3]), (yyvsp[-1])); }
+		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::ARRAY_SUB, (yyvsp[-3]), (yyvsp[-1])); (yyval)->pos = (yyvsp[-1])->pos; }
 
 		break;
 
 		case 31:
 
-		{ (yyval) = new stnode::call((yyvsp[-2])); }
+		{ (yyval) = new stnode::call((yyvsp[-2])); (yyval)->pos = (yyvsp[-2])->pos; }
 
 		break;
 
 		case 32:
 
-		{ (yyval) = new stnode::call((yyvsp[-3]), (yyvsp[-1])); }
+		{ (yyval) = new stnode::call((yyvsp[-3]), (yyvsp[-1])); (yyval)->pos = (yyvsp[-1])->pos; }
 
 		break;
 
@@ -1479,7 +1479,7 @@ yyreduce:
 
 		case 46:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::CAST, (yyvsp[-2]), (yyvsp[0])); }
+		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::CAST, (yyvsp[-2]), (yyvsp[0])); (yyval)->pos = (yyvsp[-2])->pos;  }
 
 		break;
 
@@ -1593,7 +1593,7 @@ yyreduce:
 
 		case 76:
 
-		{ (yyval) = new stnode::op::opTriple(stnode::op::ops::COLONEXP, (yyvsp[-4]), (yyvsp[-2]), (yyvsp[0])); }
+		{ (yyval) = new stnode::op::opTriple(stnode::op::ops::COLONEXP, (yyvsp[-4]), (yyvsp[-2]), (yyvsp[0])); (yyval)->pos = (yyvsp[-2])->pos; }
 
 		break;
 
@@ -1665,7 +1665,7 @@ yyreduce:
 
 		case 90:
 
-		{ (yyval) = new stnode::expTree((yyvsp[-2]), (yyvsp[0])); }
+		{ (yyval) = new stnode::expTree((yyvsp[-2]), (yyvsp[0])); (yyval)->pos = (yyvsp[0])->pos; }
 
 		break;
 
@@ -2251,6 +2251,8 @@ int yylex()
 			yylval = new stnode::delim;
 			ret = DELIM;
 	}
+	if (yylval != NULL)
+		yylval->pos = (*yacc_p)->pos;
 	yacc_p++;
 	return ret;
 }

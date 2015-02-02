@@ -25,6 +25,7 @@ int main(int argc, char* argv[])
 			cout << '^' << endl;
 			break;
 		}
+		lineN++;
 		getline(cin, str, '\n');
 	}
 	int pos2 = parser(ret, &ret2);

@@ -5,6 +5,8 @@
 
 #include "scanner.h"
 
+extern int lineNumber;
+
 namespace stnode
 {
 	enum type{ ERROR, TYPE, NUMBER, CHARA, STR, ID, OP, FUNC, CALL, RETURN, IF, ALLOC, CONST, TREE, DELIM };
@@ -12,7 +14,8 @@ namespace stnode
 	class stnode
 	{
 	public:
-		int line, pos;
+		stnode(){ lineN = lineNumber; };
+		int lineN, pos;
 		virtual type getType() { return type::ERROR; };
 	};
 }
@@ -193,6 +196,7 @@ namespace stnode
 
 	class delim :public stnode
 	{
+	public:
 		type getType(){ return type::DELIM; };
 	};
 }

@@ -18,7 +18,7 @@ namespace token
 			5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
 			5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
 		};
-		int len = str.length();
+		size_t len = str.length();
 		if (len < 1)
 			return -1;
 		std::stringstream ss;
@@ -247,7 +247,9 @@ bool isOCTDigit(char a)
 
 int scanner(std::string *str, tokenList *tList, int lineN)
 {
-	int pos = 0;
+	tList->push_back(new token::begin(lineN));
+	tList->back()->pos = 0;
+	int pos = 1;
 	std::string::iterator p, pEnd = str->end();
 	for (p = str->begin(); p != pEnd; nextChar)
 	{
