@@ -1,11 +1,14 @@
 #include "stdafx.h"
 #include "scanner.h"
 
+#define nextChar p++, pos++
+#define prevChar p--, pos--
+
 namespace token
 {
 	int number::toNum(std::string str, long long &ret, int type)
 	{
-		static int numLevel[] = {
+		static const int numLevel[] = {
 			5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
 			4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 5, 5, 5, 5, 5, 5,
 			5, 5, 5, 5, 5, 5, 5, 5, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 3, 5, 5, 5, 5, 5, 5, 5,
@@ -15,7 +18,7 @@ namespace token
 			5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
 			5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
 		};
-		int len = str.length();
+		size_t len = str.length();
 		if (len < 1)
 			return -1;
 		std::stringstream ss;
@@ -101,14 +104,15 @@ namespace token
 	{
 		std::string op2Str(opType op)
 		{
-			static opItem opMap[] = {
+			static const opItem opMap[] = {
 				opType::ERROR, "ERROR",
 				opType::SUB_LEFT, "SUB_LEFT",
 				opType::SUB_RIGHT, "SUB_RIGHT",
 				opType::BRACKET_LEFT, "BRACKET_LEFT",
 				opType::BRACKET_RIGHT, "BRACKET_RIGHT",
-				opType::OBJ_MEMBER, "OBJ_MEMBER",
-				opType::PTR_MEMBER, "PTR_MEMBER",
+				opType::MEMBER, "MEMBER",
+				opType::BRACE_LEFT, "BRACE_LEFT",
+				opType::BRACE_RIGHT, "BRACE_RIGHT",
 				opType::POSI, "POSI",
 				opType::NEGA, "NEGA",
 				opType::INC, "INC",
@@ -146,8 +150,11 @@ namespace token
 				opType::ANDASS, "ANDASS",
 				opType::XORASS, "XORASS",
 				opType::BORASS, "BORASS",
-				opType::COMMA, "COMMA", };
-			for (int i = 0; i < 45; i++)
+				opType::COMMA, "COMMA", 
+				opType::QMARK, "QUESTION MARK",
+				opType::COLON, "COLON",
+			};
+			for (int i = 0; i < 48; i++)
 				if (op == opMap[i].val)
 					return opMap[i].str;
 			return "";
@@ -158,7 +165,7 @@ namespace token
 	{
 		std::string kw2Str(keywords kw)
 		{
-			static keywordItem keywordMap[] =
+			static const keywordItem keywordMap[] =
 			{
 				"sint", keywords::SINT,
 				"s8", keywords::S8,
@@ -176,6 +183,8 @@ namespace token
 				"end", keywords::END,
 				"function", keywords::FUNCTION,
 				"return", keywords::RETURN,
+				"if", keywords::IF,
+				"else", keywords::ELSE,
 			};
 			for (int i = 0; i < 27; i++)
 				if (kw == keywordMap[i].val)
@@ -185,7 +194,7 @@ namespace token
 
 		keywords str2Kw(std::string str)
 		{
-			static keywordItem keywordMap[] =
+			static const keywordItem keywordMap[] =
 			{
 				"sint", keywords::SINT,
 				"s8", keywords::S8,
@@ -203,6 +212,8 @@ namespace token
 				"end", keywords::END,
 				"function", keywords::FUNCTION,
 				"return", keywords::RETURN,
+				"if", keywords::IF,
+				"else", keywords::ELSE,
 				"byte", keywords::S8,
 				"char", keywords::S8,
 				"dword", keywords::S32,
@@ -227,13 +238,6 @@ namespace token
 			return keywords::ERROR;
 		}
 	}
-
-	keyword::keyword(std::string _keyword)
-	{
-		word = keywords::str2Kw(_keyword);
-		if (word == keywords::keywords::ERROR)
-			throw(NotAKeyWord());
-	}
 }
 
 bool isOCTDigit(char a)
@@ -241,382 +245,617 @@ bool isOCTDigit(char a)
 	return a >= '0' && a <= '7';
 }
 
-tokenList scanner(std::string str)
+int scanner(std::string *str, tokenList *tList, int lineN)
 {
-	tokenList tList;
-	std::string::iterator p, pEnd = str.end();
-	for (p = str.begin(); p != pEnd; p++)
+	tList->push_back(new token::begin(lineN));
+	tList->back()->pos = 0;
+	int pos = 1;
+	std::string::iterator p, pEnd = str->end();
+	for (p = str->begin(); p != pEnd; nextChar)
 	{
 		switch (*p)
 		{
 			case '#':
 				p = pEnd;
 				break;
+			case ';':
+				tList->push_back(new token::delim(-1));
+				tList->back()->pos = pos;
+				break;
 			case '(':
-				tList.push_back(new token::op(token::ops::opType::BRACKET_LEFT));
+				tList->push_back(new token::op(token::ops::opType::BRACKET_LEFT));
+				tList->back()->pos = pos;
 				break;
 			case ')':
-				tList.push_back(new token::op(token::ops::opType::BRACKET_RIGHT));
+				tList->push_back(new token::op(token::ops::opType::BRACKET_RIGHT));
+				tList->back()->pos = pos;
 				break;
 			case '[':
-				tList.push_back(new token::op(token::ops::opType::SUB_LEFT));
+				tList->push_back(new token::op(token::ops::opType::SUB_LEFT));
+				tList->back()->pos = pos;
 				break;
 			case ']':
-				tList.push_back(new token::op(token::ops::opType::SUB_RIGHT));
+				tList->push_back(new token::op(token::ops::opType::SUB_RIGHT));
+				tList->back()->pos = pos;
+				break;
+			case '{':
+				tList->push_back(new token::op(token::ops::opType::BRACE_LEFT));
+				tList->back()->pos = pos;
+				break;
+			case '}':
+				tList->push_back(new token::op(token::ops::opType::BRACE_RIGHT));
+				tList->back()->pos = pos;
 				break;
 			case ',':
-				tList.push_back(new token::op(token::ops::opType::COMMA));
+				tList->push_back(new token::op(token::ops::opType::COMMA));
+				tList->back()->pos = pos;
+				break;
+			case '.':
+				tList->push_back(new token::op(token::ops::opType::MEMBER));
+				tList->back()->pos = pos;
 				break;
 			case '~':
-				tList.push_back(new token::op(token::ops::opType::NOT));
+				tList->push_back(new token::op(token::ops::opType::NOT));
+				tList->back()->pos = pos;
 				break;
 			case '+':
-				p++;
+				nextChar;
 				if (p != pEnd)
 				{
 					if (*p == '=')
-						tList.push_back(new token::op(token::ops::opType::ADDASS));
+					{
+						tList->push_back(new token::op(token::ops::opType::ADDASS));
+						tList->back()->pos = pos - 1;
+					}
 					else if (*p == '+')
-						tList.push_back(new token::op(token::ops::opType::INC));
+					{
+						tList->push_back(new token::op(token::ops::opType::INC));
+						tList->back()->pos = pos - 1;
+					}
 					else if (isdigit(*p))
 					{
-						p--;
+						prevChar;
 						goto number_process;
 					}
 					else
 					{
-						tList.push_back(new token::op(token::ops::opType::ADD));
-						p--;
+						prevChar;
+						if (tList->empty())
+						{
+							tList->push_back(new token::op(token::ops::opType::POSI));
+							tList->back()->pos = pos;
+						}
+						else
+						{
+							switch (tList->back()->getType())
+							{
+								case token::type::ID:
+								case token::type::NUMBER:
+								case token::type::CHARA:
+								case token::type::STR:
+									tList->push_back(new token::op(token::ops::opType::ADD));
+									tList->back()->pos = pos;
+									break;
+								default:
+									tList->push_back(new token::op(token::ops::opType::POSI));
+									tList->back()->pos = pos;
+							}
+						}
 					}
 				}
 				else
 				{
-					tList.push_back(new token::op(token::ops::opType::ADD));
-					p--;
+					prevChar;
+					tList->push_back(new token::op(token::ops::opType::ADD));
+					tList->back()->pos = pos;
 				}
 				break;
 			case '-':
-				p++;
+				nextChar;
 				if (p != pEnd)
 				{
 					if (*p == '=')
-						tList.push_back(new token::op(token::ops::opType::SUBASS));
-					else if (*p == '-')
-						tList.push_back(new token::op(token::ops::opType::DEC));
-					else if (isxdigit(*p))
 					{
-						p--;
+						tList->push_back(new token::op(token::ops::opType::SUBASS));
+						tList->back()->pos = pos - 1;
+					}
+					else if (*p == '-')
+					{
+						tList->push_back(new token::op(token::ops::opType::DEC));
+						tList->back()->pos = pos - 1;
+					}
+					else if (isdigit(*p))
+					{
+						prevChar;
 						goto number_process;
 					}
 					else
 					{
-						tList.push_back(new token::op(token::ops::opType::SUB));
-						p--;
+						prevChar;
+						if (tList->empty())
+						{
+							tList->push_back(new token::op(token::ops::opType::NEGA));
+							tList->back()->pos = pos;
+						}
+						else
+						{
+							switch (tList->back()->getType())
+							{
+								case token::type::ID:
+								case token::type::NUMBER:
+								case token::type::CHARA:
+								case token::type::STR:
+								{
+									tList->push_back(new token::op(token::ops::opType::SUB));
+									tList->back()->pos = pos;
+								}
+									break;
+								default:
+								{
+									tList->push_back(new token::op(token::ops::opType::NEGA));
+									tList->back()->pos = pos;
+								}
+							}
+						}
 					}
 				}
 				else
 				{
-					tList.push_back(new token::op(token::ops::opType::SUB));
-					p--;
+					prevChar;
+					tList->push_back(new token::op(token::ops::opType::SUB));
+					tList->back()->pos = pos;
 				}
 				break;
 			case '*':
-				p++;
+				nextChar;
 				if (p != pEnd && *p == '=')
-					tList.push_back(new token::op(token::ops::opType::MULASS));
+				{
+					tList->push_back(new token::op(token::ops::opType::MULASS));
+					tList->back()->pos = pos - 1;
+				}
 				else
 				{
-					p--;
-					switch (tList.back()->getType())
+					prevChar;
+					if (tList->empty())
 					{
-						case token::type::ID:
-						case token::type::NUMBER:
-						case token::type::CHARA:
-						case token::type::STR:
-							tList.push_back(new token::op(token::ops::opType::MUL));
-							break;
-						default:
-							tList.push_back(new token::op(token::ops::opType::DEREF));
+						tList->push_back(new token::op(token::ops::opType::DEREF));
+						tList->back()->pos = pos;
 					}
-				}
-				break;
-			case '/':
-				p++;
-				if (p != pEnd && *p == '=')
-					tList.push_back(new token::op(token::ops::opType::DIVASS));
-				else
-				{
-					tList.push_back(new token::op(token::ops::opType::DIV));
-					p--;
-				}
-				break;
-			case '%':
-				p++;
-				if (p != pEnd && *p == '=')
-					tList.push_back(new token::op(token::ops::opType::MODASS));
-				else
-				{
-					tList.push_back(new token::op(token::ops::opType::MOD));
-					p--;
-				}
-				break;
-			case '=':
-				p++;
-				if (p != pEnd && *p == '=')
-					tList.push_back(new token::op(token::ops::opType::EQU));
-				else
-				{
-					tList.push_back(new token::op(token::ops::opType::ASSIGN));
-					p--;
-				}
-				break;
-			case '!':
-				p++;
-				if (p != pEnd && *p == '=')
-					tList.push_back(new token::op(token::ops::opType::NEQU));
-				else
-				{
-					tList.push_back(new token::op(token::ops::opType::LGNOT));
-					p--;
-				}
-				break;
-			case '&':
-				p++;
-				if (p != pEnd)
-				{
-					if (*p == '=')
-						tList.push_back(new token::op(token::ops::opType::ANDASS));
-					else if (*p == '&')
-						tList.push_back(new token::op(token::ops::opType::LGAND));
 					else
 					{
-						switch (tList.back()->getType())
+						switch (tList->back()->getType())
 						{
 							case token::type::ID:
 							case token::type::NUMBER:
 							case token::type::CHARA:
 							case token::type::STR:
-								tList.push_back(new token::op(token::ops::opType::AND));
+								tList->push_back(new token::op(token::ops::opType::MUL));
+								tList->back()->pos = pos;
 								break;
+							case token::type::OP:
+							{
+								token::op* op = dynamic_cast<token::op*>(tList->back());
+								switch (op->opType)
+								{
+									case token::ops::opType::SUB_RIGHT:
+									case token::ops::opType::BRACKET_RIGHT:
+									case token::ops::opType::INC:
+									case token::ops::opType::DEC:
+										tList->push_back(new token::op(token::ops::opType::MUL));
+										tList->back()->pos = pos;
+										break;
+									default:
+										tList->push_back(new token::op(token::ops::opType::DEREF));
+										tList->back()->pos = pos;
+								}
+								break;
+							}
 							default:
-								tList.push_back(new token::op(token::ops::opType::REF));
+								tList->push_back(new token::op(token::ops::opType::DEREF));
+								tList->back()->pos = pos;
 						}
-						p--;
+					}
+				}
+				break;
+			case '/':
+				nextChar;
+				if (p != pEnd && *p == '=')
+				{
+					tList->push_back(new token::op(token::ops::opType::DIVASS));
+					tList->back()->pos = pos - 1;
+				}
+				else
+				{
+					prevChar;
+					tList->push_back(new token::op(token::ops::opType::DIV));
+					tList->back()->pos = pos;
+				}
+				break;
+			case '%':
+				nextChar;
+				if (p != pEnd && *p == '=')
+				{
+					tList->push_back(new token::op(token::ops::opType::MODASS));
+					tList->back()->pos = pos - 1;
+				}
+				else
+				{
+					prevChar;
+					tList->push_back(new token::op(token::ops::opType::MOD));
+					tList->back()->pos = pos;
+				}
+				break;
+			case '=':
+				nextChar;
+				if (p != pEnd && *p == '=')
+				{
+					tList->push_back(new token::op(token::ops::opType::EQU));
+					tList->back()->pos = pos - 1;
+				}
+				else
+				{
+					prevChar;
+					tList->push_back(new token::op(token::ops::opType::ASSIGN));
+					tList->back()->pos = pos;
+				}
+				break;
+			case '!':
+				nextChar;
+				if (p != pEnd && *p == '=')
+				{
+					tList->push_back(new token::op(token::ops::opType::NEQU));
+					tList->back()->pos = pos - 1;
+				}
+				else
+				{
+					prevChar;
+					tList->push_back(new token::op(token::ops::opType::LGNOT));
+					tList->back()->pos = pos;
+				}
+				break;
+			case '&':
+				nextChar;
+				if (p != pEnd)
+				{
+					if (*p == '=')
+					{
+						tList->push_back(new token::op(token::ops::opType::ANDASS));
+						tList->back()->pos = pos - 1;
+					}
+					else if (*p == '&')
+					{
+						tList->push_back(new token::op(token::ops::opType::LGAND));
+						tList->back()->pos = pos - 1;
+					}
+					else
+					{
+						prevChar;
+						if (tList->empty())
+						{
+							tList->push_back(new token::op(token::ops::opType::REF));
+							tList->back()->pos = pos;
+						}
+						else
+						{
+							switch (tList->back()->getType())
+							{
+								case token::type::ID:
+								case token::type::NUMBER:
+								case token::type::CHARA:
+								case token::type::STR:
+									tList->push_back(new token::op(token::ops::opType::AND));
+									tList->back()->pos = pos;
+									break;
+								case token::type::OP:
+								{
+									token::op* op = dynamic_cast<token::op*>(tList->back());
+									switch (op->opType)
+									{
+										case token::ops::opType::SUB_RIGHT:
+										case token::ops::opType::BRACKET_RIGHT:
+										case token::ops::opType::INC:
+										case token::ops::opType::DEC:
+											tList->push_back(new token::op(token::ops::opType::AND));
+											tList->back()->pos = pos;
+											break;
+										default:
+											tList->push_back(new token::op(token::ops::opType::REF));
+											tList->back()->pos = pos;
+									}
+									break;
+								}
+								default:
+									tList->push_back(new token::op(token::ops::opType::REF));
+									tList->back()->pos = pos;
+							}
+						}
 					}
 				}
 				else
 				{
-					switch (tList.back()->getType())
+					prevChar;
+					if (tList->empty())
 					{
-						case token::type::ID:
-						case token::type::NUMBER:
-						case token::type::CHARA:
-						case token::type::STR:
-							tList.push_back(new token::op(token::ops::opType::AND));
-							break;
-						default:
-							tList.push_back(new token::op(token::ops::opType::REF));
+						tList->push_back(new token::op(token::ops::opType::REF));
+						tList->back()->pos = pos;
 					}
-					p--;
+					else
+					{
+						switch (tList->back()->getType())
+						{
+							case token::type::ID:
+							case token::type::NUMBER:
+							case token::type::CHARA:
+							case token::type::STR:
+								tList->push_back(new token::op(token::ops::opType::AND));
+								tList->back()->pos = pos;
+								break;
+							case token::type::OP:
+							{
+								token::op* op = dynamic_cast<token::op*>(tList->back());
+								switch (op->opType)
+								{
+									case token::ops::opType::SUB_RIGHT:
+									case token::ops::opType::BRACKET_RIGHT:
+									case token::ops::opType::INC:
+									case token::ops::opType::DEC:
+										tList->push_back(new token::op(token::ops::opType::AND));
+										tList->back()->pos = pos;
+										break;
+									default:
+										tList->push_back(new token::op(token::ops::opType::REF));
+										tList->back()->pos = pos;
+								}
+								break;
+							}
+							default:
+								tList->push_back(new token::op(token::ops::opType::REF));
+								tList->back()->pos = pos;
+						}
+					}
 				}
 				break;
 			case '|':
-				p++;
+				nextChar;
 				if (p != pEnd)
 				{
 					if (*p == '=')
-						tList.push_back(new token::op(token::ops::opType::BORASS));
+					{
+						tList->push_back(new token::op(token::ops::opType::BORASS));
+						tList->back()->pos = pos - 1;
+					}
 					else if (*p == '|')
-						tList.push_back(new token::op(token::ops::opType::LGOR));
+					{
+						tList->push_back(new token::op(token::ops::opType::LGOR));
+						tList->back()->pos = pos - 1;
+					}
 					else
 					{
-						tList.push_back(new token::op(token::ops::opType::BOR));
-						p--;
+						prevChar;
+						tList->push_back(new token::op(token::ops::opType::BOR));
+						tList->back()->pos = pos;
 					}
 				}
 				else
 				{
-					tList.push_back(new token::op(token::ops::opType::BOR));
-					p--;
+					prevChar;
+					tList->push_back(new token::op(token::ops::opType::BOR));
+					tList->back()->pos = pos;
 				}
 				break;
 			case '^':
-				p++;
+				nextChar;
 				if (p != pEnd && *p == '=')
-					tList.push_back(new token::op(token::ops::opType::XORASS));
+				{
+					tList->push_back(new token::op(token::ops::opType::XORASS));
+					tList->back()->pos = pos - 1;
+				}
 				else
 				{
-					tList.push_back(new token::op(token::ops::opType::XOR));
-					p--;
+					prevChar;
+					tList->push_back(new token::op(token::ops::opType::XOR));
+					tList->back()->pos = pos;
 				}
 				break;
 			case '>':
-				p++;
+				nextChar;
 				if (p != pEnd)
 				{
 					if (*p == '=')
-						tList.push_back(new token::op(token::ops::opType::BIGEQU));
+					{
+						tList->push_back(new token::op(token::ops::opType::BIGEQU));
+						tList->back()->pos = pos - 1;
+					}
 					else if (*p == '>')
 					{
-						p++;
+						nextChar;
 						if (p != pEnd && *p == '=')
-							tList.push_back(new token::op(token::ops::opType::SHRASS));
+						{
+							tList->push_back(new token::op(token::ops::opType::SHRASS));
+							tList->back()->pos = pos - 2;
+						}
 						else
 						{
-							tList.push_back(new token::op(token::ops::opType::SHR));
-							p--;
+							prevChar;
+							tList->push_back(new token::op(token::ops::opType::SHR));
+							tList->back()->pos = pos - 1;
+							
 						}
 					}
 					else
 					{
-						tList.push_back(new token::op(token::ops::opType::BIG));
-						p--;
+						prevChar;
+						tList->push_back(new token::op(token::ops::opType::BIG));
+						tList->back()->pos = pos;
 					}
 				}
 				else
 				{
-					tList.push_back(new token::op(token::ops::opType::BIG));
-					p--;
+					prevChar;
+					tList->push_back(new token::op(token::ops::opType::BIG));
+					tList->back()->pos = pos;
 				}
 				break;
 			case '<':
-				p++;
+				nextChar;
 				if (p != pEnd)
 				{
 					if (*p == '=')
-						tList.push_back(new token::op(token::ops::opType::LESEQU));
+					{
+						tList->push_back(new token::op(token::ops::opType::LESEQU));
+						tList->back()->pos = pos - 1;
+					}
 					else if (*p == '<')
 					{
-						p++;
+						nextChar;
 						if (p != pEnd && *p == '=')
-							tList.push_back(new token::op(token::ops::opType::SHLASS));
+						{
+							tList->push_back(new token::op(token::ops::opType::SHLASS));
+							tList->back()->pos = pos - 2;
+						}
 						else
 						{
-							tList.push_back(new token::op(token::ops::opType::SHL));
-							p--;
+							prevChar;
+							tList->push_back(new token::op(token::ops::opType::SHL));
+							tList->back()->pos = pos - 1;
 						}
 					}
 					else
 					{
-						tList.push_back(new token::op(token::ops::opType::LES));
-						p--;
+						prevChar;
+						tList->push_back(new token::op(token::ops::opType::LES));
+						tList->back()->pos = pos;
 					}
 				}
 				else
 				{
-					tList.push_back(new token::op(token::ops::opType::LES));
-					p--;
+					prevChar;
+					tList->push_back(new token::op(token::ops::opType::LES));
+					tList->back()->pos = pos;
 				}
-				break;
-			case ';':
-				tList.push_back(new token::delim());
 				break;
 			case '\'':
 			{
-				p++;
+				nextChar;
 				if (p == pEnd)
 				{
-					p--;
+					prevChar;
 					break;
 				}
 				char _ch = *p;
-				p++;
+				nextChar;
 				if (p == pEnd)
 				{
-					p--;
-					p--;
+					prevChar;
+					prevChar;
 					break;
 				}
 				if ((*p) != '\'')
 				{
-					p--;
-					p--;
+					prevChar;
+					prevChar;
 				}
 				else
-					tList.push_back(new token::chara(_ch));
+				{
+					tList->push_back(new token::chara(_ch));
+					tList->back()->pos = pos - 1;
+				}
 				break;
 			}
 			case '"':
 			{
 				std::string _str;
-				p++;
-				for (; p != pEnd && (*p) != '"'; p++)
+				nextChar;
+				int startPos = pos;
+				for (; p != pEnd && (*p) != '"'; nextChar)
 				{
 					_str.push_back(*p);
 					if (*p == '\\')
 					{
-						p++;
+						nextChar;
 						_str.push_back(*p);
 					}
 				}
-				tList.push_back(new token::str(_str));
+				if (p == pEnd)
+					return pos;
+				tList->push_back(new token::str(_str));
+				tList->back()->pos = startPos;
 				break;
 			}
 			case ' ':
+			case '\t':
 				break;
 			default:
 				if (isalpha(*p) || (*p) == '_')
 				{
 					std::string token;
-					for (; p != pEnd && (isalnum(*p) || (*p) == '_'); p++)
+					int startPos = pos;
+					for (; p != pEnd && (isalnum(*p) || (*p) == '_'); nextChar)
 						token.push_back(*p);
-					try
+					prevChar;
+					token::keywords::keywords kw = token::keywords::str2Kw(token);
+					if (kw == token::keywords::keywords::ERROR)
 					{
-						tList.push_back(new token::keyword(token));
+						tList->push_back(new token::id(token));
+						tList->back()->pos = startPos;
 					}
-					catch (token::NotAKeyWord)
+					else
 					{
-						tList.push_back(new token::id(token));
+						tList->push_back(new token::keyword(kw));
+						tList->back()->pos = startPos;
 					}
-					p--;
 				}
 				else if (isdigit(*p))
 				{
 				number_process:
 					std::string::iterator pTmp = p;
 					std::string token;
+					int startPos = pos;
 					if ((*p) == '+' || (*p) == '-')
 					{
 						token.push_back(*p);
-						p++;
+						nextChar;
 					}
 					int ary = 10;
 					if (*p == '0')
 					{
 						token.push_back(*p);
-						p++;
-						ary = 8;
-						if (tolower(*p) == 'x')
+						nextChar;
+						if (p != pEnd)
 						{
-							token.push_back(*p);
-							p++;
-							ary = 16;
+							ary = 8;
+							if (tolower(*p) == 'x')
+							{
+								token.push_back(*p);
+								nextChar;
+								ary = 16;
+							}
 						}
 					}
 					switch (ary)
 					{
 						case 8:
-							for (; p != pEnd && isOCTDigit(*p); p++)
+							for (; p != pEnd && isOCTDigit(*p); nextChar)
 								token.push_back(*p);
 							break;
 						case 10:
-							for (; p != pEnd && isdigit(*p); p++)
+							for (; p != pEnd && isdigit(*p); nextChar)
 								token.push_back(*p);
 							break;
 						case 16:
-							for (; p != pEnd && isxdigit(*p); p++)
+							for (; p != pEnd && isxdigit(*p); nextChar)
 								token.push_back(*p);
 							break;
 					}
 					if (p != pEnd && (*p) == '.')
 					{
-						p++;
+						nextChar;
 						if (p != pEnd)
 						{
 							if ((ary == 8 && isOCTDigit(*p) == false) || (ary == 10 && isdigit(*p) == false) || (ary == 16 && isxdigit(*p) == false))
 							{
-								p--;
-								p--;
+								prevChar;
+								prevChar;
 							}
 							else
 							{
@@ -624,65 +863,67 @@ tokenList scanner(std::string str)
 								switch (ary)
 								{
 									case 8:
-										for (; p != pEnd && isOCTDigit(*p); p++)
+										for (; p != pEnd && isOCTDigit(*p); nextChar)
 											token.push_back(*p);
 										break;
 									case 10:
-										for (; p != pEnd && isdigit(*p); p++)
+										for (; p != pEnd && isdigit(*p); nextChar)
 											token.push_back(*p);
 										break;
 									case 16:
-										for (; p != pEnd && isxdigit(*p); p++)
+										for (; p != pEnd && isxdigit(*p); nextChar)
 											token.push_back(*p);
 										break;
 								}
 							}
 						}
 						else
-							p--;
+							prevChar;
 					}
 					if (p != pEnd && (*p) == 'E')
 					{
-						p++;
+						nextChar;
 						if (p != pEnd)
 						{
 							token.push_back('E');
 							if ((*p) == '+' || (*p) == '-')
 							{
 								token.push_back(*p);
-								p++;
+								nextChar;
 							}
 							if ((ary == 8 && isOCTDigit(*p) == false) || (ary == 10 && isdigit(*p) == false) || (ary == 16 && isxdigit(*p) == false))
 							{
-								p--;
+								prevChar;
 								if ((*p) == '+' || (*p) == '-')
 								{
-									p--;
+									prevChar;
 									token.pop_back();
 								}
-								p--;
+								prevChar;
 								token.pop_back();
 							}
 							else
 							{
-								for (; p != pEnd && isdigit(*p); p++)
+								for (; p != pEnd && isdigit(*p); nextChar)
 									token.push_back(*p);
 							}
 						}
 						else
-							p--;
+							prevChar;
 					}
-					tList.push_back(new token::number(token));
-					p--;
+					tList->push_back(new token::number(token));
+					tList->back()->pos = startPos;
+					prevChar;
 				}
 				else
 				{
-					throw(p);
+					return pos;
 				}
 		}
 		if (p == pEnd)
 			break;
 	}
-	tList.push_back(new token::delim);
-	return tList;
+	tList->push_back(new token::delim(lineN));
+	tList->back()->pos = pos;
+	return -1;
 }

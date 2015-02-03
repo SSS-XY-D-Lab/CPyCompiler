@@ -6,19 +6,14 @@
 #include <string>
 #include <sstream>
 
-typedef unsigned short int USHORT;
-typedef unsigned int UINT;
-typedef unsigned long ULONG;
-typedef unsigned long long ULONGLONG;
-typedef unsigned char BYTE;
-
 namespace token
 {
-	enum type{ ERROR, NUMBER, CHARA, STR, ID, OP, KEYWORD, DELIM };
+	enum type{ ERROR, NUMBER, CHARA, STR, ID, OP, KEYWORD, BEGIN, DELIM };
 
 	class token
 	{
 	public:
+		int pos;
 		virtual type getType() { return type::ERROR; };
 	};
 
@@ -66,7 +61,9 @@ namespace token
 	{
 		enum opType{
 			ERROR,
-			SUB_LEFT, SUB_RIGHT, BRACKET_LEFT, BRACKET_RIGHT, OBJ_MEMBER, PTR_MEMBER,
+			COMMA, SUB_LEFT, SUB_RIGHT, BRACKET_LEFT, BRACKET_RIGHT,
+			BRACE_LEFT, BRACE_RIGHT,
+			MEMBER,
 			POSI, NEGA, INC, DEC, REF, DEREF, NOT, LGNOT,
 			DIV, MUL, MOD,
 			ADD, SUB,
@@ -75,7 +72,7 @@ namespace token
 			EQU, NEQU,
 			AND, XOR, BOR, LGAND, LGOR,
 			ASSIGN, MODASS, DIVASS, MULASS, ADDASS, SUBASS, SHLASS, SHRASS, ANDASS, XORASS, BORASS,
-			COMMA
+			QMARK, COLON
 		};
 
 		struct opItem
@@ -97,15 +94,9 @@ namespace token
 		type getType() { return type::OP; };
 	};
 
-	
-	class NotAKeyWord :public std::exception {
-	public:
-		const char* what(){ return "This word is not a key word"; }
-	};
-
 	namespace keywords
 	{
-		enum keywords{ ERROR, SINT, S8, S16, S32, S64, UINT, U8, U16, U32, U64, VOID, CONST, DIM, END, FUNCTION, RETURN };
+		enum keywords{ ERROR, SINT, S8, S16, S32, S64, UINT, U8, U16, U32, U64, VOID, CONST, DIM, END, FUNCTION, RETURN, IF, ELSE };
 
 		struct keywordItem
 		{
@@ -121,21 +112,29 @@ namespace token
 	{
 	public:
 		//keyword(){};
-		keyword(std::string);
 		keyword(keywords::keywords _word){ word = _word; };
 		keywords::keywords word;
 		type getType() { return type::KEYWORD; };
 	};
 
+	class begin :public token
+	{
+	public:
+		begin(int _lineN){ lineN = _lineN; };
+		int lineN;
+		type getType() { return type::BEGIN; };
+	};
+
 	class delim :public token
 	{
 	public:
-		delim(){};
+		delim(int _lineN){ lineN = _lineN; };
+		int lineN;
 		type getType() { return type::DELIM; };
 	};
 }
 typedef std::list < token::token* > tokenList;
 
-tokenList scanner(std::string str);
+int scanner(std::string *str, tokenList *tList, int lineN);
 
 #endif
