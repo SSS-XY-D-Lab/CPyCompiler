@@ -24,6 +24,9 @@
     <ClInclude Include="parser.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="stanalyzer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -39,7 +42,10 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="parser_yacc.cpp">
-      <Filter>头文件</Filter>
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="stanalyzer.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

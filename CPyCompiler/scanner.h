@@ -8,11 +8,12 @@
 
 namespace token
 {
-	enum type{ ERROR, NUMBER, CHARA, STR, ID, OP, KEYWORD, DELIM };
+	enum type{ ERROR, NUMBER, CHARA, STR, ID, OP, KEYWORD, BEGIN, DELIM };
 
 	class token
 	{
 	public:
+		int pos;
 		virtual type getType() { return type::ERROR; };
 	};
 
@@ -114,6 +115,14 @@ namespace token
 		keyword(keywords::keywords _word){ word = _word; };
 		keywords::keywords word;
 		type getType() { return type::KEYWORD; };
+	};
+
+	class begin :public token
+	{
+	public:
+		begin(int _lineN){ lineN = _lineN; };
+		int lineN;
+		type getType() { return type::BEGIN; };
 	};
 
 	class delim :public token

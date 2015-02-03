@@ -1387,21 +1387,27 @@ yyreduce:
 	YY_REDUCE_PRINT(yyn);
 	switch (yyn)
 	{
+		case 28:
+
+		{ (yyval) = (yyvsp[-1]); }
+
+		break;
+
 		case 30:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::ARRAY_SUB, (yyvsp[-3]), (yyvsp[-1])); delete (yyvsp[-2]); delete (yyvsp[0]); }
+		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::ARRAY_SUB, (yyvsp[-3]), (yyvsp[-1])); (yyval)->pos = (yyvsp[-1])->pos; }
 
 		break;
 
 		case 31:
 
-		{ (yyval) = new stnode::call((yyvsp[-2])); delete (yyvsp[-1]); delete (yyvsp[0]); }
+		{ (yyval) = new stnode::call((yyvsp[-2])); (yyval)->pos = (yyvsp[-2])->pos; }
 
 		break;
 
 		case 32:
 
-		{ (yyval) = new stnode::call((yyvsp[-3]), (yyvsp[-1])); delete (yyvsp[-2]); delete (yyvsp[0]); }
+		{ (yyval) = new stnode::call((yyvsp[-3]), (yyvsp[-1])); (yyval)->pos = (yyvsp[-1])->pos; }
 
 		break;
 
@@ -1413,25 +1419,25 @@ yyreduce:
 
 		case 34:
 
-		{ stnode::op::opSingle *op = dynamic_cast<stnode::op::opSingle*>((yyvsp[0])); op->arg1 = (yyvsp[-1]); (yyval) = op; }
+		{ stnode::op::opSingle *op = dynamic_cast<stnode::op::opSingle*>((yyvsp[0])); op->opVal = stnode::op::ops::INC_POST; op->arg1 = (yyvsp[-1]); (yyval) = op; }
 
 		break;
 
 		case 35:
 
-		{ stnode::op::opSingle *op = dynamic_cast<stnode::op::opSingle*>((yyvsp[0])); op->arg1 = (yyvsp[-1]); (yyval) = op; }
+		{ stnode::op::opSingle *op = dynamic_cast<stnode::op::opSingle*>((yyvsp[0])); op->opVal = stnode::op::ops::DEC_POST; op->arg1 = (yyvsp[-1]); (yyval) = op; }
 
 		break;
 
 		case 37:
 
-		{ stnode::op::opSingle *op = dynamic_cast<stnode::op::opSingle*>((yyvsp[-1])); op->arg1 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::opSingle *op = dynamic_cast<stnode::op::opSingle*>((yyvsp[-1])); op->opVal = stnode::op::ops::INC_PRE; op->arg1 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 38:
 
-		{ stnode::op::opSingle *op = dynamic_cast<stnode::op::opSingle*>((yyvsp[-1])); op->arg1 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::opSingle *op = dynamic_cast<stnode::op::opSingle*>((yyvsp[-1])); op->opVal = stnode::op::ops::DEC_PRE; op->arg1 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
@@ -1473,7 +1479,7 @@ yyreduce:
 
 		case 46:
 
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::CAST, (yyvsp[-2]), (yyvsp[0])); delete (yyvsp[-3]); delete (yyvsp[-1]); }
+		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::CAST, (yyvsp[-2]), (yyvsp[0])); (yyval)->pos = (yyvsp[-2])->pos;  }
 
 		break;
 
@@ -1587,7 +1593,7 @@ yyreduce:
 
 		case 76:
 
-		{ (yyval) = new stnode::op::opTriple(stnode::op::ops::COLONEXP, (yyvsp[-4]), (yyvsp[-2]), (yyvsp[0])); delete (yyvsp[-3]); delete (yyvsp[-1]); }
+		{ (yyval) = new stnode::op::opTriple(stnode::op::ops::COLONEXP, (yyvsp[-4]), (yyvsp[-2]), (yyvsp[0])); (yyval)->pos = (yyvsp[-2])->pos; }
 
 		break;
 
@@ -1659,7 +1665,7 @@ yyreduce:
 
 		case 90:
 
-		{ (yyval) = new stnode::expTree((yyvsp[-2]), (yyvsp[0])); }
+		{ (yyval) = new stnode::expTree((yyvsp[-2]), (yyvsp[0])); (yyval)->pos = (yyvsp[0])->pos; }
 
 		break;
 
@@ -1948,19 +1954,19 @@ int yylex()
 					break;
 				case token::ops::opType::SUB_LEFT:
 					ret = SUB_LEFT;
-					newOP = stnode::op::ops::SUB_LEFT;
+					newOP = stnode::op::ops::ERROR;
 					break;
 				case token::ops::opType::SUB_RIGHT:
 					ret = SUB_RIGHT;
-					newOP = stnode::op::ops::SUB_RIGHT;
+					newOP = stnode::op::ops::ERROR;
 					break;
 				case token::ops::opType::BRACKET_LEFT:
 					ret = BRACKET_LEFT;
-					newOP = stnode::op::ops::BRACKET_LEFT;
+					newOP = stnode::op::ops::ERROR;
 					break;
 				case token::ops::opType::BRACKET_RIGHT:
 					ret = BRACKET_RIGHT;
-					newOP = stnode::op::ops::BRACKET_RIGHT;
+					newOP = stnode::op::ops::ERROR;
 					break;
 				case token::ops::opType::MEMBER:
 					ret = MEMBER;
@@ -2116,11 +2122,11 @@ int yylex()
 					break;
 				case token::ops::opType::QMARK:
 					ret = QMARK;
-					newOP = stnode::op::ops::QMARK;
+					newOP = stnode::op::ops::ERROR;
 					break;
 				case token::ops::opType::COLON:
 					ret = COLON;
-					newOP = stnode::op::ops::COLON;
+					newOP = stnode::op::ops::ERROR;
 					break;
 				default:
 					yyerror("Illegal Token(OP)");
@@ -2173,7 +2179,7 @@ int yylex()
 					opPtr = new stnode::op::opDouble(newOP);
 					break;
 				default:
-					opPtr = new stnode::op::op(newOP);
+					opPtr = NULL;
 			}
 			yylval = opPtr;
 			break;
@@ -2245,6 +2251,8 @@ int yylex()
 			yylval = new stnode::delim;
 			ret = DELIM;
 	}
+	if (yylval != NULL)
+		yylval->pos = (*yacc_p)->pos;
 	yacc_p++;
 	return ret;
 }

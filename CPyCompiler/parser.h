@@ -5,6 +5,8 @@
 
 #include "scanner.h"
 
+extern int lineNumber;
+
 namespace stnode
 {
 	enum type{ ERROR, TYPE, NUMBER, CHARA, STR, ID, OP, FUNC, CALL, RETURN, IF, ALLOC, CONST, TREE, DELIM };
@@ -12,6 +14,8 @@ namespace stnode
 	class stnode
 	{
 	public:
+		stnode(){ lineN = lineNumber; };
+		int lineN, pos;
 		virtual type getType() { return type::ERROR; };
 	};
 }
@@ -69,7 +73,7 @@ namespace stnode
 	{
 		enum ops{
 			ERROR,
-			COMMA, SUB_LEFT, SUB_RIGHT, BRACKET_LEFT, BRACKET_RIGHT, ARRAY_SUB, MEMBER, CAST, 
+			COMMA, ARRAY_SUB, MEMBER, CAST, 
 			POSI, NEGA, INC, DEC, INC_POST, DEC_POST, INC_PRE, DEC_PRE, 
 			REF, DEREF, NOT, LGNOT,
 			DIV, MUL, MOD,
@@ -79,7 +83,7 @@ namespace stnode
 			EQU, NEQU,
 			AND, XOR, BOR, LGAND, LGOR,
 			ASSIGN, MODASS, DIVASS, MULASS, ADDASS, SUBASS, SHLASS, SHRASS, ANDASS, XORASS, BORASS,
-			QMARK, COLON, COLONEXP
+			COLONEXP
 		};
 
 		enum opType{
@@ -192,6 +196,7 @@ namespace stnode
 
 	class delim :public stnode
 	{
+	public:
 		type getType(){ return type::DELIM; };
 	};
 }
