@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "scanner.h"
+#include "lexer.h"
 
 #define nextChar p++, pos++
 #define prevChar p--, pos--

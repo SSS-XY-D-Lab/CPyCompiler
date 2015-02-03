@@ -2,7 +2,7 @@
 //
 
 #include "stdafx.h"
-#include "scanner.h"
+#include "lexer.h"
 #include "parser.h"
 using namespace std;
 

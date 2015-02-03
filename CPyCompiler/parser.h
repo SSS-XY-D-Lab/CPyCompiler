@@ -3,7 +3,7 @@
 #ifndef _H_ANALYZER
 #define _H_ANALYZER
 
-#include "scanner.h"
+#include "lexer.h"
 
 extern int lineNumber;
 
