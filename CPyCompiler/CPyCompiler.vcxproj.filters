@@ -21,10 +21,10 @@
     <ClInclude Include="parser.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="stanalyzer.h">
+    <ClInclude Include="lexer.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="lexer.h">
+    <ClInclude Include="inter.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -41,10 +41,10 @@
     <ClCompile Include="parser_yacc.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="stanalyzer.cpp">
+    <ClCompile Include="lexer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="lexer.cpp">
+    <ClCompile Include="inter.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
