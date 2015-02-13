@@ -74,7 +74,7 @@ namespace stnode
 		enum ops{
 			ERROR,
 			COMMA, ARRAY_SUB, MEMBER, CAST, 
-			POSI, NEGA, INC, DEC, INC_POST, DEC_POST, INC_PRE, DEC_PRE, 
+			POSI, NEGA, INC_POST, DEC_POST, INC_PRE, DEC_PRE, 
 			REF, DEREF, NOT, LGNOT,
 			DIV, MUL, MOD,
 			ADD, SUB,
@@ -122,12 +122,6 @@ namespace stnode
 			opTriple(ops _opVal, stnode *_arg1 = NULL, stnode *_arg2 = NULL, stnode *_arg3 = NULL){ opVal = _opVal; arg1 = _arg1; arg2 = _arg2; arg3 = _arg3; };
 			stnode *arg1, *arg2, *arg3;
 			opType getOpType(){ return opType::TRIPLE; };
-		};
-
-		struct opItem
-		{
-			ops val;
-			std::string str;
 		};
 
 		std::string op2Str(ops op);
@@ -203,6 +197,7 @@ namespace stnode
 
 int parser(tokenList &tList, stTree *sTree);
 
+extern int lineNumber;
 extern stnode::stnode *yacc_result;
 extern tokenList::iterator yacc_p, yacc_pEnd;
 extern char *yacc_err;

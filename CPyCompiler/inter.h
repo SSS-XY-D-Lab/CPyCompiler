@@ -5,30 +5,18 @@
 
 #include "parser.h"
 #include <unordered_map>
-#include <vector>
+#include <unordered_set>
 
-namespace inter
+namespace iCode
 {
-	enum opType{};
-
-	struct arg
+	class id
 	{
-		stnode::type type;
+	public:
 		std::string name;
-	};
-
-	struct op
-	{
-		opType op;
-		int arg1, arg2, res;
+		stnode::varType type;
 	};
 }
-typedef std::unordered_map<std::string, int> idIndexLayer;
-typedef std::list<idIndexLayer*> idIndexTable;
-typedef std::vector<inter::arg> idTable;
 
-typedef std::list<inter::op> icodeSeq;
-
-int inter(stTree &ret);
+int stanalyzer(stnode::stnode *node);
 
 #endif
