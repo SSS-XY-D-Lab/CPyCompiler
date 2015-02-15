@@ -2,9 +2,12 @@
 //
 
 #include "stdafx.h"
-#include "scanner.h"
+#include "lexer.h"
 #include "parser.h"
+#include <vector>
 using namespace std;
+
+vector<string> lines;
 
 int main(int argc, char* argv[])
 {
@@ -16,22 +19,18 @@ int main(int argc, char* argv[])
 	getline(cin, str, '\n');
 	while (str != "")
 	{
+		lines.push_back(str);
 		pos = scanner(&str, &ret, lineN);
 		if (pos != -1)
 		{
 			cout << str << endl;
-			for (; pos > 0; pos--)
+			for (; pos > 1; pos--)
 				cout << ' ';
 			cout << '^' << endl;
 			break;
 		}
 		lineN++;
 		getline(cin, str, '\n');
-	}
-	int pos2 = parser(ret, &ret2);
-	if (pos2 != -1)
-	{
-		cout << pos2 << endl;
 	}
 	if (pos == -1)
 	{
@@ -82,6 +81,14 @@ int main(int argc, char* argv[])
 					break;
 				}
 			}
+		}
+		int pos2 = parser(ret, &ret2);
+		if (pos2 != -1)
+		{
+			cout << lines[lineNumber - 1] << endl;
+			for (; pos2 > 1; pos2--)
+				cout << ' ';
+			cout << '^' << endl;
 		}
 	}
 	system("pause");
