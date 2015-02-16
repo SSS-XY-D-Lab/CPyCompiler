@@ -10,7 +10,7 @@
 
 namespace stnode
 {
-	class id_inter :public stnode::stnode
+	class id_inter :public stnode
 	{
 	public:
 		int id;

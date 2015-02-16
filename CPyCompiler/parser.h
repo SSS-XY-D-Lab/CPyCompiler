@@ -11,8 +11,7 @@ struct errInfo
 	int lineN, pos;
 	char* err;
 };
-errInfo noErr = errInfo(-1, -1, NULL);
-extern int lineNumber;
+#define noErr (errInfo(-1, -1, NULL))
 
 namespace stnode
 {
@@ -21,7 +20,6 @@ namespace stnode
 	class stnode
 	{
 	public:
-		stnode(){ lineN = lineNumber; };
 		int lineN, pos;
 		virtual type getType() { return type::ERROR; };
 	};
@@ -204,7 +202,7 @@ namespace stnode
 
 errInfo parser(tokenList &tList, stTree *sTree);
 
-extern int lineNumber;
+extern int yacc_lineN;
 extern stnode::stnode *yacc_result;
 extern tokenList::iterator yacc_p, yacc_pEnd;
 extern char *yacc_err;

@@ -6,10 +6,10 @@
 #define nextTokenD p++
 #define prevToken p--
 
-int lineNumber;
 stnode::stnode *yacc_result;
 tokenList::iterator yacc_p, yacc_pEnd;
 char *yacc_err;
+int yacc_lineN;
 int yyparse();
 
 namespace stnode
@@ -262,7 +262,7 @@ stnode::op::ops getOpType(token::ops::opType op)
 	return ret;
 }
 
-errInfo parser_exp(tokenList &tList, stnode::stnode **root, tokenList::iterator &p)
+errInfo parser_exp(tokenList &tList, stnode::stnode **root, tokenList::iterator &p, int lineNumber)
 {
 	tokenList::iterator pBeg = p, pEnd = tList.end();
 	for (; p != pEnd; p++)
@@ -273,6 +273,7 @@ errInfo parser_exp(tokenList &tList, stnode::stnode **root, tokenList::iterator 
 	yacc_err = NULL;
 	yacc_p = pBeg;
 	yacc_pEnd = p;
+	yacc_lineN = lineNumber;
 	yyparse();
 	if (yacc_err != NULL)
 	{
@@ -284,7 +285,7 @@ errInfo parser_exp(tokenList &tList, stnode::stnode **root, tokenList::iterator 
 	return noErr;
 }
 
-errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p)
+errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p, int lineNumber)
 {
 	tokenList::iterator pEnd = tList.end();
 	if ((*p)->getType() == token::type::KEYWORD)
@@ -327,6 +328,7 @@ errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterato
 			}
 			newVar = new stnode::id(varName->str, varType, subCount);
 			newVar->pos = varPos;
+			newVar->lineN = lineNumber;
 			if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::ASSIGN)
 			{
 				//init val
@@ -341,7 +343,7 @@ errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterato
 							break;
 					p = tList.insert(p, new token::delim(-2));
 					assert(pEnd == tList.end());
-					errInfo expError = parser_exp(tList, initVal, pBeg);
+					errInfo expError = parser_exp(tList, initVal, pBeg, lineNumber);
 					p = tList.erase(p);
 					if (*initVal == NULL)
 					{
@@ -370,7 +372,7 @@ errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterato
 								break;
 						p = tList.insert(p, new token::delim(-2));
 						assert(pEnd == tList.end());
-						expError = parser_exp(tList, initVal + i, pBeg);
+						expError = parser_exp(tList, initVal + i, pBeg, lineNumber);
 						p = tList.erase(p);
 						if (initVal[i] == NULL)
 						{
@@ -432,7 +434,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 	sTreeStk.push_back(lvlInfo(_sTree, new stnode::stnode));
 	tokenList::iterator p, pEnd = tList.end();
 	bool allowFunc = true;
-	lineNumber = 1;
+	int lineNumber = 1;
 	for (p = tList.begin(); p != pEnd;)
 	{
 		token::token *first = *p;
@@ -457,7 +459,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 						nextToken(;);
 						stnode::alloc *allocPtr = new stnode::alloc(true);
 						allocPtr->pos = first->pos;
-						errInfo err = parser_dim(tList, allocPtr, p);
+						errInfo err = parser_dim(tList, allocPtr, p, lineNumber);
 						if (err.err != NULL)
 						{
 							delete allocPtr;
@@ -471,7 +473,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 						nextToken(;);
 						stnode::alloc *allocPtr = new stnode::alloc(false);
 						allocPtr->pos = first->pos;
-						errInfo err = parser_dim(tList, allocPtr, p);
+						errInfo err = parser_dim(tList, allocPtr, p, lineNumber);
 						if (err.err != NULL)
 						{
 							delete allocPtr;
@@ -600,7 +602,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 						else
 						{
 							stnode::stnode *exp;
-							errInfo err = parser_exp(tList, &exp, p);
+							errInfo err = parser_exp(tList, &exp, p, lineNumber);
 							if (err.err != NULL)
 								return err;
 							retPtr->retVal = exp;
@@ -612,7 +614,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 					{
 						stnode::stnode *exp;
 						nextToken(;);
-						errInfo err = parser_exp(tList, &exp, p);
+						errInfo err = parser_exp(tList, &exp, p, lineNumber);
 						if (err.err != NULL)
 							return err;
 						stnode::ifelse *ifPtr = new stnode::ifelse;
@@ -675,7 +677,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 			default:
 			{
 				stnode::stnode *ptrExp = NULL;
-				errInfo err = parser_exp(tList, &ptrExp, p);
+				errInfo err = parser_exp(tList, &ptrExp, p, lineNumber);
 				if (err.err != NULL)
 					return err;
 				ptr = ptrExp;

@@ -2249,7 +2249,11 @@ int yylex()
 			yylval = new stnode::delim;
 			ret = DELIM;
 	}
-	yylval->pos = (*yacc_p)->pos;
+	if (yylval != NULL)
+	{
+		yylval->pos = (*yacc_p)->pos;
+		yylval->lineN = yacc_lineN;
+	}
 	yacc_p++;
 	return ret;
 }
