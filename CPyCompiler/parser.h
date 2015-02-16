@@ -5,11 +5,18 @@
 
 #include "lexer.h"
 
+struct errInfo
+{
+	errInfo(int _lineN, int _pos, char *_err){ lineN = _lineN; pos = _pos; err = _err; };
+	int lineN, pos;
+	char* err;
+};
+errInfo noErr = errInfo(-1, -1, NULL);
 extern int lineNumber;
 
 namespace stnode
 {
-	enum type{ ERROR, TYPE, NUMBER, CHARA, STR, ID, OP, FUNC, CALL, RETURN, IF, ALLOC, CONST, TREE, DELIM };
+	enum type{ ERROR, TYPE, NUMBER, CHARA, STR, ID, ID_INTER, OP, FUNC, CALL, RETURN, IF, ALLOC, CONST, TREE, DELIM };
 
 	class stnode
 	{
@@ -195,7 +202,7 @@ namespace stnode
 	};
 }
 
-int parser(tokenList &tList, stTree *sTree);
+errInfo parser(tokenList &tList, stTree *sTree);
 
 extern int lineNumber;
 extern stnode::stnode *yacc_result;

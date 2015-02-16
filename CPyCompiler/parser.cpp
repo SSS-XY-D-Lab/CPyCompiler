@@ -1,10 +1,10 @@
 #include "stdafx.h"
 #include "parser.h"
 
-#define nextToken(x) p++; if (p == pEnd) { x p--; return (*p)->pos; }
+#define errPtr ((*p)->pos)
+#define nextToken(x) p++; if (p == pEnd) { x p--; return errInfo(lineNumber, errPtr, "Need more token"); }
 #define nextTokenD p++
 #define prevToken p--
-#define errPtr ((*p)->pos)
 
 int lineNumber;
 stnode::stnode *yacc_result;
@@ -262,111 +262,7 @@ stnode::op::ops getOpType(token::ops::opType op)
 	return ret;
 }
 
-stnode::op::op *getOp(stnode::op::ops type)
-{
-	stnode::op::op *opPtr;
-	switch (type)
-	{
-		case stnode::op::ops::NOT:
-		case stnode::op::ops::LGNOT:
-		case stnode::op::ops::POSI:
-		case stnode::op::ops::NEGA:
-		case stnode::op::ops::REF:
-		case stnode::op::ops::DEREF:
-			opPtr = new stnode::op::opSingle(type);
-			break;
-		case stnode::op::ops::ARRAY_SUB:
-		case stnode::op::ops::MEMBER:
-		case stnode::op::ops::DIV:
-		case stnode::op::ops::MUL:
-		case stnode::op::ops::MOD:
-		case stnode::op::ops::ADD:
-		case stnode::op::ops::SUB:
-		case stnode::op::ops::SHL:
-		case stnode::op::ops::SHR:
-		case stnode::op::ops::BIG:
-		case stnode::op::ops::BIGEQU:
-		case stnode::op::ops::LES:
-		case stnode::op::ops::LESEQU:
-		case stnode::op::ops::EQU:
-		case stnode::op::ops::NEQU:
-		case stnode::op::ops::AND:
-		case stnode::op::ops::XOR:
-		case stnode::op::ops::BOR:
-		case stnode::op::ops::LGAND:
-		case stnode::op::ops::LGOR:
-		case stnode::op::ops::ASSIGN:
-		case stnode::op::ops::MODASS:
-		case stnode::op::ops::DIVASS:
-		case stnode::op::ops::MULASS:
-		case stnode::op::ops::ADDASS:
-		case stnode::op::ops::SUBASS:
-		case stnode::op::ops::SHLASS:
-		case stnode::op::ops::SHRASS:
-		case stnode::op::ops::ANDASS:
-		case stnode::op::ops::XORASS:
-		case stnode::op::ops::BORASS:
-			opPtr = new stnode::op::opDouble(type);
-			break;
-		default:
-			opPtr = NULL;
-	}
-	return opPtr;
-}
-
-stnode::stnode *getNode(token::token *tk)
-{
-	stnode::stnode *ret = NULL;
-	switch (tk->getType())
-	{
-		case token::type::ID:
-		{
-			token::id* tok = dynamic_cast<token::id*>(tk);
-			ret = new stnode::id(tok->str);
-			break;
-		}
-		case token::type::CHARA:
-		{
-			token::chara* tok = dynamic_cast<token::chara*>(tk);
-			ret = new stnode::chara(tok->ch);
-			break;
-		}
-		case token::type::STR:
-		{
-			token::str* tok = dynamic_cast<token::str*>(tk);
-			ret = new stnode::str(tok->strr);
-			break;
-		}
-		case token::type::OP:
-		{
-			token::op* tok = dynamic_cast<token::op*>(tk);
-			stnode::op::ops type = getOpType(tok->opType);
-			if (type == stnode::op::ops::ERROR)
-				return NULL;
-			ret = getOp(type);
-			break;
-		}
-		case token::type::NUMBER:
-		{
-			token::number* tok = dynamic_cast<token::number*>(tk);
-			ret = new stnode::number(tok->val);
-			break;
-		}
-		case token::type::KEYWORD:
-		{
-			token::keyword* tok = dynamic_cast<token::keyword*>(tk);
-			stnode::varType type = getVarType(tok->word);
-			if (type == stnode::varType::_ERROR)
-				return NULL;
-			ret = new stnode::vartype(type);
-			break;
-		}
-	}
-	ret->pos = tk->pos;
-	return ret;
-}
-
-int parser_exp(tokenList &tList, stnode::stnode **root, tokenList::iterator &p)
+errInfo parser_exp(tokenList &tList, stnode::stnode **root, tokenList::iterator &p)
 {
 	tokenList::iterator pBeg = p, pEnd = tList.end();
 	for (; p != pEnd; p++)
@@ -382,13 +278,13 @@ int parser_exp(tokenList &tList, stnode::stnode **root, tokenList::iterator &p)
 	{
 		if (yacc_p == pEnd)
 			yacc_p--;
-		return (*yacc_p)->pos;
+		return errInfo(lineNumber, (*yacc_p)->pos, yacc_err);
 	}
 	*root = yacc_result;
-	return -1;
+	return noErr;
 }
 
-int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p)
+errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p)
 {
 	tokenList::iterator pEnd = tList.end();
 	if ((*p)->getType() == token::type::KEYWORD)
@@ -404,7 +300,7 @@ int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p
 		}
 		stnode::varType varType = getVarType(type->word, isPtr);
 		if (varType == stnode::varType::_ERROR || varType == stnode::varType::VOID)
-			return errPtr;
+			return errInfo(lineNumber, errPtr, "Invalid type");
 		stnode::id *newVar = NULL;
 		token::id *varName = NULL;
 		long long subCount = 1;
@@ -414,7 +310,7 @@ int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p
 			int varPos = (*p)->pos;
 			varName = dynamic_cast<token::id *>(*p);
 			if (varName == NULL)
-				return errPtr;
+				return errInfo(lineNumber, errPtr, "Need Variable name");
 			nextToken(;);
 			subCount = 0;
 			if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::SUB_LEFT)
@@ -422,11 +318,11 @@ int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p
 				//array
 				nextToken(;);
 				if ((*p)->getType() != token::type::NUMBER)
-					return errPtr;
+					return errInfo(lineNumber, errPtr, "Number expected");
 				subCount = dynamic_cast<token::number *>(*p)->val;
 				nextToken(;);
 				if ((*p)->getType() != token::type::OP || dynamic_cast<token::op *>(*p)->opType != token::ops::opType::SUB_RIGHT)
-					return errPtr;
+					return errInfo(lineNumber, errPtr, "] excepted");
 				nextToken(;);
 			}
 			newVar = new stnode::id(varName->str, varType, subCount);
@@ -445,11 +341,11 @@ int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p
 							break;
 					p = tList.insert(p, new token::delim(-2));
 					assert(pEnd == tList.end());
-					parser_exp(tList, initVal, pBeg);
+					errInfo expError = parser_exp(tList, initVal, pBeg);
 					p = tList.erase(p);
 					if (*initVal == NULL)
 					{
-						delete newVar; return errPtr;
+						delete newVar; return expError;
 					}
 					allocPtr->var.push_back(stnode::allocUnit(newVar, initVal));
 				}
@@ -459,12 +355,13 @@ int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p
 					if ((*p)->getType() != token::type::OP || dynamic_cast<token::op *>(*p)->opType != token::ops::opType::BRACE_LEFT)
 					{
 						delete newVar;
-						return errPtr;
+						return errInfo(lineNumber, errPtr, "{ excepted");
 					}
 					nextToken(delete newVar;);
 					stnode::stnode **initVal = new stnode::stnode*[subCount];
 					long long i;
 					tokenList::iterator pBeg;
+					errInfo expError = noErr;
 					for (i = 0; p != pEnd && i < subCount; nextTokenD, i++)
 					{
 						pBeg = p;
@@ -473,15 +370,15 @@ int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p
 								break;
 						p = tList.insert(p, new token::delim(-2));
 						assert(pEnd == tList.end());
-						parser_exp(tList, initVal + i, pBeg);
+						expError = parser_exp(tList, initVal + i, pBeg);
 						p = tList.erase(p);
 						if (initVal[i] == NULL)
 						{
-							delete newVar; delete[] initVal; return errPtr;
+							delete newVar; delete[] initVal; return expError;
 						}
 						if ((*p)->getType() != token::type::OP)
 						{
-							delete newVar; delete[] initVal; return errPtr;
+							delete newVar; delete[] initVal; return errInfo(lineNumber, errPtr, "Unexpected token");
 						}
 						else
 						{
@@ -493,11 +390,11 @@ int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p
 							}
 							else if (i == subCount - 1 && type == token::ops::opType::COMMA)
 							{
-								delete newVar; delete[] initVal; return errPtr;
+								delete newVar; delete[] initVal; return errInfo(lineNumber, errPtr, "Unexpected token");
 							}
 							else if (type != token::ops::opType::COMMA)
 							{
-								delete newVar; delete[] initVal; return errPtr;
+								delete newVar; delete[] initVal; return errInfo(lineNumber, errPtr, "} expected");
 							}
 						}
 					}
@@ -512,13 +409,13 @@ int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p
 				nextToken(;);
 		}
 		if (p == pEnd)
-			return errPtr;
+			return errInfo(lineNumber, errPtr, "Need more token");
 	}
 	else
 	{
-		return errPtr;
+		return errInfo(lineNumber, errPtr, "Type expected");
 	}
-	return -1;
+	return noErr;
 }
 
 struct lvlInfo
@@ -528,7 +425,7 @@ struct lvlInfo
 	stnode::stnode *ptr;
 };
 
-int parser(tokenList &tList, stTree *_sTree)
+errInfo parser(tokenList &tList, stTree *_sTree)
 {
 	stnode::stnode *ptr = NULL;
 	std::list<lvlInfo>sTreeStk;
@@ -560,8 +457,8 @@ int parser(tokenList &tList, stTree *_sTree)
 						nextToken(;);
 						stnode::alloc *allocPtr = new stnode::alloc(true);
 						allocPtr->pos = first->pos;
-						int err = parser_dim(tList, allocPtr, p);
-						if (err != -1)
+						errInfo err = parser_dim(tList, allocPtr, p);
+						if (err.err != NULL)
 						{
 							delete allocPtr;
 							return err;
@@ -574,8 +471,8 @@ int parser(tokenList &tList, stTree *_sTree)
 						nextToken(;);
 						stnode::alloc *allocPtr = new stnode::alloc(false);
 						allocPtr->pos = first->pos;
-						int err = parser_dim(tList, allocPtr, p);
-						if (err != -1)
+						errInfo err = parser_dim(tList, allocPtr, p);
+						if (err.err != NULL)
 						{
 							delete allocPtr;
 							return err;
@@ -592,7 +489,7 @@ int parser(tokenList &tList, stTree *_sTree)
 							if ((*p)->getType() != token::type::KEYWORD)
 							{
 								delete funcPtr;
-								return errPtr;
+								return errInfo(lineNumber, errPtr, "Type expected");
 							}
 							token::keyword *type = dynamic_cast<token::keyword *>(*p);
 							nextToken(delete funcPtr;);
@@ -609,26 +506,26 @@ int parser(tokenList &tList, stTree *_sTree)
 								p--;
 								if (isPtr)
 									p--;
-								return errPtr;
+								return errInfo(lineNumber, errPtr, "Type expected");
 							}
 							funcPtr->retType = varType;
 							if ((*p)->getType() != token::type::ID)
 							{
 								delete funcPtr;
-								return errPtr;
+								return errInfo(lineNumber, errPtr, "Function name expected");
 							}
 							funcPtr->name = dynamic_cast<token::id *>(*p)->str;
 							nextToken(;);
 							if ((*p)->getType() != token::type::OP || dynamic_cast<token::op *>(*p)->opType != token::ops::opType::BRACKET_LEFT)
 							{
 								delete funcPtr;
-								return errPtr;
+								return errInfo(lineNumber, errPtr, "( expected");
 							}
 							nextToken(;);
 							if ((*p)->getType() != token::type::KEYWORD)
 							{
 								delete funcPtr;
-								return errPtr;
+								return errInfo(lineNumber, errPtr, "Parameter type expected");
 							}
 							if (dynamic_cast<token::keyword *>(*p)->word != token::keywords::keywords::VOID)
 							{
@@ -648,12 +545,12 @@ int parser(tokenList &tList, stTree *_sTree)
 									if (varType == stnode::varType::_ERROR || varType == stnode::varType::VOID)
 									{
 										delete funcPtr;
-										return errPtr - (isPtr ? 2 : 1);
+										return errInfo(lineNumber, errPtr - (isPtr ? 2 : 1), "Parameter type expected");
 									}
 									if ((*p)->getType() != token::type::ID)
 									{
 										delete funcPtr;
-										return errPtr;
+										return errInfo(lineNumber, errPtr, "Parameter name expected");
 									}
 									varName = dynamic_cast<token::id *>(*p)->str;
 									newVar = new stnode::id(varName, varType);
@@ -663,7 +560,7 @@ int parser(tokenList &tList, stTree *_sTree)
 									if ((*p)->getType() == token::type::DELIM)
 									{
 										delete funcPtr;
-										return errPtr;
+										return errInfo(lineNumber, errPtr, "Need more token");
 									}
 									else if ((*p)->getType() == token::type::OP)
 									{
@@ -687,7 +584,7 @@ int parser(tokenList &tList, stTree *_sTree)
 						}
 						else
 						{
-							return errPtr;
+							return errInfo(lineNumber, errPtr, "Can't define function inside function");
 						}
 						break;
 					case token::keywords::keywords::RETURN:
@@ -703,8 +600,8 @@ int parser(tokenList &tList, stTree *_sTree)
 						else
 						{
 							stnode::stnode *exp;
-							int err = parser_exp(tList, &exp, p);
-							if (err != -1)
+							errInfo err = parser_exp(tList, &exp, p);
+							if (err.err != NULL)
 								return err;
 							retPtr->retVal = exp;
 						}
@@ -715,8 +612,8 @@ int parser(tokenList &tList, stTree *_sTree)
 					{
 						stnode::stnode *exp;
 						nextToken(;);
-						int err = parser_exp(tList, &exp, p);
-						if (err != -1)
+						errInfo err = parser_exp(tList, &exp, p);
+						if (err.err != NULL)
 							return err;
 						stnode::ifelse *ifPtr = new stnode::ifelse;
 						ifPtr->pos = first->pos;
@@ -734,7 +631,7 @@ int parser(tokenList &tList, stTree *_sTree)
 						if (info.ptr->getType() != stnode::type::IF)
 						{
 							delete block;
-							return errPtr;
+							return errInfo(lineNumber, errPtr, "Missing if");
 						}
 						stnode::ifelse *ifPtr = dynamic_cast<stnode::ifelse *>(info.ptr);
 						ifPtr->blockTrue = info.sTree;
@@ -748,7 +645,7 @@ int parser(tokenList &tList, stTree *_sTree)
 						switch (info.ptr->getType())
 						{
 							case stnode::type::ERROR:
-								return errPtr;
+								return errInfo(lineNumber, errPtr, "Missing code block beginning");
 							case stnode::type::IF:
 							{
 								stnode::ifelse *ifPtr = dynamic_cast<stnode::ifelse *>(info.ptr);
@@ -771,15 +668,15 @@ int parser(tokenList &tList, stTree *_sTree)
 						break;
 					}
 					default:
-						return errPtr;
+						return errInfo(lineNumber, errPtr, "Unexpected token");
 				}
 				break;
 			}
 			default:
 			{
 				stnode::stnode *ptrExp = NULL;
-				int err = parser_exp(tList, &ptrExp, p);
-				if (err != -1)
+				errInfo err = parser_exp(tList, &ptrExp, p);
+				if (err.err != NULL)
 					return err;
 				ptr = ptrExp;
 			}
@@ -787,5 +684,5 @@ int parser(tokenList &tList, stTree *_sTree)
 		if (ptr != NULL)
 			sTreeStk.back().sTree->push_back(ptr);
 	}
-	return -1;
+	return noErr;
 }

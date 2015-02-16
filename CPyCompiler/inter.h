@@ -8,10 +8,21 @@
 #include <unordered_set>
 #include <vector>
 
+namespace stnode
+{
+	class id_inter :public stnode::stnode
+	{
+	public:
+		int id;
+		id_inter(int _id){ id = _id; };
+		type getType() { return type::ID_INTER; };
+	};
+}
+
 namespace iCode
 {
 	enum argType{ ERROR, CONST, ID };
-	enum opType{};
+	enum opType{ ADD, SUB, MUL, DIV, MOD, SHL, SHR, R_ADD, I_ADD };
 
 	class arg
 	{
@@ -42,6 +53,6 @@ namespace iCode
 }
 typedef std::list<iCode::code> iCodeSeq;
 
-int stanalyzer(stnode::stnode *node);
+int stanalyzer(stnode::stnode **node);
 
 #endif
