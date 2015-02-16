@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "scanner.h"
+#include "lexer.h"
 
 #define nextChar p++, pos++
 #define prevChar p--, pos--
@@ -312,14 +312,8 @@ int scanner(std::string *str, tokenList *tList, int lineN)
 						tList->push_back(new token::op(token::ops::opType::INC));
 						tList->back()->pos = pos - 1;
 					}
-					else if (isdigit(*p))
-					{
-						prevChar;
-						goto number_process;
-					}
 					else
 					{
-						prevChar;
 						if (tList->empty())
 						{
 							tList->push_back(new token::op(token::ops::opType::POSI));
@@ -337,10 +331,16 @@ int scanner(std::string *str, tokenList *tList, int lineN)
 									tList->back()->pos = pos;
 									break;
 								default:
+									if (isdigit(*p))
+									{
+										prevChar;
+										goto number_process;
+									}
 									tList->push_back(new token::op(token::ops::opType::POSI));
 									tList->back()->pos = pos;
 							}
 						}
+						prevChar;
 					}
 				}
 				else
@@ -364,14 +364,8 @@ int scanner(std::string *str, tokenList *tList, int lineN)
 						tList->push_back(new token::op(token::ops::opType::DEC));
 						tList->back()->pos = pos - 1;
 					}
-					else if (isdigit(*p))
-					{
-						prevChar;
-						goto number_process;
-					}
 					else
 					{
-						prevChar;
 						if (tList->empty())
 						{
 							tList->push_back(new token::op(token::ops::opType::NEGA));
@@ -385,18 +379,20 @@ int scanner(std::string *str, tokenList *tList, int lineN)
 								case token::type::NUMBER:
 								case token::type::CHARA:
 								case token::type::STR:
-								{
 									tList->push_back(new token::op(token::ops::opType::SUB));
 									tList->back()->pos = pos;
-								}
 									break;
 								default:
-								{
+									if (isdigit(*p))
+									{
+										prevChar;
+										goto number_process;
+									}
 									tList->push_back(new token::op(token::ops::opType::NEGA));
 									tList->back()->pos = pos;
-								}
 							}
 						}
+						prevChar;
 					}
 				}
 				else

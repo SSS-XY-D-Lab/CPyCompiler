@@ -142,16 +142,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="parser.h" />
-    <ClInclude Include="scanner.h" />
-    <ClInclude Include="stanalyzer.h" />
+    <ClInclude Include="lexer.h" />
+    <ClInclude Include="inter.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="parser.cpp" />
     <ClCompile Include="CPyCompiler.cpp" />
     <ClCompile Include="parser_yacc.cpp" />
-    <ClCompile Include="scanner.cpp" />
-    <ClCompile Include="stanalyzer.cpp" />
+    <ClCompile Include="lexer.cpp" />
+    <ClCompile Include="inter.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

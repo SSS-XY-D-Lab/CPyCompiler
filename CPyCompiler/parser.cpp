@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "parser.h"
 
-#define nextToken(x) p++; if (p == pEnd) { x return (*p)->pos; }
+#define nextToken(x) p++; if (p == pEnd) { x p--; return (*p)->pos; }
 #define nextTokenD p++
 #define prevToken p--
 #define errPtr ((*p)->pos)
@@ -16,6 +16,12 @@ namespace stnode
 {
 	namespace op
 	{
+		struct opItem
+		{
+			ops val;
+			std::string str;
+		};
+
 		std::string op2Str(ops op)
 		{
 			static const opItem opMap[] = {
@@ -26,8 +32,6 @@ namespace stnode
 				ops::MEMBER, "MEMBER",
 				ops::POSI, "POSI",
 				ops::NEGA, "NEGA",
-				ops::INC, "INC",
-				ops::DEC, "DEC",
 				ops::INC_POST, "INC_POST",
 				ops::DEC_POST, "DEC_POST",
 				ops::INC_PRE, "INC_PRE",
@@ -80,11 +84,11 @@ namespace stnode
 			if (p->init)
 			{
 				if (p->var->subCount == 0)
-					delete &p->val;
+					delete *(p->val);
 				else
 				{
 					for (long long i = p->var->subCount - 1; i >= 0; i--)
-						delete &(p->val[i]);
+						delete p->val[i];
 					delete[] p->val;
 				}
 			}
@@ -149,12 +153,6 @@ stnode::op::ops getOpType(token::ops::opType op)
 			break;
 		case token::ops::opType::NEGA:
 			ret = stnode::op::ops::NEGA;
-			break;
-		case token::ops::opType::INC:
-			ret = stnode::op::ops::INC;
-			break;
-		case token::ops::opType::DEC:
-			ret = stnode::op::ops::DEC;
 			break;
 		case token::ops::opType::REF:
 			ret = stnode::op::ops::REF;
@@ -269,8 +267,6 @@ stnode::op::op *getOp(stnode::op::ops type)
 	stnode::op::op *opPtr;
 	switch (type)
 	{
-		case stnode::op::ops::INC:
-		case stnode::op::ops::DEC:
 		case stnode::op::ops::NOT:
 		case stnode::op::ops::LGNOT:
 		case stnode::op::ops::POSI:
@@ -383,7 +379,11 @@ int parser_exp(tokenList &tList, stnode::stnode **root, tokenList::iterator &p)
 	yacc_pEnd = p;
 	yyparse();
 	if (yacc_err != NULL)
+	{
+		if (yacc_p == pEnd)
+			yacc_p--;
 		return (*yacc_p)->pos;
+	}
 	*root = yacc_result;
 	return -1;
 }
@@ -438,14 +438,20 @@ int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p
 				if (subCount == 0)
 				{
 					//init var
-					stnode::stnode **initVal = new stnode::stnode*; 
-					*initVal = getNode(*p);
-					if (initVal == NULL)
+					stnode::stnode **initVal = new stnode::stnode*;
+					tokenList::iterator pBeg = p;
+					for (; p != pEnd; nextTokenD)
+						if (((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::COMMA) || (*p)->getType() == token::type::DELIM)
+							break;
+					p = tList.insert(p, new token::delim(-2));
+					assert(pEnd == tList.end());
+					parser_exp(tList, initVal, pBeg);
+					p = tList.erase(p);
+					if (*initVal == NULL)
 					{
 						delete newVar; return errPtr;
 					}
 					allocPtr->var.push_back(stnode::allocUnit(newVar, initVal));
-					nextToken(delete newVar;);
 				}
 				else
 				{
@@ -458,14 +464,21 @@ int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p
 					nextToken(delete newVar;);
 					stnode::stnode **initVal = new stnode::stnode*[subCount];
 					long long i;
+					tokenList::iterator pBeg;
 					for (i = 0; p != pEnd && i < subCount; nextTokenD, i++)
 					{
-						initVal[i] = getNode(*p);
-						if (initVal == NULL)
+						pBeg = p;
+						for (; p != pEnd; nextTokenD)
+							if ((*p)->getType() == token::type::OP && (static_cast<token::op *>(*p)->opType == token::ops::opType::COMMA || static_cast<token::op *>(*p)->opType == token::ops::opType::BRACE_RIGHT))
+								break;
+						p = tList.insert(p, new token::delim(-2));
+						assert(pEnd == tList.end());
+						parser_exp(tList, initVal + i, pBeg);
+						p = tList.erase(p);
+						if (initVal[i] == NULL)
 						{
 							delete newVar; delete[] initVal; return errPtr;
 						}
-						nextToken(delete newVar; delete[] initVal;);
 						if ((*p)->getType() != token::type::OP)
 						{
 							delete newVar; delete[] initVal; return errPtr;
@@ -477,6 +490,10 @@ int parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterator &p
 							{
 								nextToken(delete newVar; delete[] initVal;);
 								break;
+							}
+							else if (i == subCount - 1 && type == token::ops::opType::COMMA)
+							{
+								delete newVar; delete[] initVal; return errPtr;
 							}
 							else if (type != token::ops::opType::COMMA)
 							{

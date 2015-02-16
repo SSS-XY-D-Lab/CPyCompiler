@@ -1419,25 +1419,25 @@ yyreduce:
 
 		case 34:
 
-		{ stnode::op::opSingle *op = dynamic_cast<stnode::op::opSingle*>((yyvsp[0])); op->opVal = stnode::op::ops::INC_POST; op->arg1 = (yyvsp[-1]); (yyval) = op; }
+		{ stnode::op::opSingle *op = new stnode::op::opSingle(stnode::op::ops::INC_POST); op->arg1 = (yyvsp[-1]); (yyval) = op; }
 
 		break;
 
 		case 35:
 
-		{ stnode::op::opSingle *op = dynamic_cast<stnode::op::opSingle*>((yyvsp[0])); op->opVal = stnode::op::ops::DEC_POST; op->arg1 = (yyvsp[-1]); (yyval) = op; }
+		{ stnode::op::opSingle *op = new stnode::op::opSingle(stnode::op::ops::DEC_POST); op->arg1 = (yyvsp[-1]); (yyval) = op; }
 
 		break;
 
 		case 37:
 
-		{ stnode::op::opSingle *op = dynamic_cast<stnode::op::opSingle*>((yyvsp[-1])); op->opVal = stnode::op::ops::INC_PRE; op->arg1 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::opSingle *op = new stnode::op::opSingle(stnode::op::ops::INC_PRE); op->arg1 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
 		case 38:
 
-		{ stnode::op::opSingle *op = dynamic_cast<stnode::op::opSingle*>((yyvsp[-1])); op->opVal = stnode::op::ops::DEC_PRE; op->arg1 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::opSingle *op = new stnode::op::opSingle(stnode::op::ops::DEC_PRE); op->arg1 = (yyvsp[0]); (yyval) = op; }
 
 		break;
 
@@ -1982,11 +1982,11 @@ int yylex()
 					break;
 				case token::ops::opType::INC:
 					ret = INC;
-					newOP = stnode::op::ops::INC;
+					newOP = stnode::op::ops::ERROR;
 					break;
 				case token::ops::opType::DEC:
 					ret = DEC;
-					newOP = stnode::op::ops::DEC;
+					newOP = stnode::op::ops::ERROR;
 					break;
 				case token::ops::opType::REF:
 					ret = REF;
@@ -2135,8 +2135,6 @@ int yylex()
 			stnode::op::op *opPtr;
 			switch (newOP)
 			{
-				case stnode::op::ops::INC:
-				case stnode::op::ops::DEC:
 				case stnode::op::ops::NOT:
 				case stnode::op::ops::LGNOT:
 				case stnode::op::ops::POSI:
@@ -2251,8 +2249,7 @@ int yylex()
 			yylval = new stnode::delim;
 			ret = DELIM;
 	}
-	if (yylval != NULL)
-		yylval->pos = (*yacc_p)->pos;
+	yylval->pos = (*yacc_p)->pos;
 	yacc_p++;
 	return ret;
 }

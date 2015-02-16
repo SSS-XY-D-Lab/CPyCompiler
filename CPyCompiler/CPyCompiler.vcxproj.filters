@@ -18,13 +18,13 @@
     <ClInclude Include="stdafx.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="scanner.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="parser.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="stanalyzer.h">
+    <ClInclude Include="lexer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="inter.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -35,16 +35,16 @@
     <ClCompile Include="CPyCompiler.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="scanner.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="parser.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="parser_yacc.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="stanalyzer.cpp">
+    <ClCompile Include="lexer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="inter.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
