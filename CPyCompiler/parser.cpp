@@ -78,6 +78,8 @@ namespace stnode
 
 	alloc::~alloc()
 	{
+	    if (convert)
+            return;
 		std::list<allocUnit>::iterator p, pEnd = var.end();
 		for (p = var.begin(); p != pEnd; p++)
 		{

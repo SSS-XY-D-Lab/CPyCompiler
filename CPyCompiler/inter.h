@@ -20,7 +20,7 @@ namespace stnode
 	class func_inter :public stnode
 	{
 	public:
-        int funcID;
+		int funcID;
 		std::list<int> args;
 		varType retType;
 		stTree *block;
@@ -29,9 +29,10 @@ namespace stnode
 
 	struct allocUnit_inter
 	{
-		allocUnit_inter(id_inter* _var){ var = _var; init = false; };
-		allocUnit_inter(id_inter* _var, stnode **_val){ var = _var; init = true; val = _val; };
-		id_inter *var;
+		allocUnit_inter(int _var, int _subCount){ varID = _var; subCount = _subCount; init = false; };
+		allocUnit_inter(int _var, int _subCount, stnode **_val){ varID = _var; subCount = _subCount; init = true; val = _val; };
+		int varID;
+		int subCount;
 		bool init;
 		stnode **val;
 	};

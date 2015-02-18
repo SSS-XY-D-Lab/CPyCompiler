@@ -178,10 +178,11 @@ namespace stnode
 	class alloc :public stnode
 	{
 	public:
-		alloc(bool _readOnly){ readOnly = _readOnly; };
+		alloc(bool _readOnly){ readOnly = _readOnly; convert = false; };
 		~alloc();
 		std::list<allocUnit> var;
 		bool readOnly;
+		bool convert;
 		type getType(){ return type::ALLOC; };
 	};
 
