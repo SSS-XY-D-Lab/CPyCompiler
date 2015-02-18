@@ -1,6 +1,66 @@
 #include "stdafx.h"
 #include "inter.h"
 
+stnode::varType toPtr(stnode::varType type)
+{
+    switch (type)
+    {
+		case stnode::varType::VOID:
+			return stnode::varType::VOID_PTR;
+		case stnode::varType::SINT:
+			return stnode::varType::SINT_PTR;
+		case stnode::varType::S8:
+			return stnode::varType::S8_PTR;
+		case stnode::varType::S16:
+			return stnode::varType::S16_PTR;
+		case stnode::varType::S32:
+			return stnode::varType::S32_PTR;
+		case stnode::varType::S64:
+			return stnode::varType::S64_PTR;
+		case stnode::varType::UINT:
+			return stnode::varType::UINT_PTR;
+		case stnode::varType::U8:
+			return stnode::varType::U8_PTR;
+		case stnode::varType::U16:
+			return stnode::varType::U16_PTR;
+		case stnode::varType::U32:
+			return stnode::varType::U32_PTR;
+		case stnode::varType::U64:
+			return stnode::varType::U64_PTR;
+		case stnode::varType::VOID_PTR:
+			return stnode::varType::VOID_PTR_2;
+		case stnode::varType::SINT_PTR:
+			return stnode::varType::SINT_PTR_2;
+		case stnode::varType::S8_PTR:
+			return stnode::varType::S8_PTR_2;
+		case stnode::varType::S16_PTR:
+			return stnode::varType::S16_PTR_2;
+		case stnode::varType::S32_PTR:
+			return stnode::varType::S32_PTR_2;
+		case stnode::varType::S64_PTR:
+			return stnode::varType::S64_PTR_2;
+		case stnode::varType::UINT_PTR:
+			return stnode::varType::UINT_PTR_2;
+		case stnode::varType::U8_PTR:
+			return stnode::varType::U8_PTR_2;
+		case stnode::varType::U16_PTR:
+			return stnode::varType::U16_PTR_2;
+		case stnode::varType::U32_PTR:
+			return stnode::varType::U32_PTR_2;
+		case stnode::varType::U64_PTR:
+			return stnode::varType::U64_PTR_2;
+    }
+    return stnode::varType::_ERROR;
+}
+
+stnode::varType getIDType(stnode::id *id)
+{
+    if (id->subCount > 0)
+		return toPtr(id->dtype);
+	else
+		return id->dtype;
+}
+
 struct idItem
 {
 	idItem(stnode::varType _type, bool _isConst = false){ type = _type; isConst = _isConst; };
@@ -64,6 +124,7 @@ errInfo stAnalyzer(stnode::stnode **node)
 			newNode->lineN = oldNode->lineN;
 			newNode->pos = oldNode->pos;
 			delete oldNode;
+			*node = newNode;
 			break;
 		}
 		case stnode::type::OP:
@@ -110,6 +171,7 @@ errInfo stAnalyzer(stnode::stnode **node)
 				default:
 					return errInfo(opNode->lineN, opNode->pos, "Invalid Operator");
 			}
+			break;
 		}
 		case stnode::type::FUNC:
 		{
@@ -130,7 +192,7 @@ errInfo stAnalyzer(stnode::stnode **node)
 				int argID;
 				for (p = oldNode->args.begin(); p != pEnd; p++)
 				{
-					argID = newID((*p)->name, (*p)->dtype, true);
+					argID = newID((*p)->name, getIDType(*p), true);
 					if (argID < 0)
 						return errInfo((*p)->lineN, (*p)->pos, ERR_NEWID_MSG[-argID]);
 					newNode->args.push_back(argID);
@@ -153,6 +215,7 @@ errInfo stAnalyzer(stnode::stnode **node)
 
 			delete oldNode;
 			idHashTable.pop_back();
+			*node = newNode;
 			break;
 		}
 		case stnode::type::CALL:
@@ -172,6 +235,7 @@ errInfo stAnalyzer(stnode::stnode **node)
 			errInfo err = stAnalyzer(&(retNode->retVal));
 			if (err.err != NULL)
 				return err;
+			break;
 		}
 		case stnode::type::IF:
 		{
@@ -202,6 +266,7 @@ errInfo stAnalyzer(stnode::stnode **node)
 					*p = ptr;
 				}
 			}
+			break;
 		}
 		case stnode::type::ALLOC:
 		{
@@ -212,15 +277,30 @@ errInfo stAnalyzer(stnode::stnode **node)
             int varID;
             for (p = oldNode->var.begin(); p != pEnd; p++)
 			{
-				varID = newID(p->var->name, p->var->dtype);
+				varID = newID(p->var->name, getIDType(p->var));
 				if (varID < 0)
 					return errInfo(oldNode->lineN, oldNode->pos, ERR_NEWID_MSG[-varID]);
-				if (p->init = true)
+				if (p->init)
 					newNode->var.push_back(stnode::allocUnit_inter(varID, p->var->subCount, p->val));
+				else
+					newNode->var.push_back(stnode::allocUnit_inter(varID, p->var->subCount));
 			}
+
+			oldNode->convert = true;
+			delete oldNode;
+			*node = newNode;
+			break;
 		}
 		case stnode::type::TREE:
 		{
+			stnode::expTree *treeNode = dynamic_cast<stnode::expTree*>(*node);
+            errInfo err = stAnalyzer(&(treeNode->exp));
+            if (err.err != NULL)
+				return err;
+			err = stAnalyzer(&(treeNode->son));
+            if (err.err != NULL)
+				return err;
+			break;
 		}
 	}
 	return noErr;
