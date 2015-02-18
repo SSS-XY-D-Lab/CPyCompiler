@@ -7,15 +7,15 @@
 
 struct errInfo
 {
-	errInfo(int _lineN, int _pos, char *_err){ lineN = _lineN; pos = _pos; err = _err; };
+	errInfo(int _lineN, int _pos, const char *_err){ lineN = _lineN; pos = _pos; err = _err; };
 	int lineN, pos;
-	char* err;
+	const char* err;
 };
 #define noErr (errInfo(-1, -1, NULL))
 
 namespace stnode
 {
-	enum type{ ERROR, TYPE, NUMBER, CHARA, STR, ID, ID_INTER, OP, FUNC, CALL, RETURN, IF, ALLOC, CONST, TREE, DELIM };
+	enum type{ ERROR, TYPE, NUMBER, CHARA, STR, ID, ID_INTER, OP, FUNC, FUNC_INTER, CALL, RETURN, IF, ALLOC, ALLOC_INTER, CONST, TREE, DELIM };
 
 	class stnode
 	{
@@ -78,8 +78,8 @@ namespace stnode
 	{
 		enum ops{
 			ERROR,
-			COMMA, ARRAY_SUB, MEMBER, CAST, 
-			POSI, NEGA, INC_POST, DEC_POST, INC_PRE, DEC_PRE, 
+			COMMA, ARRAY_SUB, MEMBER, CAST,
+			POSI, NEGA, INC_POST, DEC_POST, INC_PRE, DEC_PRE,
 			REF, DEREF, NOT, LGNOT,
 			DIV, MUL, MOD,
 			ADD, SUB,
@@ -120,7 +120,7 @@ namespace stnode
 			stnode *arg1, *arg2;
 			opType getOpType(){ return opType::DOUBLE; };
 		};
-		
+
 		class opTriple :public op
 		{
 		public:
@@ -205,7 +205,7 @@ errInfo parser(tokenList &tList, stTree *sTree);
 extern int yacc_lineN;
 extern stnode::stnode *yacc_result;
 extern tokenList::iterator yacc_p, yacc_pEnd;
-extern char *yacc_err;
+extern const char *yacc_err;
 int yyparse();
 
 #endif

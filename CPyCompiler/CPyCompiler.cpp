@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "lexer.h"
 #include "parser.h"
-#include <vector>
+#include "inter.h"
 using namespace std;
 
 vector<string> lines;

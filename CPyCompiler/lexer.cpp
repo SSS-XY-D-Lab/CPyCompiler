@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "lexer.h"
+#include <climits>
 
 #define nextChar p++, pos++
 #define prevChar p--, pos--
@@ -150,7 +151,7 @@ namespace token
 				opType::ANDASS, "ANDASS",
 				opType::XORASS, "XORASS",
 				opType::BORASS, "BORASS",
-				opType::COMMA, "COMMA", 
+				opType::COMMA, "COMMA",
 				opType::QMARK, "QUESTION MARK",
 				opType::COLON, "COLON",
 			};
@@ -675,7 +676,7 @@ int scanner(std::string *str, tokenList *tList, int lineN)
 							prevChar;
 							tList->push_back(new token::op(token::ops::opType::SHR));
 							tList->back()->pos = pos - 1;
-							
+
 						}
 					}
 					else

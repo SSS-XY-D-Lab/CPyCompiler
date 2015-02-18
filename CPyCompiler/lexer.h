@@ -2,6 +2,7 @@
 
 #ifndef _H_SCANNER
 #define _H_SCANNER
+
 #include <list>
 #include <string>
 #include <sstream>

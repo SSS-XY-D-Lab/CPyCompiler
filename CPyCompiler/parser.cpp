@@ -8,7 +8,7 @@
 
 stnode::stnode *yacc_result;
 tokenList::iterator yacc_p, yacc_pEnd;
-char *yacc_err;
+const char *yacc_err;
 int yacc_lineN;
 int yyparse();
 
@@ -138,128 +138,6 @@ stnode::varType getVarType(token::keywords::keywords kw, bool isPtr = false)
 			varType = stnode::varType::_ERROR;
 	}
 	return varType;
-}
-
-stnode::op::ops getOpType(token::ops::opType op)
-{
-	stnode::op::ops ret;
-	switch (op)
-	{
-		case token::ops::opType::MEMBER:
-			ret = stnode::op::ops::MEMBER;
-			break;
-		case token::ops::opType::POSI:
-			ret = stnode::op::ops::POSI;
-			break;
-		case token::ops::opType::NEGA:
-			ret = stnode::op::ops::NEGA;
-			break;
-		case token::ops::opType::REF:
-			ret = stnode::op::ops::REF;
-			break;
-		case token::ops::opType::DEREF:
-			ret = stnode::op::ops::DEREF;
-			break;
-		case token::ops::opType::NOT:
-			ret = stnode::op::ops::NOT;
-			break;
-		case token::ops::opType::LGNOT:
-			ret = stnode::op::ops::LGNOT;
-			break;
-		case token::ops::opType::DIV:
-			ret = stnode::op::ops::DIV;
-			break;
-		case token::ops::opType::MUL:
-			ret = stnode::op::ops::MUL;
-			break;
-		case token::ops::opType::MOD:
-			ret = stnode::op::ops::MOD;
-			break;
-		case token::ops::opType::ADD:
-			ret = stnode::op::ops::ADD;
-			break;
-		case token::ops::opType::SUB:
-			ret = stnode::op::ops::SUB;
-			break;
-		case token::ops::opType::SHL:
-			ret = stnode::op::ops::SHL;
-			break;
-		case token::ops::opType::SHR:
-			ret = stnode::op::ops::SHR;
-			break;
-		case token::ops::opType::BIG:
-			ret = stnode::op::ops::BIG;
-			break;
-		case token::ops::opType::BIGEQU:
-			ret = stnode::op::ops::BIGEQU;
-			break;
-		case token::ops::opType::LES:
-			ret = stnode::op::ops::LES;
-			break;
-		case token::ops::opType::LESEQU:
-			ret = stnode::op::ops::LESEQU;
-			break;
-		case token::ops::opType::EQU:
-			ret = stnode::op::ops::EQU;
-			break;
-		case token::ops::opType::NEQU:
-			ret = stnode::op::ops::NEQU;
-			break;
-		case token::ops::opType::AND:
-			ret = stnode::op::ops::AND;
-			break;
-		case token::ops::opType::XOR:
-			ret = stnode::op::ops::XOR;
-			break;
-		case token::ops::opType::BOR:
-			ret = stnode::op::ops::BOR;
-			break;
-		case token::ops::opType::LGAND:
-			ret = stnode::op::ops::LGAND;
-			break;
-		case token::ops::opType::LGOR:
-			ret = stnode::op::ops::LGOR;
-			break;
-		case token::ops::opType::ASSIGN:
-			ret = stnode::op::ops::ASSIGN;
-			break;
-		case token::ops::opType::MODASS:
-			ret = stnode::op::ops::MODASS;
-			break;
-		case token::ops::opType::DIVASS:
-			ret = stnode::op::ops::DIVASS;
-			break;
-		case token::ops::opType::MULASS:
-			ret = stnode::op::ops::MULASS;
-			break;
-		case token::ops::opType::ADDASS:
-			ret = stnode::op::ops::ADDASS;
-			break;
-		case token::ops::opType::SUBASS:
-			ret = stnode::op::ops::SUBASS;
-			break;
-		case token::ops::opType::SHLASS:
-			ret = stnode::op::ops::SHLASS;
-			break;
-		case token::ops::opType::SHRASS:
-			ret = stnode::op::ops::SHRASS;
-			break;
-		case token::ops::opType::ANDASS:
-			ret = stnode::op::ops::ANDASS;
-			break;
-		case token::ops::opType::XORASS:
-			ret = stnode::op::ops::XORASS;
-			break;
-		case token::ops::opType::BORASS:
-			ret = stnode::op::ops::BORASS;
-			break;
-		case token::ops::opType::COMMA:
-			ret = stnode::op::ops::COMMA;
-			break;
-		default:
-			return stnode::op::ops::ERROR;
-	}
-	return ret;
 }
 
 errInfo parser_exp(tokenList &tList, stnode::stnode **root, tokenList::iterator &p, int lineNumber)
@@ -628,15 +506,14 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 					case token::keywords::keywords::ELSE:
 					{
 						nextToken(;);
-						stTree *block = new stTree;
-						lvlInfo info = sTreeStk.back();
+						lvlInfo &info = sTreeStk.back();
 						if (info.ptr->getType() != stnode::type::IF)
-						{
-							delete block;
 							return errInfo(lineNumber, errPtr, "Missing if");
-						}
 						stnode::ifelse *ifPtr = dynamic_cast<stnode::ifelse *>(info.ptr);
+						if (ifPtr->blockTrue != NULL)
+                            return errInfo(lineNumber, errPtr, "Too many else");
 						ifPtr->blockTrue = info.sTree;
+                        info.sTree = new stTree;
 						break;
 					}
 					case token::keywords::keywords::END:

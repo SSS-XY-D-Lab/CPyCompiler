@@ -5,7 +5,6 @@
 
 #include "parser.h"
 #include <unordered_map>
-#include <unordered_set>
 #include <vector>
 
 namespace stnode
@@ -16,6 +15,35 @@ namespace stnode
 		int id;
 		id_inter(int _id){ id = _id; };
 		type getType() { return type::ID_INTER; };
+	};
+
+	class func_inter :public stnode
+	{
+	public:
+        int funcID;
+		std::list<int> args;
+		varType retType;
+		stTree *block;
+		type getType() { return type::FUNC_INTER; };
+	};
+
+	struct allocUnit_inter
+	{
+		allocUnit_inter(id_inter* _var){ var = _var; init = false; };
+		allocUnit_inter(id_inter* _var, stnode **_val){ var = _var; init = true; val = _val; };
+		id_inter *var;
+		bool init;
+		stnode **val;
+	};
+
+	class alloc_inter :public stnode
+	{
+	public:
+		alloc_inter(bool _readOnly){ readOnly = _readOnly; };
+		~alloc_inter();
+		std::list<allocUnit_inter> var;
+		bool readOnly;
+		type getType(){ return type::ALLOC_INTER; };
 	};
 }
 
@@ -53,6 +81,6 @@ namespace iCode
 }
 typedef std::list<iCode::code> iCodeSeq;
 
-int stanalyzer(stnode::stnode **node);
+errInfo stAnalyzer(stnode::stnode **node);
 
 #endif
