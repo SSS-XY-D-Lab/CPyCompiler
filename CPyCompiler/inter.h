@@ -29,10 +29,10 @@ namespace stnode
 
 	struct allocUnit_inter
 	{
-		allocUnit_inter(int _var, int _subCount){ varID = _var; subCount = _subCount; init = false; };
-		allocUnit_inter(int _var, int _subCount, stnode **_val){ varID = _var; subCount = _subCount; init = true; val = _val; };
+		allocUnit_inter(int _var, long long _subCount){ varID = _var; subCount = _subCount; init = false; };
+		allocUnit_inter(int _var, long long _subCount, stnode **_val){ varID = _var; subCount = _subCount; init = true; val = _val; };
 		int varID;
-		int subCount;
+		long long subCount;
 		bool init;
 		stnode **val;
 	};
