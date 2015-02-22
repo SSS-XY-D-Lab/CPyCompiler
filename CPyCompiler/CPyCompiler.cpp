@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "lexer.h"
 #include "parser.h"
-#include <vector>
+#include "inter.h"
 using namespace std;
 
 vector<string> lines;
@@ -82,13 +82,14 @@ int main(int argc, char* argv[])
 				}
 			}
 		}
-		int pos2 = parser(ret, &ret2);
-		if (pos2 != -1)
+		errInfo err = parser(ret, &ret2);
+		if (err.err != NULL)
 		{
-			cout << lines[lineNumber - 1] << endl;
-			for (; pos2 > 1; pos2--)
+			cout << lines[err.lineN - 1] << endl;
+			for (; err.pos > 1; err.pos--)
 				cout << ' ';
 			cout << '^' << endl;
+			cout << err.err << endl;
 		}
 	}
 	system("pause");
