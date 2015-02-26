@@ -82,6 +82,6 @@ namespace iCode
 }
 typedef std::list<iCode::code> iCodeSeq;
 
-errInfo stAnalyzer(stnode::stnode **node);
+errInfo inter(stTree sTree, iCodeSeq &ret);
 
 #endif

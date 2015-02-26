@@ -67,10 +67,9 @@ namespace stnode
 	class id :public stnode
 	{
 	public:
-		id(std::string _name, varType _type = varType::_ERROR, long long _subCount = 0){ name = _name; dtype = _type; subCount = _subCount; };
+		id(std::string _name, varType _type = varType::_ERROR){ name = _name; dtype = _type; };
 		std::string name;
 		varType dtype;
-		long long subCount;
 		type getType() { return type::ID; };
 	};
 
@@ -168,9 +167,10 @@ namespace stnode
 
 	struct allocUnit
 	{
-		allocUnit(id* _var){ var = _var; init = false; };
-		allocUnit(id* _var, stnode **_val){ var = _var; init = true; val = _val; };
+		allocUnit(id* _var, int _subCount){ var = _var; subCount = _subCount; init = false; };
+		allocUnit(id* _var, stnode **_val, int _subCount){ var = _var; init = true; val = _val; subCount = _subCount; };
 		id *var;
+		long long subCount;
 		bool init;
 		stnode **val;
 	};

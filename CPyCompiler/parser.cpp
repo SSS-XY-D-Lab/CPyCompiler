@@ -85,11 +85,11 @@ namespace stnode
 		{
 			if (p->init)
 			{
-				if (p->var->subCount == 0)
+				if (p->subCount == 0)
 					delete *(p->val);
 				else
 				{
-					for (long long i = p->var->subCount - 1; i >= 0; i--)
+					for (long long i = p->subCount - 1; i >= 0; i--)
 						delete p->val[i];
 					delete[] p->val;
 				}
@@ -174,7 +174,7 @@ errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterato
 		token::keyword *type = dynamic_cast<token::keyword *>(*p);
 		nextToken(;);
 		bool isPtr = false;
-		if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::DEREF)
+		if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::MUL)
 		{
 			isPtr = true;
 			nextToken(;);
@@ -206,7 +206,7 @@ errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterato
 					return errInfo(lineNumber, errPtr, "] excepted");
 				nextToken(;);
 			}
-			newVar = new stnode::id(varName->str, varType, subCount);
+			newVar = new stnode::id(varName->str, varType);
 			newVar->pos = varPos;
 			newVar->lineN = lineNumber;
 			if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::ASSIGN)
@@ -229,7 +229,7 @@ errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterato
 					{
 						delete newVar; return expError;
 					}
-					allocPtr->var.push_back(stnode::allocUnit(newVar, initVal));
+					allocPtr->var.push_back(stnode::allocUnit(newVar, initVal, 0));
 				}
 				else
 				{
@@ -280,11 +280,11 @@ errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterato
 							}
 						}
 					}
-					allocPtr->var.push_back(stnode::allocUnit(newVar, initVal));
+					allocPtr->var.push_back(stnode::allocUnit(newVar, initVal, subCount));
 				}
 			}
 			else
-				allocPtr->var.push_back(stnode::allocUnit(newVar));
+				allocPtr->var.push_back(stnode::allocUnit(newVar, subCount));
 			if ((*p)->getType() == token::type::DELIM)
 				break;
 			else if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::COMMA)
@@ -376,7 +376,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 							token::keyword *type = dynamic_cast<token::keyword *>(*p);
 							nextToken(delete funcPtr;);
 							bool isPtr = false;
-							if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::DEREF)
+							if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::MUL)
 							{
 								isPtr = true;
 								nextToken(delete funcPtr;)
@@ -418,7 +418,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 									type = dynamic_cast<token::keyword *>(*p);
 									nextToken(delete funcPtr;);
 									bool isPtr = false;
-									if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::DEREF)
+									if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::MUL)
 									{
 										isPtr = true;
 										nextToken(delete funcPtr;)
