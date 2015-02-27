@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "inter.h"
 
+const int intSize = 2;
+
 stnode::varType toPtr(stnode::varType type)
 {
 	switch (type)
@@ -51,6 +53,54 @@ stnode::varType toPtr(stnode::varType type)
 			return stnode::varType::U64_PTR_2;
 	}
 	return stnode::varType::_ERROR;
+}
+
+int typeSize(stnode::varType type)
+{
+	switch (type)
+	{
+		case stnode::varType::VOID:
+			return 0;
+		case stnode::varType::SINT:
+		case stnode::varType::UINT:
+			return intSize;
+		case stnode::varType::S8:
+		case stnode::varType::U8:
+			return 1;
+		case stnode::varType::S16:
+		case stnode::varType::U16:
+			return 2;
+		case stnode::varType::S32:
+		case stnode::varType::U32:
+			return 4;
+		case stnode::varType::S64:
+		case stnode::varType::U64:
+			return 8;
+		case stnode::varType::VOID_PTR:
+		case stnode::varType::SINT_PTR:
+		case stnode::varType::S8_PTR:
+		case stnode::varType::S16_PTR:
+		case stnode::varType::S32_PTR:
+		case stnode::varType::S64_PTR:
+		case stnode::varType::UINT_PTR:
+		case stnode::varType::U8_PTR:
+		case stnode::varType::U16_PTR:
+		case stnode::varType::U32_PTR:
+		case stnode::varType::U64_PTR:
+		case stnode::varType::VOID_PTR_2:
+		case stnode::varType::SINT_PTR_2:
+		case stnode::varType::S8_PTR_2:
+		case stnode::varType::S16_PTR_2:
+		case stnode::varType::S32_PTR_2:
+		case stnode::varType::S64_PTR_2:
+		case stnode::varType::UINT_PTR_2:
+		case stnode::varType::U8_PTR_2:
+		case stnode::varType::U16_PTR_2:
+		case stnode::varType::U32_PTR_2:
+		case stnode::varType::U64_PTR_2:
+			return intSize;
+	}
+	return -1;
 }
 
 struct idItem
@@ -136,46 +186,11 @@ errInfo stAnalyzer_build(stnode::stnode **node)
 		case stnode::type::OP:
 		{
 			stnode::op::op *opNode = dynamic_cast<stnode::op::op*>(*node);
-			switch (opNode->getOpType())
+			for (int i = 0; i < opNode->argCount; i++)
 			{
-				case stnode::op::opType::TRIPLE:
-				{
-					stnode::op::opTriple *opNodeT = dynamic_cast<stnode::op::opTriple*>(opNode);
-					errInfo err = noErr;
-					err = stAnalyzer_build(&opNodeT->arg3);
-					if (err.err != NULL)
-						return err;
-					err = stAnalyzer_build(&opNodeT->arg2);
-					if (err.err != NULL)
-						return err;
-					err = stAnalyzer_build(&opNodeT->arg1);
-					if (err.err != NULL)
-						return err;
-					break;
-				}
-				case stnode::op::opType::DOUBLE:
-				{
-					stnode::op::opDouble *opNodeD = dynamic_cast<stnode::op::opDouble*>(opNode);
-					errInfo err = noErr;
-					err = stAnalyzer_build(&opNodeD->arg2);
-					if (err.err != NULL)
-						return err;
-					err = stAnalyzer_build(&opNodeD->arg1);
-					if (err.err != NULL)
-						return err;
-					break;
-				}
-				case stnode::op::opType::SINGLE:
-				{
-					stnode::op::opSingle *opNodeS = dynamic_cast<stnode::op::opSingle*>(opNode);
-					errInfo err = noErr;
-					err = stAnalyzer_build(&opNodeS->arg1);
-					if (err.err != NULL)
-						return err;
-					break;
-				}
-				default:
-					return errInfo(opNode->lineN, opNode->pos, "Invalid Operator");
+				errInfo err = stAnalyzer_build(&opNode->arg[i]);
+				if (err.err != NULL)
+					return err;
 			}
 			break;
 		}
@@ -320,15 +335,10 @@ errInfo stAnalyzer_build(stnode::stnode **node)
 	return noErr;
 }
 
-errInfo stAnalyzer_type(stnode::stnode **node)
+errInfo stAnalyzer_type(stnode::stnode **node, stnode::varType retType)
 {
 	switch ((*node)->getType())
 	{
-		case stnode::type::ID_INTER:
-		{
-			
-			break;
-		}
 		case stnode::type::OP:
 		{
 			stnode::op::op *opNode = dynamic_cast<stnode::op::op*>(*node);
@@ -356,7 +366,7 @@ errInfo stAnalyzer_type(stnode::stnode **node)
 		{
 			stnode::ifelse *ifNode = dynamic_cast<stnode::ifelse*>(*node);
 
-			errInfo err = stAnalyzer_type(&(ifNode->exp));
+			errInfo err = stAnalyzer_type(&(ifNode->exp), retType);
 			if (err.err != NULL)
 				return err;
 
@@ -367,7 +377,7 @@ errInfo stAnalyzer_type(stnode::stnode **node)
 			for (p = ifNode->blockTrue->begin(); p != pEnd; p++)
 			{
 				ptr = *p;
-				err = stAnalyzer_type(&ptr);
+				err = stAnalyzer_type(&ptr, retType);
 				*p = ptr;
 			}
 
@@ -377,7 +387,7 @@ errInfo stAnalyzer_type(stnode::stnode **node)
 				for (p = ifNode->blockFalse->begin(); p != pEnd; p++)
 				{
 					ptr = *p;
-					err = stAnalyzer_type(&ptr);
+					err = stAnalyzer_type(&ptr, retType);
 					*p = ptr;
 				}
 			}
@@ -392,10 +402,10 @@ errInfo stAnalyzer_type(stnode::stnode **node)
 		case stnode::type::TREE:
 		{
 			stnode::expTree *treeNode = dynamic_cast<stnode::expTree*>(*node);
-			errInfo err = stAnalyzer_type(&(treeNode->exp));
+			errInfo err = stAnalyzer_type(&(treeNode->exp), retType);
 			if (err.err != NULL)
 				return err;
-			err = stAnalyzer_type(&(treeNode->son));
+			err = stAnalyzer_type(&(treeNode->son), retType);
 			if (err.err != NULL)
 				return err;
 			break;

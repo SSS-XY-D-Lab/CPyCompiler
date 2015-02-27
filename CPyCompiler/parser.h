@@ -90,42 +90,18 @@ namespace stnode
 			COLONEXP
 		};
 
-		enum opType{
-			_ERROR, SINGLE, DOUBLE, TRIPLE
-		};
-
 		class op :public stnode
 		{
 		public:
-			op(){ opVal = ops::ERROR; };
-			op(ops _opVal){ opVal = _opVal; };
+			op(ops _opVal){ opVal = _opVal; argCount = 0; };
+			op(ops _opVal, stnode *_arg1){ opVal = _opVal; arg[0] = _arg1; argCount = 1; };
+			op(ops _opVal, stnode *_arg1, stnode *_arg2){ opVal = _opVal; arg[0] = _arg1; arg[1] = _arg2; argCount = 2; };
+			op(ops _opVal, stnode *_arg1, stnode *_arg2, stnode *_arg3){ opVal = _opVal; arg[0] = _arg1; arg[1] = _arg2; arg[2] = _arg3; argCount = 3; };
 			ops opVal;
+			int argCount;
+			stnode *arg[3];
 			type getType(){ return type::OP; };
-			virtual opType getOpType(){ return opType::_ERROR; };
-		};
-
-		class opSingle :public op
-		{
-		public:
-			opSingle(ops _opVal, stnode *_arg1 = NULL){ opVal = _opVal; arg1 = _arg1; };
-			stnode *arg1;
-			opType getOpType(){ return opType::SINGLE; };
-		};
-
-		class opDouble :public op
-		{
-		public:
-			opDouble(ops _opVal, stnode *_arg1 = NULL, stnode *_arg2 = NULL){ opVal = _opVal; arg1 = _arg1; arg2 = _arg2; };
-			stnode *arg1, *arg2;
-			opType getOpType(){ return opType::DOUBLE; };
-		};
-
-		class opTriple :public op
-		{
-		public:
-			opTriple(ops _opVal, stnode *_arg1 = NULL, stnode *_arg2 = NULL, stnode *_arg3 = NULL){ opVal = _opVal; arg1 = _arg1; arg2 = _arg2; arg3 = _arg3; };
-			stnode *arg1, *arg2, *arg3;
-			opType getOpType(){ return opType::TRIPLE; };
+		private:
 		};
 
 		std::string op2Str(ops op);
@@ -167,8 +143,8 @@ namespace stnode
 
 	struct allocUnit
 	{
-		allocUnit(id* _var, int _subCount){ var = _var; subCount = _subCount; init = false; };
-		allocUnit(id* _var, stnode **_val, int _subCount){ var = _var; init = true; val = _val; subCount = _subCount; };
+		allocUnit(id* _var, long long _subCount){ var = _var; subCount = _subCount; init = false; };
+		allocUnit(id* _var, stnode **_val, long long _subCount){ var = _var; init = true; val = _val; subCount = _subCount; };
 		id *var;
 		long long subCount;
 		bool init;

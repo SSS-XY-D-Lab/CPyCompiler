@@ -1398,7 +1398,7 @@ yyreduce:
 
 		case 30:
 #line 44 "cpyexp.y" /* yacc.c:1646  */
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::ARRAY_SUB, (yyvsp[-3]), (yyvsp[-1])); (yyval)->pos = (yyvsp[-2])->pos; (yyval)->lineN = (yyvsp[-2])->lineN; delete (yyvsp[-2]); delete (yyvsp[0]); }
+		{ (yyval) = new stnode::op::op(stnode::op::ops::ARRAY_SUB, (yyvsp[-3]), (yyvsp[-1])); (yyval)->pos = (yyvsp[-2])->pos; (yyval)->lineN = (yyvsp[-2])->lineN; delete (yyvsp[-2]); delete (yyvsp[0]); }
 #line 1403 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
@@ -1416,255 +1416,255 @@ yyreduce:
 
 		case 33:
 #line 47 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
 #line 1421 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 34:
 #line 48 "cpyexp.y" /* yacc.c:1646  */
-		{ (yyval) = new stnode::op::opSingle(stnode::op::ops::INC_POST, (yyvsp[-1])); (yyval)->pos = (yyvsp[0])->pos; (yyval)->lineN = (yyvsp[0])->lineN; delete (yyvsp[0]); }
+		{ (yyval) = new stnode::op::op(stnode::op::ops::INC_POST, (yyvsp[-1])); (yyval)->pos = (yyvsp[0])->pos; (yyval)->lineN = (yyvsp[0])->lineN; delete (yyvsp[0]); }
 #line 1427 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 35:
 #line 49 "cpyexp.y" /* yacc.c:1646  */
-		{ (yyval) = new stnode::op::opSingle(stnode::op::ops::DEC_POST, (yyvsp[-1])); (yyval)->pos = (yyvsp[0])->pos; (yyval)->lineN = (yyvsp[0])->lineN; delete (yyvsp[0]); }
+		{ (yyval) = new stnode::op::op(stnode::op::ops::DEC_POST, (yyvsp[-1])); (yyval)->pos = (yyvsp[0])->pos; (yyval)->lineN = (yyvsp[0])->lineN; delete (yyvsp[0]); }
 #line 1433 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 37:
 #line 52 "cpyexp.y" /* yacc.c:1646  */
-		{ (yyval) = new stnode::op::opSingle(stnode::op::ops::INC_PRE, (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; delete (yyvsp[-1]); }
+		{ (yyval) = new stnode::op::op(stnode::op::ops::INC_PRE, (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; delete (yyvsp[-1]); }
 #line 1439 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 38:
 #line 53 "cpyexp.y" /* yacc.c:1646  */
-		{ (yyval) = new stnode::op::opSingle(stnode::op::ops::DEC_PRE, (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; delete (yyvsp[-1]); }
+		{ (yyval) = new stnode::op::op(stnode::op::ops::DEC_PRE, (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; delete (yyvsp[-1]); }
 #line 1445 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 39:
 #line 54 "cpyexp.y" /* yacc.c:1646  */
-		{ (yyval) = new stnode::op::opSingle(stnode::op::ops::REF, (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; delete (yyvsp[-1]); }
+		{ (yyval) = new stnode::op::op(stnode::op::ops::REF, (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; delete (yyvsp[-1]); }
 #line 1451 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 40:
 #line 55 "cpyexp.y" /* yacc.c:1646  */
-		{ (yyval) = new stnode::op::opSingle(stnode::op::ops::DEREF, (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; delete (yyvsp[-1]); }
+		{ (yyval) = new stnode::op::op(stnode::op::ops::DEREF, (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; delete (yyvsp[-1]); }
 #line 1457 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 41:
 #line 56 "cpyexp.y" /* yacc.c:1646  */
 		{ if ((yyvsp[0])->getType() == stnode::type::NUMBER) { (yyval) = (yyvsp[0]); }
-		else { (yyval) = new stnode::op::opSingle(stnode::op::ops::POSI, (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; } delete (yyvsp[-1]); }
+		else { (yyval) = new stnode::op::op(stnode::op::ops::POSI, (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; } delete (yyvsp[-1]); }
 #line 1463 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 42:
 #line 57 "cpyexp.y" /* yacc.c:1646  */
 		{ if ((yyvsp[0])->getType() == stnode::type::NUMBER) { (yyval) = new stnode::number(-dynamic_cast<stnode::number*>((yyvsp[0]))->val); }
-		else { (yyval) = new stnode::op::opSingle(stnode::op::ops::NEGA, (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; } delete (yyvsp[-1]); }
+		else { (yyval) = new stnode::op::op(stnode::op::ops::NEGA, (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; } delete (yyvsp[-1]); }
 #line 1469 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 43:
 #line 58 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opSingle *op = dynamic_cast<stnode::op::opSingle*>((yyvsp[-1])); op->arg1 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[0]); (yyval) = op; }
 #line 1475 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 44:
 #line 59 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opSingle *op = dynamic_cast<stnode::op::opSingle*>((yyvsp[-1])); op->arg1 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[0]); (yyval) = op; }
 #line 1481 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 46:
 #line 62 "cpyexp.y" /* yacc.c:1646  */
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::CAST, (yyvsp[-2]), (yyvsp[0])); (yyval)->pos = (yyvsp[-2])->pos; (yyval)->lineN = (yyvsp[-2])->lineN;  delete (yyvsp[-3]); delete (yyvsp[-1]); }
+		{ (yyval) = new stnode::op::op(stnode::op::ops::CAST, (yyvsp[-2]), (yyvsp[0])); (yyval)->pos = (yyvsp[-2])->pos; (yyval)->lineN = (yyvsp[-2])->lineN;  delete (yyvsp[-3]); delete (yyvsp[-1]); }
 #line 1487 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 48:
 #line 65 "cpyexp.y" /* yacc.c:1646  */
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::MUL, (yyvsp[-2]), (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; delete (yyvsp[-1]); }
+		{ (yyval) = new stnode::op::op(stnode::op::ops::MUL, (yyvsp[-2]), (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; delete (yyvsp[-1]); }
 #line 1493 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 49:
 #line 66 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
 #line 1499 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 50:
 #line 67 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
 #line 1505 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 52:
 #line 70 "cpyexp.y" /* yacc.c:1646  */
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::ADD, (yyvsp[-2]), (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; delete (yyvsp[-1]); }
+		{ (yyval) = new stnode::op::op(stnode::op::ops::ADD, (yyvsp[-2]), (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; delete (yyvsp[-1]); }
 #line 1511 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 53:
 #line 71 "cpyexp.y" /* yacc.c:1646  */
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::SUB, (yyvsp[-2]), (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; delete (yyvsp[-1]); }
+		{ (yyval) = new stnode::op::op(stnode::op::ops::SUB, (yyvsp[-2]), (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; delete (yyvsp[-1]); }
 #line 1517 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 55:
 #line 74 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
 #line 1523 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 56:
 #line 75 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
 #line 1529 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 58:
 #line 78 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
 #line 1535 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 59:
 #line 79 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
 #line 1541 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 60:
 #line 80 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
 #line 1547 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 61:
 #line 81 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
 #line 1553 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 63:
 #line 84 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
 #line 1559 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 64:
 #line 85 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
 #line 1565 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 66:
 #line 88 "cpyexp.y" /* yacc.c:1646  */
-		{ (yyval) = new stnode::op::opDouble(stnode::op::ops::AND, (yyvsp[-2]), (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; delete (yyvsp[-1]); }
+		{ (yyval) = new stnode::op::op(stnode::op::ops::AND, (yyvsp[-2]), (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; delete (yyvsp[-1]); }
 #line 1571 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 68:
 #line 91 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
 #line 1577 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 70:
 #line 94 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
 #line 1583 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 72:
 #line 97 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
 #line 1589 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 74:
 #line 100 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
 #line 1595 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 76:
 #line 103 "cpyexp.y" /* yacc.c:1646  */
-		{ (yyval) = new stnode::op::opTriple(stnode::op::ops::COLONEXP, (yyvsp[-4]), (yyvsp[-2]), (yyvsp[0])); (yyval)->pos = (yyvsp[-2])->pos; delete (yyvsp[-3]); delete (yyvsp[-1]); }
+		{ (yyval) = new stnode::op::op(stnode::op::ops::COLONEXP, (yyvsp[-4]), (yyvsp[-2]), (yyvsp[0])); (yyval)->pos = (yyvsp[-2])->pos; delete (yyvsp[-3]); delete (yyvsp[-1]); }
 #line 1601 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 78:
 #line 106 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
 #line 1607 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 79:
 #line 107 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
 #line 1613 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 80:
 #line 108 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
 #line 1619 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 81:
 #line 109 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
 #line 1625 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 82:
 #line 110 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
 #line 1631 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 83:
 #line 111 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
 #line 1637 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 84:
 #line 112 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
 #line 1643 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 85:
 #line 113 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
 #line 1649 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 86:
 #line 114 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
 #line 1655 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 87:
 #line 115 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
 #line 1661 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 88:
 #line 116 "cpyexp.y" /* yacc.c:1646  */
-		{ stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>((yyvsp[-1])); op->arg1 = (yyvsp[-2]); op->arg2 = (yyvsp[0]); (yyval) = op; }
+		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
 #line 1667 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
@@ -2126,9 +2126,8 @@ int yylex()
 			{
 				case stnode::op::ops::NOT:
 				case stnode::op::ops::LGNOT:
-					opPtr = new stnode::op::opSingle(newOP);
+					opPtr = new stnode::op::op(newOP, NULL);
 					break;
-				case stnode::op::ops::ARRAY_SUB:
 				case stnode::op::ops::MEMBER:
 				case stnode::op::ops::DIV:
 				case stnode::op::ops::MOD:
@@ -2155,10 +2154,10 @@ int yylex()
 				case stnode::op::ops::ANDASS:
 				case stnode::op::ops::XORASS:
 				case stnode::op::ops::BORASS:
-					opPtr = new stnode::op::opDouble(newOP);
+					opPtr = new stnode::op::op(newOP, NULL, NULL);
 					break;
 				default:
-					opPtr = new stnode::op::op();
+					opPtr = new stnode::op::op(newOP, NULL);
 			}
 			yylval = opPtr;
 			break;
