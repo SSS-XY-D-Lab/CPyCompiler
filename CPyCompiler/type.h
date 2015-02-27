@@ -1,3 +1,8 @@
+#pragma once
+
+#ifndef _H_TYPE
+#define _H_TYPE
+
 namespace dataType
 {
 	enum type{ 
@@ -12,3 +17,5 @@ dataType::type toPtr(dataType::type type);
 int typeSize(dataType::type type);
 bool isUnsigned(dataType::type type);
 dataType::type higher(dataType::type a, dataType::type b);
+
+#endif
