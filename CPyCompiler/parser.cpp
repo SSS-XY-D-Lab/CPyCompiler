@@ -184,7 +184,7 @@ errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterato
 			return errInfo(lineNumber, errPtr, "Invalid type");
 		stnode::id *newVar = NULL;
 		token::id *varName = NULL;
-		long long subCount = 1;
+		size_t subCount = 0;
 		for (; p != pEnd;)
 		{
 			//name
@@ -200,7 +200,7 @@ errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterato
 				nextToken(;);
 				if ((*p)->getType() != token::type::NUMBER)
 					return errInfo(lineNumber, errPtr, "Number expected");
-				subCount = dynamic_cast<token::number *>(*p)->val;
+				subCount = static_cast<size_t>(dynamic_cast<token::number *>(*p)->val);
 				nextToken(;);
 				if ((*p)->getType() != token::type::OP || dynamic_cast<token::op *>(*p)->opType != token::ops::opType::SUB_RIGHT)
 					return errInfo(lineNumber, errPtr, "] excepted");
@@ -241,7 +241,7 @@ errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterato
 					}
 					nextToken(delete newVar;);
 					stnode::stnode **initVal = new stnode::stnode*[subCount];
-					long long i;
+					size_t i;
 					tokenList::iterator pBeg;
 					errInfo expError = noErr;
 					for (i = 0; p != pEnd && i < subCount; nextTokenD, i++)

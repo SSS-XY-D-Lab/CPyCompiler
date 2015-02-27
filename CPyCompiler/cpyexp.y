@@ -3,7 +3,7 @@
 #define YYSTYPE stnode::stnode*
 #include "parser.h"
 int yylex();
-void yyerror(char *);
+void yyerror(const char *);
 %}
 
 %token ID NUMBER CHARA STR DELIM VOID VOID_PTR SINT S8 S16 S32 S64 UINT U8 U16 U32 U64 SINT_PTR S8_PTR S16_PTR S32_PTR S64_PTR UINT_PTR U8_PTR U16_PTR U32_PTR U64_PTR COMMA SUB_LEFT SUB_RIGHT BRACKET_LEFT BRACKET_RIGHT MEMBER INC DEC NOT LGNOT DIV MUL MOD ADD SUB SHL SHR BIG BIGEQU LES LESEQU EQU NEQU AND XOR BOR LGAND LGOR ASSIGN MODASS DIVASS MULASS ADDASS SUBASS SHLASS SHRASS ANDASS XORASS BORASS QMARK COLON
@@ -445,7 +445,7 @@ int yylex()
 	return ret;
 }
 
-void yyerror(char *err)
+void yyerror(const char *err)
 {
 	yacc_err = err;
 }

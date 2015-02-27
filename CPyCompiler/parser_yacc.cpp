@@ -68,7 +68,7 @@ USER NAME SPACE" below.  */
 #define YYSTYPE stnode::stnode*
 #include "parser.h"
 int yylex();
-void yyerror(char *);
+void yyerror(const char *);
 
 #line 74 "parser_yacc.cpp" /* yacc.c:339  */
 
@@ -2235,7 +2235,7 @@ int yylex()
 	return ret;
 }
 
-void yyerror(char *err)
+void yyerror(const char *err)
 {
 	yacc_err = err;
 }

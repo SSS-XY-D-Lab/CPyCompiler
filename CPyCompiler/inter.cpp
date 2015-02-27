@@ -45,7 +45,7 @@ int newID(std::string name, dataType::type type, bool isConst = false)
 	idHashLayerTp *topLayer = idHashTable.back();
 	if (topLayer->count(name) > 0)
 		return ERR_NEWID_REDEFINE;
-	int id = idTable.size();
+	int id = static_cast<int>(idTable.size());
 	topLayer->emplace(name, id);
 	idTable.push_back(idItem(type, isConst));
 	return id;
@@ -58,7 +58,7 @@ int newFuncID(std::string name, dataType::type retType)
 	idHashLayerTp *topLayer = idHashTable.back();
 	if (topLayer->count(name) > 0)
 		return ERR_NEWID_REDEFINE;
-	int id = idTable.size();
+	int id = static_cast<int>(idTable.size());
 	topLayer->emplace(name, id);
 	idTable.push_back(idItem(dataType::VOID_PTR, retType));
 	return id;
@@ -240,7 +240,13 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType::type retType)
 		case stnode::type::OP:
 		{
 			stnode::op::op *opNode = dynamic_cast<stnode::op::op*>(*node);
-			
+			dataType::type type = dataType::VOID;
+			stnode::stnode *ptr;
+			for (int i = 0; i < opNode->argCount; i++)
+			{
+				ptr = opNode->arg[i];
+				
+			}
 			break;
 		}
 		case stnode::type::FUNC_INTER:

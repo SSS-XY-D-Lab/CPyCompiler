@@ -99,6 +99,7 @@ namespace stnode
 			ops opVal;
 			int argCount;
 			stnode *arg[3];
+			dataType::type resType;
 			type getType(){ return type::OP; };
 		};
 
@@ -141,10 +142,10 @@ namespace stnode
 
 	struct allocUnit
 	{
-		allocUnit(id* _var, long long _subCount){ var = _var; subCount = _subCount; init = false; };
-		allocUnit(id* _var, stnode **_val, long long _subCount){ var = _var; init = true; val = _val; subCount = _subCount; };
+		allocUnit(id* _var, size_t _subCount){ var = _var; subCount = _subCount; init = false; };
+		allocUnit(id* _var, stnode **_val, size_t _subCount){ var = _var; init = true; val = _val; subCount = _subCount; };
 		id *var;
-		long long subCount;
+		size_t subCount;
 		bool init;
 		stnode **val;
 	};

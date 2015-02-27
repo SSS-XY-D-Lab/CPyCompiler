@@ -29,10 +29,10 @@ namespace stnode
 
 	struct allocUnit_inter
 	{
-		allocUnit_inter(int _var, long long _subCount){ varID = _var; subCount = _subCount; init = false; };
-		allocUnit_inter(int _var, long long _subCount, stnode **_val){ varID = _var; subCount = _subCount; init = true; val = _val; };
+		allocUnit_inter(int _var, size_t _subCount){ varID = _var; subCount = _subCount; init = false; };
+		allocUnit_inter(int _var, size_t _subCount, stnode **_val){ varID = _var; subCount = _subCount; init = true; val = _val; };
 		int varID;
-		long long subCount;
+		size_t subCount;
 		bool init;
 		stnode **val;
 	};
@@ -82,6 +82,8 @@ namespace iCode
 }
 typedef std::list<iCode::code> iCodeSeq;
 
+errInfo stAnalyzer_build(stnode::stnode **node);
+errInfo stAnalyzer_type(stnode::stnode **node, dataType::type retType);
 errInfo inter(stTree sTree, iCodeSeq &ret);
 
 #endif

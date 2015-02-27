@@ -1,7 +1,9 @@
 #include "stdafx.h"
 #include "type.h"
+#include <cmath>
 
 const int intSize = 2;
+const int uintLvl = static_cast<int>(log(intSize) / log(2)) * 4;
 
 dataType::type toPtr(dataType::type type)
 {
@@ -146,15 +148,54 @@ bool isUnsigned(dataType::type type)
 	return false;
 }
 
-dataType::type higher(dataType::type a, dataType::type b)
+int typeLvl(dataType::type type)
 {
-	if (typeSize(a) == typeSize(b))
+	switch(type)
 	{
-		if (isUnsigned(a))
-			return a;
-		else
-			return b;
+		case dataType::VOID:
+			return 0;
+		case dataType::S8:
+			return 1;
+		case dataType::U8:
+			return 2;
+		case dataType::S16:
+			return 3;
+		case dataType::U16:
+			return 4;
+		case dataType::S32:
+			return 5;
+		case dataType::U32:
+			return 6;
+		case dataType::S64:
+			return 7;
+		case dataType::U64:
+			return 8;
+		case dataType::SINT:
+			return uintLvl - 1;
+		case dataType::UINT:
+		case dataType::VOID_PTR:
+		case dataType::SINT_PTR:
+		case dataType::S8_PTR:
+		case dataType::S16_PTR:
+		case dataType::S32_PTR:
+		case dataType::S64_PTR:
+		case dataType::UINT_PTR:
+		case dataType::U8_PTR:
+		case dataType::U16_PTR:
+		case dataType::U32_PTR:
+		case dataType::U64_PTR:
+		case dataType::VOID_PTR_2:
+		case dataType::SINT_PTR_2:
+		case dataType::S8_PTR_2:
+		case dataType::S16_PTR_2:
+		case dataType::S32_PTR_2:
+		case dataType::S64_PTR_2:
+		case dataType::UINT_PTR_2:
+		case dataType::U8_PTR_2:
+		case dataType::U16_PTR_2:
+		case dataType::U32_PTR_2:
+		case dataType::U64_PTR_2:
+			return uintLvl;
 	}
-	else
-		return typeSize(a) > typeSize(b) ? a : b;
+	return false;
 }
