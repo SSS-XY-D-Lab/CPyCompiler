@@ -41,79 +41,79 @@ exp1 : ID
  | BRACKET_LEFT exp BRACKET_RIGHT { $$ = $2; }
 ;
 exp2 : exp1
- | exp2 SUB_LEFT exp SUB_RIGHT { $$ = new stnode::op::opDouble(stnode::op::ops::ARRAY_SUB, $1, $3); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; delete $4; }
+ | exp2 SUB_LEFT exp SUB_RIGHT { $$ = new stnode::op::op(stnode::op::ops::ARRAY_SUB, $1, $3); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; delete $4; }
  | exp2 BRACKET_LEFT BRACKET_RIGHT { $$ = new stnode::call($1); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; delete $3; }
  | exp2 BRACKET_LEFT exp BRACKET_RIGHT { $$ = new stnode::call($1, $3); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; delete $4; }
- | exp2 MEMBER ID { stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>($2); op->arg1 = $1; op->arg2 = $3; $$ = op; }
- | exp2 INC { $$ = new stnode::op::opSingle(stnode::op::ops::INC_POST, $1); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; }
- | exp2 DEC { $$ = new stnode::op::opSingle(stnode::op::ops::DEC_POST, $1); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; }
+ | exp2 MEMBER ID { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
+ | exp2 INC { $$ = new stnode::op::op(stnode::op::ops::INC_POST, $1); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; }
+ | exp2 DEC { $$ = new stnode::op::op(stnode::op::ops::DEC_POST, $1); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; }
 ;
 exp3 : exp2
- | INC exp3 { $$ = new stnode::op::opSingle(stnode::op::ops::INC_PRE, $2); $$->pos = $1->pos; $$->lineN = $1->lineN; delete $1; }
- | DEC exp3 { $$ = new stnode::op::opSingle(stnode::op::ops::DEC_PRE, $2); $$->pos = $1->pos; $$->lineN = $1->lineN; delete $1; }
- | AND exp4 { $$ = new stnode::op::opSingle(stnode::op::ops::REF, $2); $$->pos = $1->pos; $$->lineN = $1->lineN; delete $1; }
- | MUL exp4 { $$ = new stnode::op::opSingle(stnode::op::ops::DEREF, $2); $$->pos = $1->pos; $$->lineN = $1->lineN; delete $1; }
- | ADD exp4 { if ($2->getType() == stnode::type::NUMBER) { $$ = $2; } else { $$ = new stnode::op::opSingle(stnode::op::ops::POSI, $2); $$->pos = $1->pos; $$->lineN = $1->lineN; } delete $1; }
- | SUB exp4 { if ($2->getType() == stnode::type::NUMBER) { $$ = new stnode::number(-dynamic_cast<stnode::number*>($2)->val); } else { $$ = new stnode::op::opSingle(stnode::op::ops::NEGA, $2); $$->pos = $1->pos; $$->lineN = $1->lineN; } delete $1; }
- | NOT exp4 { stnode::op::opSingle *op = dynamic_cast<stnode::op::opSingle*>($1); op->arg1 = $2; $$ = op; }
- | LGNOT exp4 { stnode::op::opSingle *op = dynamic_cast<stnode::op::opSingle*>($1); op->arg1 = $2; $$ = op; }
+ | INC exp3 { $$ = new stnode::op::op(stnode::op::ops::INC_PRE, $2); $$->pos = $1->pos; $$->lineN = $1->lineN; delete $1; }
+ | DEC exp3 { $$ = new stnode::op::op(stnode::op::ops::DEC_PRE, $2); $$->pos = $1->pos; $$->lineN = $1->lineN; delete $1; }
+ | AND exp4 { $$ = new stnode::op::op(stnode::op::ops::REF, $2); $$->pos = $1->pos; $$->lineN = $1->lineN; delete $1; }
+ | MUL exp4 { $$ = new stnode::op::op(stnode::op::ops::DEREF, $2); $$->pos = $1->pos; $$->lineN = $1->lineN; delete $1; }
+ | ADD exp4 { if ($2->getType() == stnode::type::NUMBER) { $$ = $2; } else { $$ = new stnode::op::op(stnode::op::ops::POSI, $2); $$->pos = $1->pos; $$->lineN = $1->lineN; } delete $1; }
+ | SUB exp4 { if ($2->getType() == stnode::type::NUMBER) { $$ = new stnode::number(-dynamic_cast<stnode::number*>($2)->val); } else { $$ = new stnode::op::op(stnode::op::ops::NEGA, $2); $$->pos = $1->pos; $$->lineN = $1->lineN; } delete $1; }
+ | NOT exp4 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($1); op->arg[0] = $2; $$ = op; }
+ | LGNOT exp4 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($1); op->arg[0] = $2; $$ = op; }
 ;
 exp4 : exp3
- | BRACKET_LEFT vtype BRACKET_RIGHT exp4 { $$ = new stnode::op::opDouble(stnode::op::ops::CAST, $2, $4); $$->pos = $2->pos; $$->lineN = $2->lineN;  delete $1; delete $3; }
+ | BRACKET_LEFT vtype BRACKET_RIGHT exp4 { $$ = new stnode::op::op(stnode::op::ops::CAST, $2, $4); $$->pos = $2->pos; $$->lineN = $2->lineN;  delete $1; delete $3; }
 ;
 exp5 : exp4
- | exp5 MUL exp4 { $$ = new stnode::op::opDouble(stnode::op::ops::MUL, $1, $3); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; }
- | exp5 DIV exp4 { stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>($2); op->arg1 = $1; op->arg2 = $3; $$ = op; }
- | exp5 MOD exp4 { stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>($2); op->arg1 = $1; op->arg2 = $3; $$ = op; }
+ | exp5 MUL exp4 { $$ = new stnode::op::op(stnode::op::ops::MUL, $1, $3); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; }
+ | exp5 DIV exp4 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
+ | exp5 MOD exp4 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
 ;
 exp6 : exp5
- | exp6 ADD exp5 { $$ = new stnode::op::opDouble(stnode::op::ops::ADD, $1, $3); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; }
- | exp6 SUB exp5 { $$ = new stnode::op::opDouble(stnode::op::ops::SUB, $1, $3); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; }
+ | exp6 ADD exp5 { $$ = new stnode::op::op(stnode::op::ops::ADD, $1, $3); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; }
+ | exp6 SUB exp5 { $$ = new stnode::op::op(stnode::op::ops::SUB, $1, $3); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; }
 ;
 exp7 : exp6
- | exp7 SHL exp6 { stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>($2); op->arg1 = $1; op->arg2 = $3; $$ = op; }
- | exp7 SHR exp6 { stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>($2); op->arg1 = $1; op->arg2 = $3; $$ = op; }
+ | exp7 SHL exp6 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
+ | exp7 SHR exp6 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
 ;
 exp8 : exp7
- | exp8 BIG exp7 { stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>($2); op->arg1 = $1; op->arg2 = $3; $$ = op; }
- | exp8 BIGEQU exp7 { stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>($2); op->arg1 = $1; op->arg2 = $3; $$ = op; }
- | exp8 LES exp7 { stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>($2); op->arg1 = $1; op->arg2 = $3; $$ = op; }
- | exp8 LESEQU exp7 { stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>($2); op->arg1 = $1; op->arg2 = $3; $$ = op; }
+ | exp8 BIG exp7 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
+ | exp8 BIGEQU exp7 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
+ | exp8 LES exp7 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
+ | exp8 LESEQU exp7 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
 ;
 exp9 : exp8
- | exp9 EQU exp8 { stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>($2); op->arg1 = $1; op->arg2 = $3; $$ = op; }
- | exp9 NEQU exp8 { stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>($2); op->arg1 = $1; op->arg2 = $3; $$ = op; }
+ | exp9 EQU exp8 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
+ | exp9 NEQU exp8 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
 ;
 exp10 : exp9
- | exp10 AND exp9 { $$ = new stnode::op::opDouble(stnode::op::ops::AND, $1, $3); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; }
+ | exp10 AND exp9 { $$ = new stnode::op::op(stnode::op::ops::AND, $1, $3); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; }
 ;
 exp11 : exp10
- | exp11 XOR exp10 { stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>($2); op->arg1 = $1; op->arg2 = $3; $$ = op; }
+ | exp11 XOR exp10 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
 ;
 exp12 : exp11
- | exp12 BOR exp11 { stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>($2); op->arg1 = $1; op->arg2 = $3; $$ = op; }
+ | exp12 BOR exp11 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
 ;
 exp13 : exp12
- | exp13 LGAND exp12 { stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>($2); op->arg1 = $1; op->arg2 = $3; $$ = op; }
+ | exp13 LGAND exp12 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
 ;
 exp14 : exp13
- | exp14 LGOR exp13 { stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>($2); op->arg1 = $1; op->arg2 = $3; $$ = op; }
+ | exp14 LGOR exp13 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
 ;
 exp15 : exp14
- | exp14 QMARK exp COLON exp15 { $$ = new stnode::op::opTriple(stnode::op::ops::COLONEXP, $1, $3, $5); $$->pos = $3->pos; delete $2; delete $4; }
+ | exp14 QMARK exp COLON exp15 { $$ = new stnode::op::op(stnode::op::ops::COLONEXP, $1, $3, $5); $$->pos = $3->pos; delete $2; delete $4; }
 ;
 exp16 : exp15
- | exp3 ASSIGN exp16 { stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>($2); op->arg1 = $1; op->arg2 = $3; $$ = op; }
- | exp3 MODASS exp16 { stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>($2); op->arg1 = $1; op->arg2 = $3; $$ = op; }
- | exp3 DIVASS exp16 { stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>($2); op->arg1 = $1; op->arg2 = $3; $$ = op; }
- | exp3 MULASS exp16 { stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>($2); op->arg1 = $1; op->arg2 = $3; $$ = op; }
- | exp3 ADDASS exp16 { stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>($2); op->arg1 = $1; op->arg2 = $3; $$ = op; }
- | exp3 SUBASS exp16 { stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>($2); op->arg1 = $1; op->arg2 = $3; $$ = op; }
- | exp3 SHLASS exp16 { stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>($2); op->arg1 = $1; op->arg2 = $3; $$ = op; }
- | exp3 SHRASS exp16 { stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>($2); op->arg1 = $1; op->arg2 = $3; $$ = op; }
- | exp3 ANDASS exp16 { stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>($2); op->arg1 = $1; op->arg2 = $3; $$ = op; }
- | exp3 XORASS exp16 { stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>($2); op->arg1 = $1; op->arg2 = $3; $$ = op; }
- | exp3 BORASS exp16 { stnode::op::opDouble *op = dynamic_cast<stnode::op::opDouble*>($2); op->arg1 = $1; op->arg2 = $3; $$ = op; }
+ | exp3 ASSIGN exp16 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
+ | exp3 MODASS exp16 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
+ | exp3 DIVASS exp16 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
+ | exp3 MULASS exp16 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
+ | exp3 ADDASS exp16 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
+ | exp3 SUBASS exp16 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
+ | exp3 SHLASS exp16 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
+ | exp3 SHRASS exp16 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
+ | exp3 ANDASS exp16 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
+ | exp3 XORASS exp16 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
+ | exp3 BORASS exp16 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
 ;
 exp : exp16
  | exp COMMA exp16 { $$ = new stnode::expTree($1, $3); $$->pos = $3->pos; }
@@ -336,9 +336,8 @@ int yylex()
 			{
 				case stnode::op::ops::NOT:
 				case stnode::op::ops::LGNOT:
-					opPtr = new stnode::op::opSingle(newOP);
+					opPtr = new stnode::op::op(newOP, NULL);
 					break;
-				case stnode::op::ops::ARRAY_SUB:
 				case stnode::op::ops::MEMBER:
 				case stnode::op::ops::DIV:
 				case stnode::op::ops::MOD:
@@ -365,10 +364,10 @@ int yylex()
 				case stnode::op::ops::ANDASS:
 				case stnode::op::ops::XORASS:
 				case stnode::op::ops::BORASS:
-					opPtr = new stnode::op::opDouble(newOP);
+					opPtr = new stnode::op::op(newOP, NULL, NULL);
 					break;
 				default:
-					opPtr = new stnode::op::op();
+					opPtr = new stnode::op::op(newOP, NULL);
 			}
 			yylval = opPtr;
 			break;
@@ -382,52 +381,52 @@ int yylex()
 				yacc_p--;
 			else
 				isPtr = true;
-			stnode::varType varType;
+			dataType::type varType;
 			switch (tk->word)
 			{
 				case token::keywords::SINT:
-					if (isPtr){ varType = stnode::varType::SINT_PTR; ret = SINT_PTR; }
-					else{ varType = stnode::varType::SINT; ret = SINT; }
+					if (isPtr){ varType = dataType::SINT_PTR; ret = SINT_PTR; }
+					else{ varType = dataType::SINT; ret = SINT; }
 					break;
 				case token::keywords::S8:
-					if (isPtr){ varType = stnode::varType::S8_PTR; ret = S8_PTR; }
-					else{ varType = stnode::varType::S8; ret = S8; }
+					if (isPtr){ varType = dataType::S8_PTR; ret = S8_PTR; }
+					else{ varType = dataType::S8; ret = S8; }
 					break;
 				case token::keywords::S16:
-					if (isPtr){ varType = stnode::varType::S16_PTR; ret = S16_PTR; }
-					else{ varType = stnode::varType::S16; ret = S16; }
+					if (isPtr){ varType = dataType::S16_PTR; ret = S16_PTR; }
+					else{ varType = dataType::S16; ret = S16; }
 					break;
 				case token::keywords::S32:
-					if (isPtr){ varType = stnode::varType::S32_PTR; ret = S32_PTR; }
-					else{ varType = stnode::varType::S32; ret = S32; }
+					if (isPtr){ varType = dataType::S32_PTR; ret = S32_PTR; }
+					else{ varType = dataType::S32; ret = S32; }
 					break;
 				case token::keywords::S64:
-					if (isPtr){ varType = stnode::varType::S64_PTR; ret = S64_PTR; }
-					else{ varType = stnode::varType::S64; ret = S64; }
+					if (isPtr){ varType = dataType::S64_PTR; ret = S64_PTR; }
+					else{ varType = dataType::S64; ret = S64; }
 					break;
 				case token::keywords::UINT:
-					if (isPtr){ varType = stnode::varType::UINT_PTR; ret = UINT_PTR; }
-					else{ varType = stnode::varType::UINT; ret = UINT; }
+					if (isPtr){ varType = dataType::UINT_PTR; ret = UINT_PTR; }
+					else{ varType = dataType::UINT; ret = UINT; }
 					break;
 				case token::keywords::U8:
-					if (isPtr){ varType = stnode::varType::U8_PTR; ret = U8_PTR; }
-					else{ varType = stnode::varType::U8; ret = U8; }
+					if (isPtr){ varType = dataType::U8_PTR; ret = U8_PTR; }
+					else{ varType = dataType::U8; ret = U8; }
 					break;
 				case token::keywords::U16:
-					if (isPtr){ varType = stnode::varType::U16_PTR; ret = U16_PTR; }
-					else{ varType = stnode::varType::U16; ret = U16; }
+					if (isPtr){ varType = dataType::U16_PTR; ret = U16_PTR; }
+					else{ varType = dataType::U16; ret = U16; }
 					break;
 				case token::keywords::U32:
-					if (isPtr){ varType = stnode::varType::U32_PTR; ret = U32_PTR; }
-					else{ varType = stnode::varType::U32; ret = U32; }
+					if (isPtr){ varType = dataType::U32_PTR; ret = U32_PTR; }
+					else{ varType = dataType::U32; ret = U32; }
 					break;
 				case token::keywords::U64:
-					if (isPtr){ varType = stnode::varType::U64_PTR; ret = U64_PTR; }
-					else{ varType = stnode::varType::U64; ret = U64; }
+					if (isPtr){ varType = dataType::U64_PTR; ret = U64_PTR; }
+					else{ varType = dataType::U64; ret = U64; }
 					break;
 				case token::keywords::VOID:
-					if (isPtr){ varType = stnode::varType::VOID_PTR; ret = VOID_PTR; }
-					else{ varType = stnode::varType::VOID; ret = VOID; }
+					if (isPtr){ varType = dataType::VOID_PTR; ret = VOID_PTR; }
+					else{ varType = dataType::VOID; ret = VOID; }
 					break;
 				default:
 					yyerror("Illegal Token(Keyword)");

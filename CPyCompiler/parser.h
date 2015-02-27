@@ -4,6 +4,7 @@
 #define _H_ANALYZER
 
 #include "lexer.h"
+#include "type.h"
 
 struct errInfo
 {
@@ -29,13 +30,11 @@ typedef std::list<stnode::stnode*> stTree;
 
 namespace stnode
 {
-	enum varType{ _ERROR, VOID, SINT, S8, S16, S32, S64, UINT, U8, U16, U32, U64, VOID_PTR, SINT_PTR, S8_PTR, S16_PTR, S32_PTR, S64_PTR, UINT_PTR, U8_PTR, U16_PTR, U32_PTR, U64_PTR, VOID_PTR_2, SINT_PTR_2, S8_PTR_2, S16_PTR_2, S32_PTR_2, S64_PTR_2, UINT_PTR_2, U8_PTR_2, U16_PTR_2, U32_PTR_2, U64_PTR_2 };
-
 	class vartype :public stnode
 	{
 	public:
-		vartype(varType _vtype){ vtype = _vtype; };
-		varType vtype;
+		vartype(dataType::type _vtype){ vtype = _vtype; };
+		dataType::type vtype;
 		type getType(){ return type::TYPE; };
 	};
 
@@ -67,10 +66,9 @@ namespace stnode
 	class id :public stnode
 	{
 	public:
-		id(std::string _name, varType _type = varType::_ERROR, long long _subCount = 0){ name = _name; dtype = _type; subCount = _subCount; };
+		id(std::string _name, dataType::type _type = dataType::ERROR){ name = _name; dtype = _type; };
 		std::string name;
-		varType dtype;
-		long long subCount;
+		dataType::type dtype;
 		type getType() { return type::ID; };
 	};
 
@@ -91,42 +89,17 @@ namespace stnode
 			COLONEXP
 		};
 
-		enum opType{
-			_ERROR, SINGLE, DOUBLE, TRIPLE
-		};
-
 		class op :public stnode
 		{
 		public:
-			op(){ opVal = ops::ERROR; };
-			op(ops _opVal){ opVal = _opVal; };
+			op(ops _opVal){ opVal = _opVal; argCount = 0; };
+			op(ops _opVal, stnode *_arg1){ opVal = _opVal; arg[0] = _arg1; argCount = 1; };
+			op(ops _opVal, stnode *_arg1, stnode *_arg2){ opVal = _opVal; arg[0] = _arg1; arg[1] = _arg2; argCount = 2; };
+			op(ops _opVal, stnode *_arg1, stnode *_arg2, stnode *_arg3){ opVal = _opVal; arg[0] = _arg1; arg[1] = _arg2; arg[2] = _arg3; argCount = 3; };
 			ops opVal;
+			int argCount;
+			stnode *arg[3];
 			type getType(){ return type::OP; };
-			virtual opType getOpType(){ return opType::_ERROR; };
-		};
-
-		class opSingle :public op
-		{
-		public:
-			opSingle(ops _opVal, stnode *_arg1 = NULL){ opVal = _opVal; arg1 = _arg1; };
-			stnode *arg1;
-			opType getOpType(){ return opType::SINGLE; };
-		};
-
-		class opDouble :public op
-		{
-		public:
-			opDouble(ops _opVal, stnode *_arg1 = NULL, stnode *_arg2 = NULL){ opVal = _opVal; arg1 = _arg1; arg2 = _arg2; };
-			stnode *arg1, *arg2;
-			opType getOpType(){ return opType::DOUBLE; };
-		};
-
-		class opTriple :public op
-		{
-		public:
-			opTriple(ops _opVal, stnode *_arg1 = NULL, stnode *_arg2 = NULL, stnode *_arg3 = NULL){ opVal = _opVal; arg1 = _arg1; arg2 = _arg2; arg3 = _arg3; };
-			stnode *arg1, *arg2, *arg3;
-			opType getOpType(){ return opType::TRIPLE; };
 		};
 
 		std::string op2Str(ops op);
@@ -137,7 +110,7 @@ namespace stnode
 	public:
 		std::string name;
 		std::list<id *> args;
-		varType retType;
+		dataType::type retType;
 		stTree *block;
 		type getType(){ return type::FUNC; };
 	};
@@ -168,9 +141,10 @@ namespace stnode
 
 	struct allocUnit
 	{
-		allocUnit(id* _var){ var = _var; init = false; };
-		allocUnit(id* _var, stnode **_val){ var = _var; init = true; val = _val; };
+		allocUnit(id* _var, long long _subCount){ var = _var; subCount = _subCount; init = false; };
+		allocUnit(id* _var, stnode **_val, long long _subCount){ var = _var; init = true; val = _val; subCount = _subCount; };
 		id *var;
+		long long subCount;
 		bool init;
 		stnode **val;
 	};
