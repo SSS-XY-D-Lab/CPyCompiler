@@ -97,6 +97,8 @@ int main(int argc, char* argv[])
 			errInfo err = inter(ret2, ret3);
 		}
 	}
+#ifdef WIN32
 	system("pause");
+#endif
 	return 0;
 }
