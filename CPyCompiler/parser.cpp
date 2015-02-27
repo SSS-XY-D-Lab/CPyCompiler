@@ -85,11 +85,11 @@ namespace stnode
 		{
 			if (p->init)
 			{
-				if (p->var->subCount == 0)
+				if (p->subCount == 0)
 					delete *(p->val);
 				else
 				{
-					for (long long i = p->var->subCount - 1; i >= 0; i--)
+					for (long long i = p->subCount - 1; i >= 0; i--)
 						delete p->val[i];
 					delete[] p->val;
 				}
@@ -98,46 +98,46 @@ namespace stnode
 	}
 }
 
-stnode::varType getVarType(token::keywords::keywords kw, bool isPtr = false)
+dataType::type getVarType(token::keywords::keywords kw, bool isPtr = false)
 {
-	stnode::varType varType;
+	dataType::type varType;
 	switch (kw)
 	{
 		case token::keywords::SINT:
-			varType = (isPtr ? stnode::varType::SINT_PTR : stnode::varType::SINT);
+			varType = (isPtr ? dataType::SINT_PTR : dataType::SINT);
 			break;
 		case token::keywords::S8:
-			varType = (isPtr ? stnode::varType::S8_PTR : stnode::varType::S8);
+			varType = (isPtr ? dataType::S8_PTR : dataType::S8);
 			break;
 		case token::keywords::S16:
-			varType = (isPtr ? stnode::varType::S16_PTR : stnode::varType::S16);
+			varType = (isPtr ? dataType::S16_PTR : dataType::S16);
 			break;
 		case token::keywords::S32:
-			varType = (isPtr ? stnode::varType::S32_PTR : stnode::varType::S32);
+			varType = (isPtr ? dataType::S32_PTR : dataType::S32);
 			break;
 		case token::keywords::S64:
-			varType = (isPtr ? stnode::varType::S64_PTR : stnode::varType::S64);
+			varType = (isPtr ? dataType::S64_PTR : dataType::S64);
 			break;
 		case token::keywords::UINT:
-			varType = (isPtr ? stnode::varType::UINT_PTR : stnode::varType::UINT);
+			varType = (isPtr ? dataType::UINT_PTR : dataType::UINT);
 			break;
 		case token::keywords::U8:
-			varType = (isPtr ? stnode::varType::U8_PTR : stnode::varType::U8);
+			varType = (isPtr ? dataType::U8_PTR : dataType::U8);
 			break;
 		case token::keywords::U16:
-			varType = (isPtr ? stnode::varType::U16_PTR : stnode::varType::U16);
+			varType = (isPtr ? dataType::U16_PTR : dataType::U16);
 			break;
 		case token::keywords::U32:
-			varType = (isPtr ? stnode::varType::U32_PTR : stnode::varType::U32);
+			varType = (isPtr ? dataType::U32_PTR : dataType::U32);
 			break;
 		case token::keywords::U64:
-			varType = (isPtr ? stnode::varType::U64_PTR : stnode::varType::U64);
+			varType = (isPtr ? dataType::U64_PTR : dataType::U64);
 			break;
 		case token::keywords::VOID:
-			varType = (isPtr ? stnode::varType::VOID_PTR : stnode::varType::VOID);
+			varType = (isPtr ? dataType::VOID_PTR : dataType::VOID);
 			break;
 		default:
-			varType = stnode::varType::_ERROR;
+			varType = dataType::ERROR;
 	}
 	return varType;
 }
@@ -174,13 +174,13 @@ errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterato
 		token::keyword *type = dynamic_cast<token::keyword *>(*p);
 		nextToken(;);
 		bool isPtr = false;
-		if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::DEREF)
+		if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::MUL)
 		{
 			isPtr = true;
 			nextToken(;);
 		}
-		stnode::varType varType = getVarType(type->word, isPtr);
-		if (varType == stnode::varType::_ERROR || varType == stnode::varType::VOID)
+		dataType::type varType = getVarType(type->word, isPtr);
+		if (varType == dataType::ERROR || varType == dataType::VOID)
 			return errInfo(lineNumber, errPtr, "Invalid type");
 		stnode::id *newVar = NULL;
 		token::id *varName = NULL;
@@ -206,7 +206,7 @@ errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterato
 					return errInfo(lineNumber, errPtr, "] excepted");
 				nextToken(;);
 			}
-			newVar = new stnode::id(varName->str, varType, subCount);
+			newVar = new stnode::id(varName->str, varType);
 			newVar->pos = varPos;
 			newVar->lineN = lineNumber;
 			if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::ASSIGN)
@@ -229,7 +229,7 @@ errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterato
 					{
 						delete newVar; return expError;
 					}
-					allocPtr->var.push_back(stnode::allocUnit(newVar, initVal));
+					allocPtr->var.push_back(stnode::allocUnit(newVar, initVal, 0));
 				}
 				else
 				{
@@ -280,11 +280,11 @@ errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterato
 							}
 						}
 					}
-					allocPtr->var.push_back(stnode::allocUnit(newVar, initVal));
+					allocPtr->var.push_back(stnode::allocUnit(newVar, initVal, subCount));
 				}
 			}
 			else
-				allocPtr->var.push_back(stnode::allocUnit(newVar));
+				allocPtr->var.push_back(stnode::allocUnit(newVar, subCount));
 			if ((*p)->getType() == token::type::DELIM)
 				break;
 			else if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::COMMA)
@@ -376,13 +376,13 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 							token::keyword *type = dynamic_cast<token::keyword *>(*p);
 							nextToken(delete funcPtr;);
 							bool isPtr = false;
-							if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::DEREF)
+							if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::MUL)
 							{
 								isPtr = true;
 								nextToken(delete funcPtr;)
 							}
-							stnode::varType varType = getVarType(type->word, isPtr);
-							if (varType == stnode::varType::_ERROR)
+							dataType::type varType = getVarType(type->word, isPtr);
+							if (varType == dataType::ERROR)
 							{
 								delete funcPtr;
 								p--;
@@ -418,13 +418,13 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 									type = dynamic_cast<token::keyword *>(*p);
 									nextToken(delete funcPtr;);
 									bool isPtr = false;
-									if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::DEREF)
+									if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::MUL)
 									{
 										isPtr = true;
 										nextToken(delete funcPtr;)
 									}
 									varType = getVarType(type->word, isPtr);
-									if (varType == stnode::varType::_ERROR || varType == stnode::varType::VOID)
+									if (varType == dataType::ERROR || varType == dataType::VOID)
 									{
 										delete funcPtr;
 										return errInfo(lineNumber, errPtr - (isPtr ? 2 : 1), "Parameter type expected");

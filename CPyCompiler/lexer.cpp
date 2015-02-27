@@ -39,7 +39,7 @@ namespace token
 		{
 			case 0:
 				if (len == 0)
-					return INT_MIN;
+					return -1;
 				if (str.back() == 'h' || str.back() == 'H')
 				{
 					str.erase(len - 1, 1);
@@ -65,6 +65,8 @@ namespace token
 				{
 					if (str.length() == 3)
 						ret = (int)(str[1]);
+					else
+						return -1;
 				}
 				else
 				{
@@ -641,15 +643,9 @@ int scanner(std::string *str, tokenList *tList, int lineN)
 				}
 				else if (isdigit(*p))
 				{
-				number_process:
 					std::string::iterator pTmp = p;
 					std::string token;
 					int startPos = pos;
-					if ((*p) == '+' || (*p) == '-')
-					{
-						token.push_back(*p);
-						nextChar;
-					}
 					int ary = 10;
 					if (*p == '0')
 					{
@@ -745,7 +741,14 @@ int scanner(std::string *str, tokenList *tList, int lineN)
 						else
 							prevChar;
 					}
-					tList->push_back(new token::number(token));
+					try
+					{
+						tList->push_back(new token::number(token));
+					}
+					catch (std::string err)
+					{
+						return startPos;
+					}
 					tList->back()->pos = startPos;
 					prevChar;
 				}
