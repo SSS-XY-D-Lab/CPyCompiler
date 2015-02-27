@@ -2,6 +2,7 @@
 
 #ifndef _H_SCANNER
 #define _H_SCANNER
+
 #include <list>
 #include <string>
 #include <sstream>
@@ -64,7 +65,7 @@ namespace token
 			COMMA, SUB_LEFT, SUB_RIGHT, BRACKET_LEFT, BRACKET_RIGHT,
 			BRACE_LEFT, BRACE_RIGHT,
 			MEMBER,
-			POSI, NEGA, INC, DEC, REF, DEREF, NOT, LGNOT,
+			INC, DEC, NOT, LGNOT,
 			DIV, MUL, MOD,
 			ADD, SUB,
 			SHL, SHR,

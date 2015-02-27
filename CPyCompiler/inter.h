@@ -5,13 +5,53 @@
 
 #include "parser.h"
 #include <unordered_map>
-#include <unordered_set>
 #include <vector>
+
+namespace stnode
+{
+	class id_inter :public stnode
+	{
+	public:
+		int id;
+		id_inter(int _id){ id = _id; };
+		type getType() { return type::ID_INTER; };
+	};
+
+	class func_inter :public stnode
+	{
+	public:
+		int funcID;
+		std::list<int> args;
+		dataType::type retType;
+		stTree *block;
+		type getType() { return type::FUNC_INTER; };
+	};
+
+	struct allocUnit_inter
+	{
+		allocUnit_inter(int _var, long long _subCount){ varID = _var; subCount = _subCount; init = false; };
+		allocUnit_inter(int _var, long long _subCount, stnode **_val){ varID = _var; subCount = _subCount; init = true; val = _val; };
+		int varID;
+		long long subCount;
+		bool init;
+		stnode **val;
+	};
+
+	class alloc_inter :public stnode
+	{
+	public:
+		alloc_inter(bool _readOnly){ readOnly = _readOnly; };
+		~alloc_inter();
+		std::list<allocUnit_inter> var;
+		bool readOnly;
+		type getType(){ return type::ALLOC_INTER; };
+	};
+}
 
 namespace iCode
 {
 	enum argType{ ERROR, CONST, ID };
-	enum opType{};
+	enum opType{ ADD, SUB, MUL, DIV, MOD, SHL, SHR, R_ADD, I_ADD };
 
 	class arg
 	{
@@ -23,7 +63,7 @@ namespace iCode
 	{
 	public:
 		long long val;
-		stnode::varType type;
+		dataType::type type;
 		argType getType(){ return argType::CONST; };
 	};
 
@@ -42,6 +82,6 @@ namespace iCode
 }
 typedef std::list<iCode::code> iCodeSeq;
 
-int stanalyzer(stnode::stnode *node);
+errInfo inter(stTree sTree, iCodeSeq &ret);
 
 #endif

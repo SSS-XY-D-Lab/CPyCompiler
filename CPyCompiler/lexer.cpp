@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "lexer.h"
+#include <climits>
 
 #define nextChar p++, pos++
 #define prevChar p--, pos--
@@ -38,7 +39,7 @@ namespace token
 		{
 			case 0:
 				if (len == 0)
-					return INT_MIN;
+					return -1;
 				if (str.back() == 'h' || str.back() == 'H')
 				{
 					str.erase(len - 1, 1);
@@ -64,6 +65,8 @@ namespace token
 				{
 					if (str.length() == 3)
 						ret = (int)(str[1]);
+					else
+						return -1;
 				}
 				else
 				{
@@ -113,12 +116,8 @@ namespace token
 				opType::MEMBER, "MEMBER",
 				opType::BRACE_LEFT, "BRACE_LEFT",
 				opType::BRACE_RIGHT, "BRACE_RIGHT",
-				opType::POSI, "POSI",
-				opType::NEGA, "NEGA",
 				opType::INC, "INC",
 				opType::DEC, "DEC",
-				opType::REF, "REF",
-				opType::DEREF, "DEREF",
 				opType::NOT, "NOT",
 				opType::LGNOT, "LGNOT",
 				opType::DIV, "DIV",
@@ -150,7 +149,7 @@ namespace token
 				opType::ANDASS, "ANDASS",
 				opType::XORASS, "XORASS",
 				opType::BORASS, "BORASS",
-				opType::COMMA, "COMMA", 
+				opType::COMMA, "COMMA",
 				opType::QMARK, "QUESTION MARK",
 				opType::COLON, "COLON",
 			};
@@ -314,33 +313,9 @@ int scanner(std::string *str, tokenList *tList, int lineN)
 					}
 					else
 					{
-						if (tList->empty())
-						{
-							tList->push_back(new token::op(token::ops::opType::POSI));
-							tList->back()->pos = pos;
-						}
-						else
-						{
-							switch (tList->back()->getType())
-							{
-								case token::type::ID:
-								case token::type::NUMBER:
-								case token::type::CHARA:
-								case token::type::STR:
-									tList->push_back(new token::op(token::ops::opType::ADD));
-									tList->back()->pos = pos;
-									break;
-								default:
-									if (isdigit(*p))
-									{
-										prevChar;
-										goto number_process;
-									}
-									tList->push_back(new token::op(token::ops::opType::POSI));
-									tList->back()->pos = pos;
-							}
-						}
 						prevChar;
+						tList->push_back(new token::op(token::ops::opType::ADD));
+						tList->back()->pos = pos;
 					}
 				}
 				else
@@ -366,33 +341,9 @@ int scanner(std::string *str, tokenList *tList, int lineN)
 					}
 					else
 					{
-						if (tList->empty())
-						{
-							tList->push_back(new token::op(token::ops::opType::NEGA));
-							tList->back()->pos = pos;
-						}
-						else
-						{
-							switch (tList->back()->getType())
-							{
-								case token::type::ID:
-								case token::type::NUMBER:
-								case token::type::CHARA:
-								case token::type::STR:
-									tList->push_back(new token::op(token::ops::opType::SUB));
-									tList->back()->pos = pos;
-									break;
-								default:
-									if (isdigit(*p))
-									{
-										prevChar;
-										goto number_process;
-									}
-									tList->push_back(new token::op(token::ops::opType::NEGA));
-									tList->back()->pos = pos;
-							}
-						}
 						prevChar;
+						tList->push_back(new token::op(token::ops::opType::SUB));
+						tList->back()->pos = pos;
 					}
 				}
 				else
@@ -412,45 +363,8 @@ int scanner(std::string *str, tokenList *tList, int lineN)
 				else
 				{
 					prevChar;
-					if (tList->empty())
-					{
-						tList->push_back(new token::op(token::ops::opType::DEREF));
-						tList->back()->pos = pos;
-					}
-					else
-					{
-						switch (tList->back()->getType())
-						{
-							case token::type::ID:
-							case token::type::NUMBER:
-							case token::type::CHARA:
-							case token::type::STR:
-								tList->push_back(new token::op(token::ops::opType::MUL));
-								tList->back()->pos = pos;
-								break;
-							case token::type::OP:
-							{
-								token::op* op = dynamic_cast<token::op*>(tList->back());
-								switch (op->opType)
-								{
-									case token::ops::opType::SUB_RIGHT:
-									case token::ops::opType::BRACKET_RIGHT:
-									case token::ops::opType::INC:
-									case token::ops::opType::DEC:
-										tList->push_back(new token::op(token::ops::opType::MUL));
-										tList->back()->pos = pos;
-										break;
-									default:
-										tList->push_back(new token::op(token::ops::opType::DEREF));
-										tList->back()->pos = pos;
-								}
-								break;
-							}
-							default:
-								tList->push_back(new token::op(token::ops::opType::DEREF));
-								tList->back()->pos = pos;
-						}
-					}
+					tList->push_back(new token::op(token::ops::opType::MUL));
+					tList->back()->pos = pos;
 				}
 				break;
 			case '/':
@@ -526,89 +440,15 @@ int scanner(std::string *str, tokenList *tList, int lineN)
 					else
 					{
 						prevChar;
-						if (tList->empty())
-						{
-							tList->push_back(new token::op(token::ops::opType::REF));
-							tList->back()->pos = pos;
-						}
-						else
-						{
-							switch (tList->back()->getType())
-							{
-								case token::type::ID:
-								case token::type::NUMBER:
-								case token::type::CHARA:
-								case token::type::STR:
-									tList->push_back(new token::op(token::ops::opType::AND));
-									tList->back()->pos = pos;
-									break;
-								case token::type::OP:
-								{
-									token::op* op = dynamic_cast<token::op*>(tList->back());
-									switch (op->opType)
-									{
-										case token::ops::opType::SUB_RIGHT:
-										case token::ops::opType::BRACKET_RIGHT:
-										case token::ops::opType::INC:
-										case token::ops::opType::DEC:
-											tList->push_back(new token::op(token::ops::opType::AND));
-											tList->back()->pos = pos;
-											break;
-										default:
-											tList->push_back(new token::op(token::ops::opType::REF));
-											tList->back()->pos = pos;
-									}
-									break;
-								}
-								default:
-									tList->push_back(new token::op(token::ops::opType::REF));
-									tList->back()->pos = pos;
-							}
-						}
+						tList->push_back(new token::op(token::ops::opType::AND));
+						tList->back()->pos = pos;
 					}
 				}
 				else
 				{
 					prevChar;
-					if (tList->empty())
-					{
-						tList->push_back(new token::op(token::ops::opType::REF));
-						tList->back()->pos = pos;
-					}
-					else
-					{
-						switch (tList->back()->getType())
-						{
-							case token::type::ID:
-							case token::type::NUMBER:
-							case token::type::CHARA:
-							case token::type::STR:
-								tList->push_back(new token::op(token::ops::opType::AND));
-								tList->back()->pos = pos;
-								break;
-							case token::type::OP:
-							{
-								token::op* op = dynamic_cast<token::op*>(tList->back());
-								switch (op->opType)
-								{
-									case token::ops::opType::SUB_RIGHT:
-									case token::ops::opType::BRACKET_RIGHT:
-									case token::ops::opType::INC:
-									case token::ops::opType::DEC:
-										tList->push_back(new token::op(token::ops::opType::AND));
-										tList->back()->pos = pos;
-										break;
-									default:
-										tList->push_back(new token::op(token::ops::opType::REF));
-										tList->back()->pos = pos;
-								}
-								break;
-							}
-							default:
-								tList->push_back(new token::op(token::ops::opType::REF));
-								tList->back()->pos = pos;
-						}
-					}
+					tList->push_back(new token::op(token::ops::opType::AND));
+					tList->back()->pos = pos;
 				}
 				break;
 			case '|':
@@ -675,7 +515,7 @@ int scanner(std::string *str, tokenList *tList, int lineN)
 							prevChar;
 							tList->push_back(new token::op(token::ops::opType::SHR));
 							tList->back()->pos = pos - 1;
-							
+
 						}
 					}
 					else
@@ -803,15 +643,9 @@ int scanner(std::string *str, tokenList *tList, int lineN)
 				}
 				else if (isdigit(*p))
 				{
-				number_process:
 					std::string::iterator pTmp = p;
 					std::string token;
 					int startPos = pos;
-					if ((*p) == '+' || (*p) == '-')
-					{
-						token.push_back(*p);
-						nextChar;
-					}
 					int ary = 10;
 					if (*p == '0')
 					{
@@ -907,7 +741,14 @@ int scanner(std::string *str, tokenList *tList, int lineN)
 						else
 							prevChar;
 					}
-					tList->push_back(new token::number(token));
+					try
+					{
+						tList->push_back(new token::number(token));
+					}
+					catch (std::string err)
+					{
+						return startPos;
+					}
 					tList->back()->pos = startPos;
 					prevChar;
 				}

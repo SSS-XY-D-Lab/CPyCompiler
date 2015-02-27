@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "lexer.h"
 #include "parser.h"
-#include <vector>
+#include "inter.h"
 using namespace std;
 
 vector<string> lines;
@@ -34,44 +34,44 @@ int main(int argc, char* argv[])
 	}
 	if (pos == -1)
 	{
-		tokenList::const_iterator p, pEnd = ret.cend();
-		for (p = ret.cbegin(); p != pEnd; p++)
+		tokenList::const_iterator pT, pTEnd = ret.cend();
+		for (pT = ret.cbegin(); pT != pTEnd; pT++)
 		{
-			switch ((*p)->getType())
+			switch ((*pT)->getType())
 			{
 				case token::type::ID:
 				{
-					token::id* tk = dynamic_cast<token::id*>(*p);
+					token::id* tk = dynamic_cast<token::id*>(*pT);
 					cout << "ID:" << tk->str << endl;
 					break;
 				}
 				case token::type::CHARA:
 				{
-					token::chara* tk = dynamic_cast<token::chara*>(*p);
+					token::chara* tk = dynamic_cast<token::chara*>(*pT);
 					cout << "CHAR:" << tk->ch << endl;
 					break;
 				}
 				case token::type::STR:
 				{
-					token::str* tk = dynamic_cast<token::str*>(*p);
+					token::str* tk = dynamic_cast<token::str*>(*pT);
 					cout << "STRING:" << tk->strr << endl;
 					break;
 				}
 				case token::type::OP:
 				{
-					token::op* tk = dynamic_cast<token::op*>(*p);
+					token::op* tk = dynamic_cast<token::op*>(*pT);
 					cout << "OPERATOR:" << token::ops::op2Str(tk->opType) << endl;
 					break;
 				}
 				case token::type::NUMBER:
 				{
-					token::number* tk = dynamic_cast<token::number*>(*p);
+					token::number* tk = dynamic_cast<token::number*>(*pT);
 					cout << "NUMBER:" << tk->val << endl;
 					break;
 				}
 				case token::type::KEYWORD:
 				{
-					token::keyword* tk = dynamic_cast<token::keyword*>(*p);
+					token::keyword* tk = dynamic_cast<token::keyword*>(*pT);
 					cout << "KEYWORD:" << token::keywords::kw2Str(tk->word) << endl;
 					break;
 				}
@@ -82,15 +82,23 @@ int main(int argc, char* argv[])
 				}
 			}
 		}
-		int pos2 = parser(ret, &ret2);
-		if (pos2 != -1)
+		errInfo err = parser(ret, &ret2);
+		if (err.err != NULL)
 		{
-			cout << lines[lineNumber - 1] << endl;
-			for (; pos2 > 1; pos2--)
+			cout << lines[err.lineN - 1] << endl;
+			for (; err.pos > 1; err.pos--)
 				cout << ' ';
 			cout << '^' << endl;
+			cout << err.err << endl;
+		}
+		else
+		{
+			iCodeSeq ret3;
+			errInfo err = inter(ret2, ret3);
 		}
 	}
+#ifdef WIN32
 	system("pause");
+#endif
 	return 0;
 }
