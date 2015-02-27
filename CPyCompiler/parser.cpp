@@ -174,7 +174,7 @@ errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterato
 		token::keyword *type = dynamic_cast<token::keyword *>(*p);
 		nextToken(;);
 		bool isPtr = false;
-		if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::DEREF)
+		if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == stnode::op::ops::DEREF)
 		{
 			isPtr = true;
 			nextToken(;);
@@ -376,7 +376,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 							token::keyword *type = dynamic_cast<token::keyword *>(*p);
 							nextToken(delete funcPtr;);
 							bool isPtr = false;
-							if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::DEREF)
+							if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == stnode::op::ops::DEREF)
 							{
 								isPtr = true;
 								nextToken(delete funcPtr;)
@@ -418,7 +418,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 									type = dynamic_cast<token::keyword *>(*p);
 									nextToken(delete funcPtr;);
 									bool isPtr = false;
-									if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::DEREF)
+									if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == stnode::op::ops::DEREF)
 									{
 										isPtr = true;
 										nextToken(delete funcPtr;)

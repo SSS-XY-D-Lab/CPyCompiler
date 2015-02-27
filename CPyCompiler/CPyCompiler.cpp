@@ -92,6 +92,8 @@ int main(int argc, char* argv[])
 			cout << err.err << endl;
 		}
 	}
+#ifdef WIN32
 	system("pause");
+#endif
 	return 0;
 }
