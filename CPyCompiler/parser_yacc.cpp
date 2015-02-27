@@ -2171,52 +2171,52 @@ int yylex()
 				yacc_p--;
 			else
 				isPtr = true;
-			stnode::varType varType;
+			dataType::type varType;
 			switch (tk->word)
 			{
 				case token::keywords::SINT:
-					if (isPtr){ varType = stnode::varType::SINT_PTR; ret = SINT_PTR; }
-					else{ varType = stnode::varType::SINT; ret = SINT; }
+					if (isPtr){ varType = dataType::SINT_PTR; ret = SINT_PTR; }
+					else{ varType = dataType::SINT; ret = SINT; }
 					break;
 				case token::keywords::S8:
-					if (isPtr){ varType = stnode::varType::S8_PTR; ret = S8_PTR; }
-					else{ varType = stnode::varType::S8; ret = S8; }
+					if (isPtr){ varType = dataType::S8_PTR; ret = S8_PTR; }
+					else{ varType = dataType::S8; ret = S8; }
 					break;
 				case token::keywords::S16:
-					if (isPtr){ varType = stnode::varType::S16_PTR; ret = S16_PTR; }
-					else{ varType = stnode::varType::S16; ret = S16; }
+					if (isPtr){ varType = dataType::S16_PTR; ret = S16_PTR; }
+					else{ varType = dataType::S16; ret = S16; }
 					break;
 				case token::keywords::S32:
-					if (isPtr){ varType = stnode::varType::S32_PTR; ret = S32_PTR; }
-					else{ varType = stnode::varType::S32; ret = S32; }
+					if (isPtr){ varType = dataType::S32_PTR; ret = S32_PTR; }
+					else{ varType = dataType::S32; ret = S32; }
 					break;
 				case token::keywords::S64:
-					if (isPtr){ varType = stnode::varType::S64_PTR; ret = S64_PTR; }
-					else{ varType = stnode::varType::S64; ret = S64; }
+					if (isPtr){ varType = dataType::S64_PTR; ret = S64_PTR; }
+					else{ varType = dataType::S64; ret = S64; }
 					break;
 				case token::keywords::UINT:
-					if (isPtr){ varType = stnode::varType::UINT_PTR; ret = UINT_PTR; }
-					else{ varType = stnode::varType::UINT; ret = UINT; }
+					if (isPtr){ varType = dataType::UINT_PTR; ret = UINT_PTR; }
+					else{ varType = dataType::UINT; ret = UINT; }
 					break;
 				case token::keywords::U8:
-					if (isPtr){ varType = stnode::varType::U8_PTR; ret = U8_PTR; }
-					else{ varType = stnode::varType::U8; ret = U8; }
+					if (isPtr){ varType = dataType::U8_PTR; ret = U8_PTR; }
+					else{ varType = dataType::U8; ret = U8; }
 					break;
 				case token::keywords::U16:
-					if (isPtr){ varType = stnode::varType::U16_PTR; ret = U16_PTR; }
-					else{ varType = stnode::varType::U16; ret = U16; }
+					if (isPtr){ varType = dataType::U16_PTR; ret = U16_PTR; }
+					else{ varType = dataType::U16; ret = U16; }
 					break;
 				case token::keywords::U32:
-					if (isPtr){ varType = stnode::varType::U32_PTR; ret = U32_PTR; }
-					else{ varType = stnode::varType::U32; ret = U32; }
+					if (isPtr){ varType = dataType::U32_PTR; ret = U32_PTR; }
+					else{ varType = dataType::U32; ret = U32; }
 					break;
 				case token::keywords::U64:
-					if (isPtr){ varType = stnode::varType::U64_PTR; ret = U64_PTR; }
-					else{ varType = stnode::varType::U64; ret = U64; }
+					if (isPtr){ varType = dataType::U64_PTR; ret = U64_PTR; }
+					else{ varType = dataType::U64; ret = U64; }
 					break;
 				case token::keywords::VOID:
-					if (isPtr){ varType = stnode::varType::VOID_PTR; ret = VOID_PTR; }
-					else{ varType = stnode::varType::VOID; ret = VOID; }
+					if (isPtr){ varType = dataType::VOID_PTR; ret = VOID_PTR; }
+					else{ varType = dataType::VOID; ret = VOID; }
 					break;
 				default:
 					yyerror("Illegal Token(Keyword)");

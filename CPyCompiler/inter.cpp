@@ -1,113 +1,11 @@
 #include "stdafx.h"
 #include "inter.h"
 
-const int intSize = 2;
-
-stnode::varType toPtr(stnode::varType type)
-{
-	switch (type)
-	{
-		case stnode::varType::VOID:
-			return stnode::varType::VOID_PTR;
-		case stnode::varType::SINT:
-			return stnode::varType::SINT_PTR;
-		case stnode::varType::S8:
-			return stnode::varType::S8_PTR;
-		case stnode::varType::S16:
-			return stnode::varType::S16_PTR;
-		case stnode::varType::S32:
-			return stnode::varType::S32_PTR;
-		case stnode::varType::S64:
-			return stnode::varType::S64_PTR;
-		case stnode::varType::UINT:
-			return stnode::varType::UINT_PTR;
-		case stnode::varType::U8:
-			return stnode::varType::U8_PTR;
-		case stnode::varType::U16:
-			return stnode::varType::U16_PTR;
-		case stnode::varType::U32:
-			return stnode::varType::U32_PTR;
-		case stnode::varType::U64:
-			return stnode::varType::U64_PTR;
-		case stnode::varType::VOID_PTR:
-			return stnode::varType::VOID_PTR_2;
-		case stnode::varType::SINT_PTR:
-			return stnode::varType::SINT_PTR_2;
-		case stnode::varType::S8_PTR:
-			return stnode::varType::S8_PTR_2;
-		case stnode::varType::S16_PTR:
-			return stnode::varType::S16_PTR_2;
-		case stnode::varType::S32_PTR:
-			return stnode::varType::S32_PTR_2;
-		case stnode::varType::S64_PTR:
-			return stnode::varType::S64_PTR_2;
-		case stnode::varType::UINT_PTR:
-			return stnode::varType::UINT_PTR_2;
-		case stnode::varType::U8_PTR:
-			return stnode::varType::U8_PTR_2;
-		case stnode::varType::U16_PTR:
-			return stnode::varType::U16_PTR_2;
-		case stnode::varType::U32_PTR:
-			return stnode::varType::U32_PTR_2;
-		case stnode::varType::U64_PTR:
-			return stnode::varType::U64_PTR_2;
-	}
-	return stnode::varType::_ERROR;
-}
-
-int typeSize(stnode::varType type)
-{
-	switch (type)
-	{
-		case stnode::varType::VOID:
-			return 0;
-		case stnode::varType::SINT:
-		case stnode::varType::UINT:
-			return intSize;
-		case stnode::varType::S8:
-		case stnode::varType::U8:
-			return 1;
-		case stnode::varType::S16:
-		case stnode::varType::U16:
-			return 2;
-		case stnode::varType::S32:
-		case stnode::varType::U32:
-			return 4;
-		case stnode::varType::S64:
-		case stnode::varType::U64:
-			return 8;
-		case stnode::varType::VOID_PTR:
-		case stnode::varType::SINT_PTR:
-		case stnode::varType::S8_PTR:
-		case stnode::varType::S16_PTR:
-		case stnode::varType::S32_PTR:
-		case stnode::varType::S64_PTR:
-		case stnode::varType::UINT_PTR:
-		case stnode::varType::U8_PTR:
-		case stnode::varType::U16_PTR:
-		case stnode::varType::U32_PTR:
-		case stnode::varType::U64_PTR:
-		case stnode::varType::VOID_PTR_2:
-		case stnode::varType::SINT_PTR_2:
-		case stnode::varType::S8_PTR_2:
-		case stnode::varType::S16_PTR_2:
-		case stnode::varType::S32_PTR_2:
-		case stnode::varType::S64_PTR_2:
-		case stnode::varType::UINT_PTR_2:
-		case stnode::varType::U8_PTR_2:
-		case stnode::varType::U16_PTR_2:
-		case stnode::varType::U32_PTR_2:
-		case stnode::varType::U64_PTR_2:
-			return intSize;
-	}
-	return -1;
-}
-
 struct idItem
 {
-	idItem(stnode::varType _type, bool _isConst){ type = _type; isFunc = false; isConst = _isConst; };
-	idItem(stnode::varType _type, stnode::varType _retType){ type = _type; isFunc = true; retType = _retType; isConst = true; };
-	stnode::varType type, retType;
+	idItem(dataType::type _type, bool _isConst){ type = _type; isFunc = false; isConst = _isConst; };
+	idItem(dataType::type _type, dataType::type _retType){ type = _type; isFunc = true; retType = _retType; isConst = true; };
+	dataType::type type, retType;
 	bool isConst, isFunc;
 };
 typedef std::vector<idItem> idTableTp;
@@ -140,7 +38,7 @@ const char* ERR_NEWID_MSG[3] = {
 	"Redefinition",
 };
 
-int newID(std::string name, stnode::varType type, bool isConst = false)
+int newID(std::string name, dataType::type type, bool isConst = false)
 {
 	if (idHashTable.empty())
 		return ERR_NEWID_NOLAYER;
@@ -153,7 +51,7 @@ int newID(std::string name, stnode::varType type, bool isConst = false)
 	return id;
 }
 
-int newFuncID(std::string name, stnode::varType retType)
+int newFuncID(std::string name, dataType::type retType)
 {
 	if (idHashTable.empty())
 		return ERR_NEWID_NOLAYER;
@@ -162,7 +60,7 @@ int newFuncID(std::string name, stnode::varType retType)
 		return ERR_NEWID_REDEFINE;
 	int id = idTable.size();
 	topLayer->emplace(name, id);
-	idTable.push_back(idItem(stnode::varType::VOID_PTR, retType));
+	idTable.push_back(idItem(dataType::VOID_PTR, retType));
 	return id;
 }
 
@@ -335,7 +233,7 @@ errInfo stAnalyzer_build(stnode::stnode **node)
 	return noErr;
 }
 
-errInfo stAnalyzer_type(stnode::stnode **node, stnode::varType retType)
+errInfo stAnalyzer_type(stnode::stnode **node, dataType::type retType)
 {
 	switch ((*node)->getType())
 	{

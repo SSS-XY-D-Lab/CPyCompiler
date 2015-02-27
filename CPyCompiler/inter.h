@@ -22,7 +22,7 @@ namespace stnode
 	public:
 		int funcID;
 		std::list<int> args;
-		varType retType;
+		dataType::type retType;
 		stTree *block;
 		type getType() { return type::FUNC_INTER; };
 	};
@@ -63,7 +63,7 @@ namespace iCode
 	{
 	public:
 		long long val;
-		stnode::varType type;
+		dataType::type type;
 		argType getType(){ return argType::CONST; };
 	};
 

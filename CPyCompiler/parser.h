@@ -4,6 +4,7 @@
 #define _H_ANALYZER
 
 #include "lexer.h"
+#include "type.h"
 
 struct errInfo
 {
@@ -29,13 +30,11 @@ typedef std::list<stnode::stnode*> stTree;
 
 namespace stnode
 {
-	enum varType{ _ERROR, VOID, SINT, S8, S16, S32, S64, UINT, U8, U16, U32, U64, VOID_PTR, SINT_PTR, S8_PTR, S16_PTR, S32_PTR, S64_PTR, UINT_PTR, U8_PTR, U16_PTR, U32_PTR, U64_PTR, VOID_PTR_2, SINT_PTR_2, S8_PTR_2, S16_PTR_2, S32_PTR_2, S64_PTR_2, UINT_PTR_2, U8_PTR_2, U16_PTR_2, U32_PTR_2, U64_PTR_2 };
-
 	class vartype :public stnode
 	{
 	public:
-		vartype(varType _vtype){ vtype = _vtype; };
-		varType vtype;
+		vartype(dataType::type _vtype){ vtype = _vtype; };
+		dataType::type vtype;
 		type getType(){ return type::TYPE; };
 	};
 
@@ -67,9 +66,9 @@ namespace stnode
 	class id :public stnode
 	{
 	public:
-		id(std::string _name, varType _type = varType::_ERROR){ name = _name; dtype = _type; };
+		id(std::string _name, dataType::type _type = dataType::ERROR){ name = _name; dtype = _type; };
 		std::string name;
-		varType dtype;
+		dataType::type dtype;
 		type getType() { return type::ID; };
 	};
 
@@ -101,7 +100,6 @@ namespace stnode
 			int argCount;
 			stnode *arg[3];
 			type getType(){ return type::OP; };
-		private:
 		};
 
 		std::string op2Str(ops op);
@@ -112,7 +110,7 @@ namespace stnode
 	public:
 		std::string name;
 		std::list<id *> args;
-		varType retType;
+		dataType::type retType;
 		stTree *block;
 		type getType(){ return type::FUNC; };
 	};

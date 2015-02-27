@@ -27,6 +27,9 @@
     <ClInclude Include="inter.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="type.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -45,6 +48,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="inter.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="type.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
