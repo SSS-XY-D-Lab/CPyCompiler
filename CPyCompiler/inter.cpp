@@ -30,8 +30,8 @@ int getID(std::string name)
 	return -1;
 }
 
-#define ERR_NEWID_NOLAYER -1
-#define ERR_NEWID_REDEFINE -2
+const int ERR_NEWID_NOLAYER = -1;
+const int  ERR_NEWID_REDEFINE = -2;
 const char* ERR_NEWID_MSG[3] = {
 	NULL,
 	"Internal Error:No Hash Layer, Please report",
@@ -70,7 +70,7 @@ errInfo stAnalyzer_build(stnode::stnode **node)
 	{
 		case stnode::type::ID:
 		{
-			stnode::id *oldNode = dynamic_cast<stnode::id*>(*node);
+			stnode::id *oldNode = static_cast<stnode::id*>(*node);
 			int id = getID(oldNode->name);
 			if (id == -1)
 				return errInfo(oldNode->lineN, oldNode->pos, "Undefined Variant");
@@ -83,7 +83,7 @@ errInfo stAnalyzer_build(stnode::stnode **node)
 		}
 		case stnode::type::OP:
 		{
-			stnode::op::op *opNode = dynamic_cast<stnode::op::op*>(*node);
+			stnode::op::op *opNode = static_cast<stnode::op::op*>(*node);
 			for (int i = 0; i < opNode->argCount; i++)
 			{
 				errInfo err = stAnalyzer_build(&opNode->arg[i]);
@@ -94,7 +94,7 @@ errInfo stAnalyzer_build(stnode::stnode **node)
 		}
 		case stnode::type::FUNC:
 		{
-			stnode::func *oldNode = dynamic_cast<stnode::func*>(*node);
+			stnode::func *oldNode = static_cast<stnode::func*>(*node);
 
 			int funcID = newFuncID(oldNode->name, oldNode->retType);
 			if (funcID < 0)
@@ -140,7 +140,7 @@ errInfo stAnalyzer_build(stnode::stnode **node)
 		}
 		case stnode::type::CALL:
 		{
-			stnode::call *callNode = dynamic_cast<stnode::call*>(*node);
+			stnode::call *callNode = static_cast<stnode::call*>(*node);
 			errInfo err = stAnalyzer_build(&(callNode->id));
 			if (err.err != NULL)
 				return err;
@@ -151,7 +151,7 @@ errInfo stAnalyzer_build(stnode::stnode **node)
 		}
 		case stnode::type::RETURN:
 		{
-			stnode::ret *retNode = dynamic_cast<stnode::ret*>(*node);
+			stnode::ret *retNode = static_cast<stnode::ret*>(*node);
 			errInfo err = stAnalyzer_build(&(retNode->retVal));
 			if (err.err != NULL)
 				return err;
@@ -159,7 +159,7 @@ errInfo stAnalyzer_build(stnode::stnode **node)
 		}
 		case stnode::type::IF:
 		{
-			stnode::ifelse *ifNode = dynamic_cast<stnode::ifelse*>(*node);
+			stnode::ifelse *ifNode = static_cast<stnode::ifelse*>(*node);
 			idHashTable.push_back(new idHashLayerTp);
 
 			errInfo err = stAnalyzer_build(&(ifNode->exp));
@@ -194,8 +194,8 @@ errInfo stAnalyzer_build(stnode::stnode **node)
 		}
 		case stnode::type::ALLOC:
 		{
-			stnode::alloc *oldNode = dynamic_cast<stnode::alloc*>(*node);
-			stnode::alloc_inter *newNode = new stnode::alloc_inter(oldNode->readOnly);
+			stnode::alloc *oldNode = static_cast<stnode::alloc*>(*node);
+			stnode::alloc_inter *newNode = new stnode::alloc_inter(oldNode->isConst);
 
 			std::list<stnode::allocUnit>::iterator p, pEnd = oldNode->var.end();
 			int varID;
@@ -220,11 +220,11 @@ errInfo stAnalyzer_build(stnode::stnode **node)
 		}
 		case stnode::type::TREE:
 		{
-			stnode::expTree *treeNode = dynamic_cast<stnode::expTree*>(*node);
+			stnode::expTree *treeNode = static_cast<stnode::expTree*>(*node);
 			errInfo err = stAnalyzer_build(&(treeNode->exp));
 			if (err.err != NULL)
 				return err;
-			err = stAnalyzer_build(&(treeNode->son));
+			err = stAnalyzer_build(&(treeNode->prev));
 			if (err.err != NULL)
 				return err;
 			break;
@@ -239,13 +239,102 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType::type retType)
 	{
 		case stnode::type::OP:
 		{
-			stnode::op::op *opNode = dynamic_cast<stnode::op::op*>(*node);
-			dataType::type type = dataType::VOID;
-			stnode::stnode *ptr;
-			for (int i = 0; i < opNode->argCount; i++)
+			stnode::op::op *opNode = static_cast<stnode::op::op*>(*node);
+			switch (opNode->getOpType())
 			{
-				ptr = opNode->arg[i];
-				
+				case stnode::op::opType::ARITHMETIC:
+				{
+					dataType::type type = dataType::SINT, types[3];
+					stnode::stnode *ptr;
+					int i;
+					//Get dataType of the args
+					for (i = 0; i < opNode->argCount; i++)
+					{
+						ptr = opNode->arg[i];
+						switch (ptr->getType())
+						{
+							case stnode::type::NUMBER:
+							{
+								dataType::type numType = minNum(static_cast<stnode::number*>(ptr)->val);
+								types[i] = numType;
+								if (typeLvl(numType) > typeLvl(type))
+									type = numType;
+								break;
+							}
+							case stnode::type::CHARA:
+								types[i] = dataType::S8;
+								break;
+							case stnode::type::STR:
+							{
+								types[i] = dataType::UINT;
+								if (typeLvl(dataType::UINT) > typeLvl(type))
+									type = dataType::UINT;
+								break;
+							}
+							case stnode::type::ID:
+							{
+								dataType::type idType = static_cast<stnode::id*>(ptr)->dtype;
+								types[i] = idType;
+								if (typeLvl(idType) > typeLvl(type))
+									type = idType;
+								//return errInfo(ptr->lineN, ptr->pos, "stAnalyzer_build not executed");
+								break;
+							}
+							case stnode::type::ID_INTER:
+							{
+								dataType::type idType = idTable[static_cast<stnode::id_inter*>(ptr)->id].type;
+								types[i] = idType;
+								if (typeLvl(idType) > typeLvl(type))
+									type = idType;
+								break;
+							}
+							case stnode::type::OP:
+							{
+								stnode::op::op* opPtr = static_cast<stnode::op::op*>(ptr);
+								if (opPtr->resType != dataType::ERROR)
+								{
+									dataType::type opRetType = opPtr->resType;
+									types[i] = opRetType;
+									if (typeLvl(opRetType) > typeLvl(type))
+										type = opRetType;
+								}
+								else
+								{
+									stAnalyzer_type(&opNode->arg[i], retType);
+									i--;
+									continue;
+								}
+								break;
+							}
+							case stnode::type::CAST:
+							{
+								dataType::type castType = static_cast<stnode::cast*>(ptr)->vtype;
+								types[i] = castType;
+								if (typeLvl(castType) > typeLvl(type))
+									type = castType;
+								break;
+							}
+							case stnode::type::CALL:
+							{
+
+								break;
+							}
+						}
+					}
+					//Write cast node
+					for (i = 0; i < opNode->argCount; i++)
+					{
+						ptr = opNode->arg[i];
+					}
+				}
+				case stnode::op::opType::ASSIGNMENT:
+				{
+					
+				}
+				default:
+				{
+					//Needn't auto cast
+				}
 			}
 			break;
 		}
@@ -256,19 +345,19 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType::type retType)
 		}
 		case stnode::type::CALL:
 		{
-			stnode::call *callNode = dynamic_cast<stnode::call*>(*node);
+			stnode::call *callNode = static_cast<stnode::call*>(*node);
 			
 			break;
 		}
 		case stnode::type::RETURN:
 		{
-			stnode::ret *retNode = dynamic_cast<stnode::ret*>(*node);
+			stnode::ret *retNode = static_cast<stnode::ret*>(*node);
 			
 			break;
 		}
 		case stnode::type::IF:
 		{
-			stnode::ifelse *ifNode = dynamic_cast<stnode::ifelse*>(*node);
+			stnode::ifelse *ifNode = static_cast<stnode::ifelse*>(*node);
 
 			errInfo err = stAnalyzer_type(&(ifNode->exp), retType);
 			if (err.err != NULL)
@@ -305,11 +394,11 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType::type retType)
 		}
 		case stnode::type::TREE:
 		{
-			stnode::expTree *treeNode = dynamic_cast<stnode::expTree*>(*node);
+			stnode::expTree *treeNode = static_cast<stnode::expTree*>(*node);
 			errInfo err = stAnalyzer_type(&(treeNode->exp), retType);
 			if (err.err != NULL)
 				return err;
-			err = stAnalyzer_type(&(treeNode->son), retType);
+			err = stAnalyzer_type(&(treeNode->prev), retType);
 			if (err.err != NULL)
 				return err;
 			break;

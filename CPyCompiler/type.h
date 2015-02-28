@@ -15,6 +15,9 @@ namespace dataType
 
 dataType::type toPtr(dataType::type type);
 int typeSize(dataType::type type);
+int typeLvl(dataType::type type);
 bool isUnsigned(dataType::type type);
+dataType::type minNum(long long num);
+const int intSize = 2;
 
 #endif

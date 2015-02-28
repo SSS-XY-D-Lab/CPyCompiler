@@ -59,7 +59,7 @@ exp3 : exp2
  | LGNOT exp4 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($1); op->arg[0] = $2; $$ = op; }
 ;
 exp4 : exp3
- | BRACKET_LEFT vtype BRACKET_RIGHT exp4 { $$ = new stnode::op::op(stnode::op::ops::CAST, $2, $4); $$->pos = $2->pos; $$->lineN = $2->lineN;  delete $1; delete $3; }
+ | BRACKET_LEFT vtype BRACKET_RIGHT exp4 { stnode::cast *cast = dynamic_cast<stnode::cast*>($2); cast->node = $4; $$ = cast; }
 ;
 exp5 : exp4
  | exp5 MUL exp4 { $$ = new stnode::op::op(stnode::op::ops::MUL, $1, $3); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; }
@@ -116,7 +116,7 @@ exp16 : exp15
  | exp3 BORASS exp16 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
 ;
 exp : exp16
- | exp COMMA exp16 { $$ = new stnode::expTree($1, $3); $$->pos = $3->pos; }
+ | exp COMMA exp16 { $$ = new stnode::expTree($3, $1); $$->pos = $2->pos; delete $2; }
 ;
 expr : exp DELIM { $$ = $1; yacc_result = $1; }
 
@@ -131,41 +131,41 @@ int yylex()
 	{
 		case token::type::ID:
 		{
-			token::id* tk = dynamic_cast<token::id*>(*yacc_p);
+			token::id* tk = static_cast<token::id*>(*yacc_p);
 			yylval = new stnode::id(tk->str);
 			ret = ID;
 			break;
 		}
 		case token::type::CHARA:
 		{
-			token::chara* tk = dynamic_cast<token::chara*>(*yacc_p);
+			token::chara* tk = static_cast<token::chara*>(*yacc_p);
 			yylval = new stnode::chara(tk->ch);
 			ret = CHARA;
 			break;
 		}
 		case token::type::STR:
 		{
-			token::str* tk = dynamic_cast<token::str*>(*yacc_p);
+			token::str* tk = static_cast<token::str*>(*yacc_p);
 			yylval = new stnode::str(tk->strr);
 			ret = STR;
 			break;
 		}
 		case token::type::NUMBER:
 		{
-			token::number* tk = dynamic_cast<token::number*>(*yacc_p);
+			token::number* tk = static_cast<token::number*>(*yacc_p);
 			yylval = new stnode::number(tk->val);
 			ret = NUMBER;
 			break;
 		}
 		case token::type::OP:
 		{
-			token::op* tk = dynamic_cast<token::op*>(*yacc_p);
+			token::op* tk = static_cast<token::op*>(*yacc_p);
 			stnode::op::ops newOP;
 			switch (tk->opType)
 			{
 				case token::ops::opType::COMMA:
 					ret = COMMA;
-					newOP = stnode::op::ops::COMMA;
+					newOP = stnode::op::ops::ERROR;
 					break;
 				case token::ops::opType::SUB_LEFT:
 					ret = SUB_LEFT;
@@ -374,10 +374,10 @@ int yylex()
 		}
 		case token::type::KEYWORD:
 		{
-			token::keyword* tk = dynamic_cast<token::keyword*>(*yacc_p);
+			token::keyword* tk = static_cast<token::keyword*>(*yacc_p);
 			bool isPtr = false;
 			yacc_p++;
-			if (yacc_p == yacc_pEnd || (*yacc_p)->getType() != token::type::OP || dynamic_cast<token::op *>(*yacc_p)->opType != token::ops::opType::MUL)
+			if (yacc_p == yacc_pEnd || (*yacc_p)->getType() != token::type::OP || static_cast<token::op *>(*yacc_p)->opType != token::ops::opType::MUL)
 				yacc_p--;
 			else
 				isPtr = true;
@@ -432,7 +432,7 @@ int yylex()
 					yyerror("Illegal Token(Keyword)");
 					return -1;
 			}
-			yylval = new stnode::vartype(varType);
+			yylval = new stnode::cast(NULL, varType);
 			break;
 		}
 		case token::type::DELIM:

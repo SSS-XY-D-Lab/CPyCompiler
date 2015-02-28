@@ -40,10 +40,10 @@ namespace stnode
 	class alloc_inter :public stnode
 	{
 	public:
-		alloc_inter(bool _readOnly){ readOnly = _readOnly; };
+		alloc_inter(bool _isConst){ isConst = _isConst; };
 		~alloc_inter();
 		std::list<allocUnit_inter> var;
-		bool readOnly;
+		bool isConst;
 		type getType(){ return type::ALLOC_INTER; };
 	};
 }

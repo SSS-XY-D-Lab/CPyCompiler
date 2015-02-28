@@ -2,7 +2,6 @@
 #include "type.h"
 #include <cmath>
 
-const int intSize = 2;
 const int uintLvl = static_cast<int>(log(intSize) / log(2)) * 4;
 
 dataType::type toPtr(dataType::type type)
@@ -198,4 +197,34 @@ int typeLvl(dataType::type type)
 			return uintLvl;
 	}
 	return false;
+}
+
+dataType::type minNum(long long num)
+{
+	if (num < 0)
+	{
+		if (num < INT_MIN)
+			return dataType::S64;
+		if (num < SHRT_MIN)
+			return dataType::S32;
+		if (num < SCHAR_MIN)
+			return dataType::S16;
+		return dataType::S8;
+	}
+	else
+	{
+		if (num > UINT_MAX)
+			return dataType::S64;
+		if (num > INT_MAX)
+			return dataType::U32;
+		if (num > USHRT_MAX)
+			return dataType::S32;
+		if (num > SHRT_MAX)
+			return dataType::U16;
+		if (num > UCHAR_MAX)
+			return dataType::S16;
+		if (num > SCHAR_MAX)
+			return dataType::U8;
+		return dataType::S8;
+	}
 }

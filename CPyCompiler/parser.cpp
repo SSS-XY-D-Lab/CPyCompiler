@@ -10,7 +10,6 @@ stnode::stnode *yacc_result;
 tokenList::iterator yacc_p, yacc_pEnd;
 const char *yacc_err;
 int yacc_lineN;
-int yyparse();
 
 namespace stnode
 {
@@ -26,9 +25,7 @@ namespace stnode
 		{
 			static const opItem opMap[] = {
 				ops::ERROR, "ERROR",
-				ops::COMMA, "COMMA",
 				ops::ARRAY_SUB, "ARRAY_SUB",
-				ops::CAST, "CAST",
 				ops::MEMBER, "MEMBER",
 				ops::POSI, "POSI",
 				ops::NEGA, "NEGA",
@@ -73,6 +70,62 @@ namespace stnode
 				if (op == opMap[i].val)
 					return opMap[i].str;
 			return "";
+		}
+
+		opType op::getOpType()
+		{
+			switch (opVal)
+			{
+				case ops::ARRAY_SUB:
+				case ops::MEMBER:
+				case ops::REF:
+				case ops::DEREF:
+					return opType::POINTER;
+				case ops::POSI:
+				case ops::NEGA:
+				case ops::INC_POST:
+				case ops::DEC_POST:
+				case ops::INC_PRE:
+				case ops::DEC_PRE:
+				case ops::NOT:
+				case ops::DIV:
+				case ops::MUL:
+				case ops::MOD:
+				case ops::ADD:
+				case ops::SUB:
+				case ops::SHL:
+				case ops::SHR:
+				case ops::BIG:
+				case ops::BIGEQU:
+				case ops::LES:
+				case ops::LESEQU:
+				case ops::EQU:
+				case ops::NEQU:
+				case ops::AND:
+				case ops::XOR:
+				case ops::BOR:
+					return opType::ARITHMETIC;
+				case ops::LGNOT:
+				case ops::LGAND:
+				case ops::LGOR:
+					return opType::LOGICAL;
+				case ops::ASSIGN:
+				case ops::MODASS:
+				case ops::DIVASS:
+				case ops::MULASS:
+				case ops::ADDASS:
+				case ops::SUBASS:
+				case ops::SHLASS:
+				case ops::SHRASS:
+				case ops::ANDASS:
+				case ops::XORASS:
+				case ops::BORASS:
+					return opType::ASSIGNMENT;
+				case ops::COLONEXP:
+					return opType::CONDITIONAL;
+				default:
+					return opType::OTHER;
+			}
 		}
 	}
 
@@ -171,10 +224,10 @@ errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterato
 	if ((*p)->getType() == token::type::KEYWORD)
 	{
 		//type
-		token::keyword *type = dynamic_cast<token::keyword *>(*p);
+		token::keyword *type = static_cast<token::keyword *>(*p);
 		nextToken(;);
 		bool isPtr = false;
-		if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::MUL)
+		if ((*p)->getType() == token::type::OP && static_cast<token::op *>(*p)->opType == token::ops::opType::MUL)
 		{
 			isPtr = true;
 			nextToken(;);
@@ -189,27 +242,27 @@ errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterato
 		{
 			//name
 			int varPos = (*p)->pos;
-			varName = dynamic_cast<token::id *>(*p);
-			if (varName == NULL)
+			if ((*p)->getType() != token::type::ID)
 				return errInfo(lineNumber, errPtr, "Need Variable name");
+			varName = static_cast<token::id *>(*p);
 			nextToken(;);
 			subCount = 0;
-			if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::SUB_LEFT)
+			if ((*p)->getType() == token::type::OP && static_cast<token::op *>(*p)->opType == token::ops::opType::SUB_LEFT)
 			{
 				//array
 				nextToken(;);
 				if ((*p)->getType() != token::type::NUMBER)
 					return errInfo(lineNumber, errPtr, "Number expected");
-				subCount = static_cast<size_t>(dynamic_cast<token::number *>(*p)->val);
+				subCount = static_cast<size_t>(static_cast<token::number *>(*p)->val);
 				nextToken(;);
-				if ((*p)->getType() != token::type::OP || dynamic_cast<token::op *>(*p)->opType != token::ops::opType::SUB_RIGHT)
+				if ((*p)->getType() != token::type::OP || static_cast<token::op *>(*p)->opType != token::ops::opType::SUB_RIGHT)
 					return errInfo(lineNumber, errPtr, "] excepted");
 				nextToken(;);
 			}
 			newVar = new stnode::id(varName->str, varType);
 			newVar->pos = varPos;
 			newVar->lineN = lineNumber;
-			if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::ASSIGN)
+			if ((*p)->getType() == token::type::OP && static_cast<token::op *>(*p)->opType == token::ops::opType::ASSIGN)
 			{
 				//init val
 				nextToken(delete newVar;);
@@ -219,7 +272,7 @@ errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterato
 					stnode::stnode **initVal = new stnode::stnode*;
 					tokenList::iterator pBeg = p;
 					for (; p != pEnd; nextTokenD)
-						if (((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::COMMA) || (*p)->getType() == token::type::DELIM)
+						if (((*p)->getType() == token::type::OP && static_cast<token::op *>(*p)->opType == token::ops::opType::COMMA) || (*p)->getType() == token::type::DELIM)
 							break;
 					p = tList.insert(p, new token::delim(-2));
 					assert(pEnd == tList.end());
@@ -234,7 +287,7 @@ errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterato
 				else
 				{
 					//init array
-					if ((*p)->getType() != token::type::OP || dynamic_cast<token::op *>(*p)->opType != token::ops::opType::BRACE_LEFT)
+					if ((*p)->getType() != token::type::OP || static_cast<token::op *>(*p)->opType != token::ops::opType::BRACE_LEFT)
 					{
 						delete newVar;
 						return errInfo(lineNumber, errPtr, "{ excepted");
@@ -264,7 +317,7 @@ errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterato
 						}
 						else
 						{
-							token::ops::opType type = dynamic_cast<token::op *>(*p)->opType;
+							token::ops::opType type = static_cast<token::op *>(*p)->opType;
 							if (type == token::ops::opType::BRACE_RIGHT)
 							{
 								nextToken(delete newVar; delete[] initVal;);
@@ -287,7 +340,7 @@ errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterato
 				allocPtr->var.push_back(stnode::allocUnit(newVar, subCount));
 			if ((*p)->getType() == token::type::DELIM)
 				break;
-			else if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::COMMA)
+			else if ((*p)->getType() == token::type::OP && static_cast<token::op *>(*p)->opType == token::ops::opType::COMMA)
 				nextToken(;);
 		}
 		if (p == pEnd)
@@ -310,7 +363,7 @@ struct lvlInfo
 errInfo parser(tokenList &tList, stTree *_sTree)
 {
 	stnode::stnode *ptr = NULL;
-	std::list<lvlInfo>sTreeStk;
+	std::list<lvlInfo> sTreeStk;
 	sTreeStk.push_back(lvlInfo(_sTree, new stnode::stnode));
 	tokenList::iterator p, pEnd = tList.end();
 	bool allowFunc = true;
@@ -321,7 +374,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 		switch (first->getType())
 		{
 			case token::type::BEGIN:
-				lineNumber = dynamic_cast<token::begin *>(first)->lineN;
+				lineNumber = static_cast<token::begin *>(first)->lineN;
 				ptr = NULL;
 				nextTokenD;
 				break;
@@ -331,7 +384,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 				break;
 			case token::type::KEYWORD:
 			{
-				token::keyword *kw = dynamic_cast<token::keyword *>(first);
+				token::keyword *kw = static_cast<token::keyword *>(first);
 				switch (kw->word)
 				{
 					case token::keywords::keywords::CONST:
@@ -373,10 +426,10 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 								delete funcPtr;
 								return errInfo(lineNumber, errPtr, "Type expected");
 							}
-							token::keyword *type = dynamic_cast<token::keyword *>(*p);
+							token::keyword *type = static_cast<token::keyword *>(*p);
 							nextToken(delete funcPtr;);
 							bool isPtr = false;
-							if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::MUL)
+							if ((*p)->getType() == token::type::OP && static_cast<token::op *>(*p)->opType == token::ops::opType::MUL)
 							{
 								isPtr = true;
 								nextToken(delete funcPtr;)
@@ -396,9 +449,9 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 								delete funcPtr;
 								return errInfo(lineNumber, errPtr, "Function name expected");
 							}
-							funcPtr->name = dynamic_cast<token::id *>(*p)->str;
+							funcPtr->name = static_cast<token::id *>(*p)->str;
 							nextToken(;);
-							if ((*p)->getType() != token::type::OP || dynamic_cast<token::op *>(*p)->opType != token::ops::opType::BRACKET_LEFT)
+							if ((*p)->getType() != token::type::OP || static_cast<token::op *>(*p)->opType != token::ops::opType::BRACKET_LEFT)
 							{
 								delete funcPtr;
 								return errInfo(lineNumber, errPtr, "( expected");
@@ -409,16 +462,16 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 								delete funcPtr;
 								return errInfo(lineNumber, errPtr, "Parameter type expected");
 							}
-							if (dynamic_cast<token::keyword *>(*p)->word != token::keywords::keywords::VOID)
+							if (static_cast<token::keyword *>(*p)->word != token::keywords::keywords::VOID)
 							{
 								stnode::id *newVar;
 								std::string varName;
 								for (; p != pEnd;)
 								{
-									type = dynamic_cast<token::keyword *>(*p);
+									type = static_cast<token::keyword *>(*p);
 									nextToken(delete funcPtr;);
 									bool isPtr = false;
-									if ((*p)->getType() == token::type::OP && dynamic_cast<token::op *>(*p)->opType == token::ops::opType::MUL)
+									if ((*p)->getType() == token::type::OP && static_cast<token::op *>(*p)->opType == token::ops::opType::MUL)
 									{
 										isPtr = true;
 										nextToken(delete funcPtr;)
@@ -434,7 +487,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 										delete funcPtr;
 										return errInfo(lineNumber, errPtr, "Parameter name expected");
 									}
-									varName = dynamic_cast<token::id *>(*p)->str;
+									varName = static_cast<token::id *>(*p)->str;
 									newVar = new stnode::id(varName, varType);
 									newVar->pos = (*p)->pos;
 									nextToken(delete funcPtr; delete newVar;)
@@ -446,7 +499,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 									}
 									else if ((*p)->getType() == token::type::OP)
 									{
-										token::ops::opType opType = dynamic_cast<token::op *>(*p)->opType;
+										token::ops::opType opType = static_cast<token::op *>(*p)->opType;
 										if (opType == token::ops::opType::COMMA)
 										{
 											nextToken(delete funcPtr;);
@@ -511,7 +564,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 						lvlInfo &info = sTreeStk.back();
 						if (info.ptr->getType() != stnode::type::IF)
 							return errInfo(lineNumber, errPtr, "Missing if");
-						stnode::ifelse *ifPtr = dynamic_cast<stnode::ifelse *>(info.ptr);
+						stnode::ifelse *ifPtr = static_cast<stnode::ifelse *>(info.ptr);
 						if (ifPtr->blockTrue != NULL)
                             return errInfo(lineNumber, errPtr, "Too many else");
 						ifPtr->blockTrue = info.sTree;
@@ -529,7 +582,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 								return errInfo(lineNumber, errPtr, "Missing code block beginning");
 							case stnode::type::IF:
 							{
-								stnode::ifelse *ifPtr = dynamic_cast<stnode::ifelse *>(info.ptr);
+								stnode::ifelse *ifPtr = static_cast<stnode::ifelse *>(info.ptr);
 								if (ifPtr->blockTrue == NULL)
 									ifPtr->blockTrue = info.sTree;
 								else
@@ -539,7 +592,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 							}
 							case stnode::type::FUNC:
 							{
-								stnode::func *funcPtr = dynamic_cast<stnode::func *>(info.ptr);
+								stnode::func *funcPtr = static_cast<stnode::func *>(info.ptr);
 								funcPtr->block = info.sTree;
 								ptr = funcPtr;
 								allowFunc = true;

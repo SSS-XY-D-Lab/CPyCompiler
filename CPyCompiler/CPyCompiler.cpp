@@ -41,37 +41,37 @@ int main(int argc, char* argv[])
 			{
 				case token::type::ID:
 				{
-					token::id* tk = dynamic_cast<token::id*>(*pT);
+					token::id* tk = static_cast<token::id*>(*pT);
 					cout << "ID:" << tk->str << endl;
 					break;
 				}
 				case token::type::CHARA:
 				{
-					token::chara* tk = dynamic_cast<token::chara*>(*pT);
+					token::chara* tk = static_cast<token::chara*>(*pT);
 					cout << "CHAR:" << tk->ch << endl;
 					break;
 				}
 				case token::type::STR:
 				{
-					token::str* tk = dynamic_cast<token::str*>(*pT);
+					token::str* tk = static_cast<token::str*>(*pT);
 					cout << "STRING:" << tk->strr << endl;
 					break;
 				}
 				case token::type::OP:
 				{
-					token::op* tk = dynamic_cast<token::op*>(*pT);
+					token::op* tk = static_cast<token::op*>(*pT);
 					cout << "OPERATOR:" << token::ops::op2Str(tk->opType) << endl;
 					break;
 				}
 				case token::type::NUMBER:
 				{
-					token::number* tk = dynamic_cast<token::number*>(*pT);
+					token::number* tk = static_cast<token::number*>(*pT);
 					cout << "NUMBER:" << tk->val << endl;
 					break;
 				}
 				case token::type::KEYWORD:
 				{
-					token::keyword* tk = dynamic_cast<token::keyword*>(*pT);
+					token::keyword* tk = static_cast<token::keyword*>(*pT);
 					cout << "KEYWORD:" << token::keywords::kw2Str(tk->word) << endl;
 					break;
 				}
