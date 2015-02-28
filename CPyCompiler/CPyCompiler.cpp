@@ -85,6 +85,7 @@ int main(int argc, char* argv[])
 		errInfo err = parser(ret, &ret2);
 		if (err.err != NULL)
 		{
+			cout << err.lineN << ':' << endl;
 			cout << lines[err.lineN - 1] << endl;
 			for (; err.pos > 1; err.pos--)
 				cout << ' ';

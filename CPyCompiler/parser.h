@@ -16,7 +16,11 @@ struct errInfo
 
 namespace stnode
 {
-	enum type{ ERROR, NUMBER, CHARA, STR, ID, ID_INTER, OP, CAST, FUNC, FUNC_INTER, CALL, RETURN, IF, ALLOC, ALLOC_INTER, TREE, DELIM };
+	enum type{ 
+		ERROR, 
+		NUMBER, CHARA, STR, ID, OP, CAST, FUNC, CALL, RETURN, IF, ALLOC, TREE, DELIM,
+		ID_INTER, FUNC_INTER, CALL_INTER, ALLOC_INTER
+	};
 
 	class stnode
 	{
@@ -124,8 +128,8 @@ namespace stnode
 	class call :public stnode
 	{
 	public:
-		call(stnode *_id, stnode *_args = NULL){ id = _id; args = _args; };
-		stnode* id;
+		call(id *_id, stnode *_args = NULL){ id = _id; args = _args; };
+		id* id;
 		stnode* args;
 		type getType(){ return type::CALL; };
 	};

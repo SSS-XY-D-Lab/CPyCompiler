@@ -431,7 +431,7 @@ not overlap.  */
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  103
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   224
+#define YYLAST   241
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  71
@@ -542,10 +542,10 @@ static const yytype_uint16 yytoknum[] =
 };
 # endif
 
-#define YYPACT_NINF -57
+#define YYPACT_NINF -54
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-57)))
+  (!!((Yystate) == (-54)))
 
 #define YYTABLE_NINF -1
 
@@ -556,21 +556,21 @@ static const yytype_uint16 yytoknum[] =
 STATE-NUM.  */
 static const yytype_int16 yypact[] =
 {
-	158, -57, -57, -57, -57, 103, 171, 171, 158, 158,
-	158, 158, 158, 158, -57, -2, 28, -57, 17, 18,
-	-1, 4, 12, -51, -46, -27, -26, -31, -57, -57,
-	-3, 37, -57, -57, -57, -57, -57, -57, -57, -57,
-	-57, -57, -57, -57, -57, -57, -57, -57, -57, -57,
-	-57, -57, -57, -57, 21, 2, 158, -57, -57, -57,
-	-57, -57, -57, -57, -57, -57, 158, 145, 57, -57,
-	-57, 158, 158, 158, 158, 158, 158, 158, 158, 158,
-	158, 158, 158, 158, 158, 158, 158, 158, 158, 158,
-	158, 158, 158, 158, 158, 158, 158, 158, 158, 158,
-	158, -57, 158, -57, 158, -57, 10, -57, 9, -57,
-	-57, -57, -57, -57, -57, -57, -57, -57, -57, -57,
-	-57, -57, -57, -57, 17, 17, 18, 18, -1, -1,
-	-1, -1, 4, 4, 12, -51, -46, -27, -26, -29,
-	-57, -57, -57, -57, 158, -57
+	143, 3, -54, -54, -54, 101, 156, 156, 143, 143,
+	143, 143, 143, 143, -54, -7, 29, -54, -23, -35,
+	-6, -2, -8, -12, -29, 11, 47, -53, -54, -54,
+	-4, 49, 17, -54, -54, -54, -54, -54, -54, -54,
+	-54, -54, -54, -54, -54, -54, -54, -54, -54, -54,
+	-54, -54, -54, -54, -54, 18, -3, 143, -54, -54,
+	-54, -54, -54, -54, -54, -54, -54, 143, 56, -54,
+	-54, 143, 143, 143, 143, 143, 143, 143, 143, 143,
+	143, 143, 143, 143, 143, 143, 143, 143, 143, 143,
+	143, 143, 143, 143, 143, 143, 143, 143, 143, 143,
+	143, -54, 143, -54, -54, 4, 143, -54, 5, -54,
+	-54, -54, -54, -54, -54, -54, -54, -54, -54, -54,
+	-54, -54, -54, -54, -23, -23, -35, -35, -6, -6,
+	-6, -6, -2, -2, -8, -12, -29, 11, 47, -28,
+	-54, -54, -54, -54, 143, -54
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -581,32 +581,32 @@ static const yytype_uint8 yydefact[] =
 	0, 24, 25, 27, 26, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 29, 36, 45, 47, 51, 54,
 	57, 62, 65, 67, 69, 71, 73, 75, 77, 89,
-	0, 0, 2, 3, 4, 5, 6, 7, 8, 9,
-	10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
-	20, 21, 22, 23, 0, 0, 0, 37, 38, 45,
-	43, 44, 40, 41, 42, 39, 0, 0, 0, 34,
+	0, 0, 0, 2, 3, 4, 5, 6, 7, 8,
+	9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+	19, 20, 21, 22, 23, 0, 0, 0, 37, 38,
+	45, 43, 44, 40, 41, 42, 39, 0, 0, 34,
 	35, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 91, 0, 1, 0, 28, 0, 31, 0, 33,
+	0, 91, 0, 1, 31, 0, 0, 28, 0, 33,
 	78, 79, 80, 81, 82, 83, 84, 85, 86, 87,
 	88, 49, 48, 50, 52, 53, 55, 56, 58, 59,
 	60, 61, 63, 64, 66, 68, 70, 72, 74, 0,
-	90, 46, 30, 32, 0, 76
+	90, 32, 46, 30, 0, 76
 };
 
 /* YYPGOTO[NTERM-NUM].  */
-static const yytype_int8 yypgoto[] =
+static const yytype_int16 yypgoto[] =
 {
-	-57, -57, -57, -57, 0, 1, 13, 46, -42, 44,
-	-30, -28, -15, 6, 11, -57, -47, -56, 3, -57
+	-54, -54, -54, -54, 0, 2, 13, -5, -27, 38,
+	-26, 37, 39, 43, 36, -54, -1, 139, 1, -54
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-	-1, 54, 14, 15, 59, 17, 18, 19, 20, 21,
-	22, 23, 24, 25, 26, 27, 28, 29, 55, 31
+	-1, 55, 14, 15, 60, 17, 18, 19, 20, 21,
+	22, 23, 24, 25, 26, 27, 28, 29, 56, 31
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -614,56 +614,60 @@ positive, shift that token.  If negative, reduce the rule whose
 number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_uint8 yytable[] =
 {
-	16, 102, 95, 30, 101, 16, 57, 58, 96, 60,
-	61, 62, 63, 64, 65, 110, 111, 112, 113, 114,
-	115, 116, 117, 118, 119, 120, 99, 102, 97, 66,
-	98, 67, 102, 68, 69, 70, 105, 103, 100, 102,
-	102, 144, 142, 143, 87, 88, 140, 128, 129, 130,
-	131, 89, 90, 91, 92, 104, 16, 82, 83, 84,
-	109, 85, 86, 93, 94, 134, 16, 16, 135, 106,
-	108, 16, 16, 16, 16, 16, 16, 16, 16, 16,
-	16, 16, 136, 121, 122, 123, 71, 72, 73, 74,
-	75, 76, 77, 78, 79, 80, 81, 145, 124, 125,
-	16, 0, 16, 139, 137, 141, 1, 2, 3, 4,
-	138, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-	41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
-	51, 52, 53, 126, 127, 0, 5, 132, 133, 6,
-	7, 8, 9, 0, 10, 0, 11, 12, 1, 2,
-	3, 4, 0, 0, 0, 0, 13, 0, 0, 0,
-	0, 1, 2, 3, 4, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 1, 2, 3, 4, 5, 107,
-	0, 6, 7, 8, 9, 0, 10, 0, 11, 12,
-	0, 5, 0, 0, 6, 7, 8, 9, 13, 10,
-	0, 11, 12, 0, 56, 0, 0, 6, 7, 8,
-	9, 13, 10, 0, 11, 12, 0, 0, 0, 0,
-	0, 0, 0, 0, 13
+	16, 30, 102, 101, 99, 16, 58, 59, 85, 86,
+	61, 62, 63, 64, 65, 66, 100, 82, 83, 84,
+	1, 2, 3, 4, 67, 96, 102, 102, 68, 69,
+	70, 107, 16, 105, 102, 102, 32, 143, 141, 87,
+	88, 95, 144, 93, 94, 89, 90, 91, 92, 103,
+	5, 104, 106, 6, 7, 8, 9, 16, 10, 109,
+	11, 12, 128, 129, 130, 131, 97, 16, 108, 134,
+	13, 16, 16, 16, 16, 16, 16, 16, 16, 16,
+	16, 16, 126, 127, 121, 122, 123, 71, 72, 73,
+	74, 75, 76, 77, 78, 79, 80, 81, 124, 125,
+	16, 139, 16, 98, 1, 2, 3, 4, 142, 33,
+	34, 35, 36, 37, 38, 39, 40, 41, 42, 43,
+	44, 45, 46, 47, 48, 49, 50, 51, 52, 53,
+	54, 132, 133, 135, 5, 138, 136, 6, 7, 8,
+	9, 137, 10, 145, 11, 12, 1, 2, 3, 4,
+	0, 0, 0, 0, 13, 0, 0, 0, 0, 1,
+	2, 3, 4, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 5, 0, 0, 6,
+	7, 8, 9, 0, 10, 0, 11, 12, 0, 57,
+	0, 0, 6, 7, 8, 9, 13, 10, 0, 11,
+	12, 0, 0, 0, 0, 0, 0, 0, 0, 13,
+	110, 111, 112, 113, 114, 115, 116, 117, 118, 119,
+	120, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 140
 };
 
 static const yytype_int16 yycheck[] =
 {
-	0, 30, 53, 0, 7, 5, 6, 7, 54, 8,
-	9, 10, 11, 12, 13, 71, 72, 73, 74, 75,
-	76, 77, 78, 79, 80, 81, 57, 30, 55, 31,
-	56, 33, 30, 35, 36, 37, 34, 0, 69, 30,
-	30, 70, 32, 34, 45, 46, 102, 89, 90, 91,
-	92, 47, 48, 49, 50, 34, 56, 40, 41, 42,
-	3, 43, 44, 51, 52, 95, 66, 67, 96, 66,
-	67, 71, 72, 73, 74, 75, 76, 77, 78, 79,
-	80, 81, 97, 82, 83, 84, 58, 59, 60, 61,
-	62, 63, 64, 65, 66, 67, 68, 144, 85, 86,
-	100, -1, 102, 100, 98, 104, 3, 4, 5, 6,
-	99, 8, 9, 10, 11, 12, 13, 14, 15, 16,
-	17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
-	27, 28, 29, 87, 88, -1, 33, 93, 94, 36,
-	37, 38, 39, -1, 41, -1, 43, 44, 3, 4,
-	5, 6, -1, -1, -1, -1, 53, -1, -1, -1,
-	-1, 3, 4, 5, 6, -1, -1, -1, -1, -1,
-	-1, -1, -1, -1, 3, 4, 5, 6, 33, 34,
-	-1, 36, 37, 38, 39, -1, 41, -1, 43, 44,
-	-1, 33, -1, -1, 36, 37, 38, 39, 53, 41,
-	-1, 43, 44, -1, 33, -1, -1, 36, 37, 38,
-	39, 53, 41, -1, 43, 44, -1, -1, -1, -1,
-	-1, -1, -1, -1, 53
+	0, 0, 30, 7, 57, 5, 6, 7, 43, 44,
+	8, 9, 10, 11, 12, 13, 69, 40, 41, 42,
+	3, 4, 5, 6, 31, 54, 30, 30, 35, 36,
+	37, 34, 32, 32, 30, 30, 33, 32, 34, 45,
+	46, 53, 70, 51, 52, 47, 48, 49, 50, 0,
+	33, 34, 34, 36, 37, 38, 39, 57, 41, 3,
+	43, 44, 89, 90, 91, 92, 55, 67, 67, 95,
+	53, 71, 72, 73, 74, 75, 76, 77, 78, 79,
+	80, 81, 87, 88, 82, 83, 84, 58, 59, 60,
+	61, 62, 63, 64, 65, 66, 67, 68, 85, 86,
+	100, 100, 102, 56, 3, 4, 5, 6, 106, 8,
+	9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+	19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
+	29, 93, 94, 96, 33, 99, 97, 36, 37, 38,
+	39, 98, 41, 144, 43, 44, 3, 4, 5, 6,
+	-1, -1, -1, -1, 53, -1, -1, -1, -1, 3,
+	4, 5, 6, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, 33, -1, -1, 36,
+	37, 38, 39, -1, 41, -1, 43, 44, -1, 33,
+	-1, -1, 36, 37, 38, 39, 53, 41, -1, 43,
+	44, -1, -1, -1, -1, -1, -1, -1, -1, 53,
+	71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
+	81, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, 102
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
@@ -673,18 +677,18 @@ static const yytype_uint8 yystos[] =
 	0, 3, 4, 5, 6, 33, 36, 37, 38, 39,
 	41, 43, 44, 53, 73, 74, 75, 76, 77, 78,
 	79, 80, 81, 82, 83, 84, 85, 86, 87, 88,
-	89, 90, 8, 9, 10, 11, 12, 13, 14, 15,
-	16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
-	26, 27, 28, 29, 72, 89, 33, 75, 75, 75,
-	76, 76, 76, 76, 76, 76, 31, 33, 35, 36,
+	89, 90, 33, 8, 9, 10, 11, 12, 13, 14,
+	15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+	25, 26, 27, 28, 29, 72, 89, 33, 75, 75,
+	75, 76, 76, 76, 76, 76, 76, 31, 35, 36,
 	37, 58, 59, 60, 61, 62, 63, 64, 65, 66,
 	67, 68, 40, 41, 42, 43, 44, 45, 46, 47,
 	48, 49, 50, 51, 52, 53, 54, 55, 56, 57,
-	69, 7, 30, 0, 34, 34, 89, 34, 89, 3,
+	69, 7, 30, 0, 34, 89, 34, 34, 89, 3,
 	88, 88, 88, 88, 88, 88, 88, 88, 88, 88,
 	88, 76, 76, 76, 77, 77, 78, 78, 79, 79,
 	79, 79, 80, 80, 81, 82, 83, 84, 85, 89,
-	88, 76, 32, 34, 70, 87
+	88, 34, 76, 32, 70, 87
 };
 
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
@@ -1393,295 +1397,295 @@ yyreduce:
 		case 28:
 #line 41 "cpyexp.y" /* yacc.c:1646  */
 		{ (yyval) = (yyvsp[-1]); }
-#line 1397 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1401 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 30:
 #line 44 "cpyexp.y" /* yacc.c:1646  */
 		{ (yyval) = new stnode::op::op(stnode::op::ops::ARRAY_SUB, (yyvsp[-3]), (yyvsp[-1])); (yyval)->pos = (yyvsp[-2])->pos; (yyval)->lineN = (yyvsp[-2])->lineN; delete (yyvsp[-2]); delete (yyvsp[0]); }
-#line 1403 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1407 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 31:
 #line 45 "cpyexp.y" /* yacc.c:1646  */
-		{ (yyval) = new stnode::call((yyvsp[-2])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; delete (yyvsp[-1]); delete (yyvsp[0]); }
-#line 1409 "parser_yacc.cpp" /* yacc.c:1646  */
+		{ (yyval) = new stnode::call(dynamic_cast<stnode::id*>((yyvsp[-2]))); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; delete (yyvsp[-1]); delete (yyvsp[0]); }
+#line 1413 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 32:
 #line 46 "cpyexp.y" /* yacc.c:1646  */
-		{ (yyval) = new stnode::call((yyvsp[-3]), (yyvsp[-1])); (yyval)->pos = (yyvsp[-2])->pos; (yyval)->lineN = (yyvsp[-2])->lineN; delete (yyvsp[-2]); delete (yyvsp[0]); }
-#line 1415 "parser_yacc.cpp" /* yacc.c:1646  */
+		{ (yyval) = new stnode::call(dynamic_cast<stnode::id*>((yyvsp[-3])), (yyvsp[-1])); (yyval)->pos = (yyvsp[-2])->pos; (yyval)->lineN = (yyvsp[-2])->lineN; delete (yyvsp[-2]); delete (yyvsp[0]); }
+#line 1419 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 33:
 #line 47 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
-#line 1421 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1425 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 34:
 #line 48 "cpyexp.y" /* yacc.c:1646  */
 		{ (yyval) = new stnode::op::op(stnode::op::ops::INC_POST, (yyvsp[-1])); (yyval)->pos = (yyvsp[0])->pos; (yyval)->lineN = (yyvsp[0])->lineN; delete (yyvsp[0]); }
-#line 1427 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1431 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 35:
 #line 49 "cpyexp.y" /* yacc.c:1646  */
 		{ (yyval) = new stnode::op::op(stnode::op::ops::DEC_POST, (yyvsp[-1])); (yyval)->pos = (yyvsp[0])->pos; (yyval)->lineN = (yyvsp[0])->lineN; delete (yyvsp[0]); }
-#line 1433 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1437 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 37:
 #line 52 "cpyexp.y" /* yacc.c:1646  */
 		{ (yyval) = new stnode::op::op(stnode::op::ops::INC_PRE, (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; delete (yyvsp[-1]); }
-#line 1439 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1443 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 38:
 #line 53 "cpyexp.y" /* yacc.c:1646  */
 		{ (yyval) = new stnode::op::op(stnode::op::ops::DEC_PRE, (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; delete (yyvsp[-1]); }
-#line 1445 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1449 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 39:
 #line 54 "cpyexp.y" /* yacc.c:1646  */
 		{ (yyval) = new stnode::op::op(stnode::op::ops::REF, (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; delete (yyvsp[-1]); }
-#line 1451 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1455 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 40:
 #line 55 "cpyexp.y" /* yacc.c:1646  */
 		{ (yyval) = new stnode::op::op(stnode::op::ops::DEREF, (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; delete (yyvsp[-1]); }
-#line 1457 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1461 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 41:
 #line 56 "cpyexp.y" /* yacc.c:1646  */
 		{ if ((yyvsp[0])->getType() == stnode::type::NUMBER) { (yyval) = (yyvsp[0]); }
 		else { (yyval) = new stnode::op::op(stnode::op::ops::POSI, (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; } delete (yyvsp[-1]); }
-#line 1463 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1467 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 42:
 #line 57 "cpyexp.y" /* yacc.c:1646  */
 		{ if ((yyvsp[0])->getType() == stnode::type::NUMBER) { (yyval) = new stnode::number(-dynamic_cast<stnode::number*>((yyvsp[0]))->val); }
 		else { (yyval) = new stnode::op::op(stnode::op::ops::NEGA, (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; } delete (yyvsp[-1]); }
-#line 1469 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1473 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 43:
 #line 58 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[0]); (yyval) = op; }
-#line 1475 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1479 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 44:
 #line 59 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[0]); (yyval) = op; }
-#line 1481 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1485 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 46:
 #line 62 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::cast *cast = dynamic_cast<stnode::cast*>((yyvsp[-2])); cast->node = (yyvsp[0]); (yyval) = cast; }
-#line 1487 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1491 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 48:
 #line 65 "cpyexp.y" /* yacc.c:1646  */
 		{ (yyval) = new stnode::op::op(stnode::op::ops::MUL, (yyvsp[-2]), (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; delete (yyvsp[-1]); }
-#line 1493 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1497 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 49:
 #line 66 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
-#line 1499 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1503 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 50:
 #line 67 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
-#line 1505 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1509 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 52:
 #line 70 "cpyexp.y" /* yacc.c:1646  */
 		{ (yyval) = new stnode::op::op(stnode::op::ops::ADD, (yyvsp[-2]), (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; delete (yyvsp[-1]); }
-#line 1511 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1515 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 53:
 #line 71 "cpyexp.y" /* yacc.c:1646  */
 		{ (yyval) = new stnode::op::op(stnode::op::ops::SUB, (yyvsp[-2]), (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; delete (yyvsp[-1]); }
-#line 1517 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1521 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 55:
 #line 74 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
-#line 1523 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1527 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 56:
 #line 75 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
-#line 1529 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1533 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 58:
 #line 78 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
-#line 1535 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1539 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 59:
 #line 79 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
-#line 1541 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1545 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 60:
 #line 80 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
-#line 1547 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1551 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 61:
 #line 81 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
-#line 1553 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1557 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 63:
 #line 84 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
-#line 1559 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1563 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 64:
 #line 85 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
-#line 1565 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1569 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 66:
 #line 88 "cpyexp.y" /* yacc.c:1646  */
 		{ (yyval) = new stnode::op::op(stnode::op::ops::AND, (yyvsp[-2]), (yyvsp[0])); (yyval)->pos = (yyvsp[-1])->pos; (yyval)->lineN = (yyvsp[-1])->lineN; delete (yyvsp[-1]); }
-#line 1571 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1575 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 68:
 #line 91 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
-#line 1577 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1581 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 70:
 #line 94 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
-#line 1583 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1587 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 72:
 #line 97 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
-#line 1589 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1593 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 74:
 #line 100 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
-#line 1595 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1599 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 76:
 #line 103 "cpyexp.y" /* yacc.c:1646  */
 		{ (yyval) = new stnode::op::op(stnode::op::ops::COLONEXP, (yyvsp[-4]), (yyvsp[-2]), (yyvsp[0])); (yyval)->pos = (yyvsp[-2])->pos; delete (yyvsp[-3]); delete (yyvsp[-1]); }
-#line 1601 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1605 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 78:
 #line 106 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
-#line 1607 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1611 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 79:
 #line 107 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
-#line 1613 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1617 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 80:
 #line 108 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
-#line 1619 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1623 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 81:
 #line 109 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
-#line 1625 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1629 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 82:
 #line 110 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
-#line 1631 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1635 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 83:
 #line 111 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
-#line 1637 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1641 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 84:
 #line 112 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
-#line 1643 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1647 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 85:
 #line 113 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
-#line 1649 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1653 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 86:
 #line 114 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
-#line 1655 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1659 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 87:
 #line 115 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
-#line 1661 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1665 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 88:
 #line 116 "cpyexp.y" /* yacc.c:1646  */
 		{ stnode::op::op *op = dynamic_cast<stnode::op::op*>((yyvsp[-1])); op->arg[0] = (yyvsp[-2]); op->arg[1] = (yyvsp[0]); (yyval) = op; }
-#line 1667 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1671 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 90:
 #line 119 "cpyexp.y" /* yacc.c:1646  */
 		{ (yyval) = new stnode::expTree((yyvsp[0]), (yyvsp[-2])); (yyval)->pos = (yyvsp[-1])->pos; delete (yyvsp[-1]); }
-#line 1673 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1677 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 		case 91:
 #line 121 "cpyexp.y" /* yacc.c:1646  */
 		{ (yyval) = (yyvsp[-1]); yacc_result = (yyvsp[-1]); }
-#line 1679 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1683 "parser_yacc.cpp" /* yacc.c:1646  */
 		break;
 
 
-#line 1683 "parser_yacc.cpp" /* yacc.c:1646  */
+#line 1687 "parser_yacc.cpp" /* yacc.c:1646  */
 		default: break;
 	}
 	/* User semantic actions sometimes alter yychar, and that requires

@@ -42,8 +42,8 @@ exp1 : ID
 ;
 exp2 : exp1
  | exp2 SUB_LEFT exp SUB_RIGHT { $$ = new stnode::op::op(stnode::op::ops::ARRAY_SUB, $1, $3); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; delete $4; }
- | exp2 BRACKET_LEFT BRACKET_RIGHT { $$ = new stnode::call($1); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; delete $3; }
- | exp2 BRACKET_LEFT exp BRACKET_RIGHT { $$ = new stnode::call($1, $3); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; delete $4; }
+ | ID BRACKET_LEFT BRACKET_RIGHT { $$ = new stnode::call(dynamic_cast<stnode::id*>($1)); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; delete $3; }
+ | ID BRACKET_LEFT exp BRACKET_RIGHT { $$ = new stnode::call(dynamic_cast<stnode::id*>($1), $3); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; delete $4; }
  | exp2 MEMBER ID { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
  | exp2 INC { $$ = new stnode::op::op(stnode::op::ops::INC_POST, $1); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; }
  | exp2 DEC { $$ = new stnode::op::op(stnode::op::ops::DEC_POST, $1); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; }

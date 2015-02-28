@@ -27,6 +27,15 @@ namespace stnode
 		type getType() { return type::FUNC_INTER; };
 	};
 
+	class call_inter :public stnode
+	{
+	public:
+		call_inter(int _funcID, stnode *_args = NULL){ funcID = _funcID; args = _args; };
+		int funcID;
+		stnode* args;
+		type getType(){ return type::CALL_INTER; };
+	};
+
 	struct allocUnit_inter
 	{
 		allocUnit_inter(int _var, size_t _subCount){ varID = _var; subCount = _subCount; init = false; };

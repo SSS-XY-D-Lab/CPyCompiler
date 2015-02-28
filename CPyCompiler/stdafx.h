@@ -16,3 +16,4 @@
 #include <cctype>
 #include <cassert>
 #include <cstdlib>
+#include <cstring>
