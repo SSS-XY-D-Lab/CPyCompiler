@@ -16,7 +16,11 @@ struct errInfo
 
 namespace stnode
 {
-	enum type{ ERROR, TYPE, NUMBER, CHARA, STR, ID, ID_INTER, OP, FUNC, FUNC_INTER, CALL, RETURN, IF, ALLOC, ALLOC_INTER, TREE, DELIM };
+	enum type{ 
+		ERROR, 
+		NUMBER, CHARA, STR, ID, OP, CAST, FUNC, CALL, RETURN, IF, ALLOC, TREE, DELIM,
+		ID_INTER, FUNC_INTER, CALL_INTER, ALLOC_INTER
+	};
 
 	class stnode
 	{
@@ -30,14 +34,6 @@ typedef std::list<stnode::stnode*> stTree;
 
 namespace stnode
 {
-	class vartype :public stnode
-	{
-	public:
-		vartype(dataType::type _vtype){ vtype = _vtype; };
-		dataType::type vtype;
-		type getType(){ return type::TYPE; };
-	};
-
 	class number:public stnode
 	{
 	public:
@@ -66,9 +62,9 @@ namespace stnode
 	class id :public stnode
 	{
 	public:
-		id(std::string _name, dataType::type _type = dataType::ERROR){ name = _name; dtype = _type; };
+		id(std::string _name, dataType _type){ name = _name; dtype = _type; };
 		std::string name;
-		dataType::type dtype;
+		dataType dtype;
 		type getType() { return type::ID; };
 	};
 
@@ -76,7 +72,7 @@ namespace stnode
 	{
 		enum ops{
 			ERROR,
-			COMMA, ARRAY_SUB, MEMBER, CAST,
+			ARRAY_SUB,
 			POSI, NEGA, INC_POST, DEC_POST, INC_PRE, DEC_PRE,
 			REF, DEREF, NOT, LGNOT,
 			DIV, MUL, MOD,
@@ -86,31 +82,44 @@ namespace stnode
 			EQU, NEQU,
 			AND, XOR, BOR, LGAND, LGOR,
 			ASSIGN, MODASS, DIVASS, MULASS, ADDASS, SUBASS, SHLASS, SHRASS, ANDASS, XORASS, BORASS,
-			COLONEXP
 		};
+
+		enum opType{ ARITHMETIC, ASSIGNMENT, LOGICAL, POINTER, OTHER };
 
 		class op :public stnode
 		{
 		public:
 			op(ops _opVal){ opVal = _opVal; argCount = 0; };
-			op(ops _opVal, stnode *_arg1){ opVal = _opVal; arg[0] = _arg1; argCount = 1; };
-			op(ops _opVal, stnode *_arg1, stnode *_arg2){ opVal = _opVal; arg[0] = _arg1; arg[1] = _arg2; argCount = 2; };
+			op(ops _opVal, stnode *_arg1){ opVal = _opVal; arg[0] = _arg1; arg[1] = NULL; arg[2] = NULL; argCount = 1; };
+			op(ops _opVal, stnode *_arg1, stnode *_arg2){ opVal = _opVal; arg[0] = _arg1; arg[1] = _arg2; arg[2] = NULL; argCount = 2; };
 			op(ops _opVal, stnode *_arg1, stnode *_arg2, stnode *_arg3){ opVal = _opVal; arg[0] = _arg1; arg[1] = _arg2; arg[2] = _arg3; argCount = 3; };
 			ops opVal;
 			int argCount;
 			stnode *arg[3];
+			dataType resType;
 			type getType(){ return type::OP; };
+
+			opType getOpType();
 		};
 
 		std::string op2Str(ops op);
 	}
+
+	class cast :public stnode
+	{
+	public:
+		cast(stnode *_node, dataType _vtype){ node = _node; vtype = _vtype; };
+		stnode *node;
+		dataType vtype;
+		type getType(){ return type::CAST; };
+	};
 
 	class func :public stnode
 	{
 	public:
 		std::string name;
 		std::list<id *> args;
-		dataType::type retType;
+		dataType retType;
 		stTree *block;
 		type getType(){ return type::FUNC; };
 	};
@@ -118,8 +127,8 @@ namespace stnode
 	class call :public stnode
 	{
 	public:
-		call(stnode *_id, stnode *_args = NULL){ id = _id; args = _args; };
-		stnode* id;
+		call(id *_id, stnode *_args = NULL){ id = _id; args = _args; };
+		id* id;
 		stnode* args;
 		type getType(){ return type::CALL; };
 	};
@@ -141,10 +150,10 @@ namespace stnode
 
 	struct allocUnit
 	{
-		allocUnit(id* _var, long long _subCount){ var = _var; subCount = _subCount; init = false; };
-		allocUnit(id* _var, stnode **_val, long long _subCount){ var = _var; init = true; val = _val; subCount = _subCount; };
+		allocUnit(id* _var, size_t _subCount){ var = _var; subCount = _subCount; init = false; };
+		allocUnit(id* _var, stnode **_val, size_t _subCount){ var = _var; init = true; val = _val; subCount = _subCount; };
 		id *var;
-		long long subCount;
+		size_t subCount;
 		bool init;
 		stnode **val;
 	};
@@ -152,10 +161,10 @@ namespace stnode
 	class alloc :public stnode
 	{
 	public:
-		alloc(bool _readOnly){ readOnly = _readOnly; convert = false; };
+		alloc(bool _isConst){ isConst = _isConst; convert = false; };
 		~alloc();
 		std::list<allocUnit> var;
-		bool readOnly;
+		bool isConst;
 		bool convert;
 		type getType(){ return type::ALLOC; };
 	};
@@ -163,8 +172,8 @@ namespace stnode
 	class expTree :public stnode
 	{
 	public:
-		expTree(stnode *_exp, stnode *_son){ exp = _exp; son = _son; };
-		stnode *exp, *son;
+		expTree(stnode *_exp, stnode *_prev){ exp = _exp; prev = _prev; };
+		stnode *exp, *prev;
 		type getType(){ return type::TREE; };
 	};
 
@@ -181,6 +190,6 @@ extern int yacc_lineN;
 extern stnode::stnode *yacc_result;
 extern tokenList::iterator yacc_p, yacc_pEnd;
 extern const char *yacc_err;
-int yyparse();
+int yyparse(void);
 
 #endif
