@@ -12,8 +12,8 @@ namespace stnode
 	class id_inter :public stnode
 	{
 	public:
-		int id;
 		id_inter(int _id){ id = _id; };
+		int id;
 		type getType() { return type::ID_INTER; };
 	};
 
@@ -22,17 +22,27 @@ namespace stnode
 	public:
 		int funcID;
 		std::list<int> args;
-		dataType::type retType;
+		dataType retType;
 		stTree *block;
 		type getType() { return type::FUNC_INTER; };
 	};
 
+	class call_inter :public stnode
+	{
+	public:
+		call_inter(int _funcID, std::vector<stnode*> &_args){ funcID = _funcID; args = _args; };
+		call_inter(int _funcID, std::list<stnode*> &_args){ funcID = _funcID; for (std::list<stnode*>::iterator p = _args.begin(), pEnd = _args.end(); p != pEnd; p++) args.push_back(*p); };
+		int funcID;
+		std::vector<stnode*> args;
+		type getType(){ return type::CALL_INTER; };
+	};
+
 	struct allocUnit_inter
 	{
-		allocUnit_inter(int _var, long long _subCount){ varID = _var; subCount = _subCount; init = false; };
-		allocUnit_inter(int _var, long long _subCount, stnode **_val){ varID = _var; subCount = _subCount; init = true; val = _val; };
+		allocUnit_inter(int _var, size_t _subCount){ varID = _var; subCount = _subCount; init = false; };
+		allocUnit_inter(int _var, size_t _subCount, stnode **_val){ varID = _var; subCount = _subCount; init = true; val = _val; };
 		int varID;
-		long long subCount;
+		size_t subCount;
 		bool init;
 		stnode **val;
 	};
@@ -40,10 +50,10 @@ namespace stnode
 	class alloc_inter :public stnode
 	{
 	public:
-		alloc_inter(bool _readOnly){ readOnly = _readOnly; };
+		alloc_inter(bool _isConst){ isConst = _isConst; };
 		~alloc_inter();
 		std::list<allocUnit_inter> var;
-		bool readOnly;
+		bool isConst;
 		type getType(){ return type::ALLOC_INTER; };
 	};
 }
@@ -63,7 +73,6 @@ namespace iCode
 	{
 	public:
 		long long val;
-		dataType::type type;
 		argType getType(){ return argType::CONST; };
 	};
 
@@ -82,6 +91,8 @@ namespace iCode
 }
 typedef std::list<iCode::code> iCodeSeq;
 
-errInfo inter(stTree sTree, iCodeSeq &ret);
+errInfo stAnalyzer_build(stnode::stnode **node);
+errInfo stAnalyzer_type(stnode::stnode **node, dataType retType);
+errInfo inter(stTree &sTree, iCodeSeq &ret);
 
 #endif
