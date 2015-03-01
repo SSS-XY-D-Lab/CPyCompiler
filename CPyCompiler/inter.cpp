@@ -652,6 +652,16 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
 	return noErr;
 }
 
+errInfo inter_gen_ret(stnode::stnode* node, iCodeSeq &ret, iCode::arg &retVal)
+{
+
+}
+
+errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret)
+{
+
+}
+
 errInfo inter(stTree &sTree, iCodeSeq &ret)
 {
 	stTree::iterator p, pEnd = sTree.end();
