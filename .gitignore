@@ -193,6 +193,7 @@ ModelManifest.xml
 
 CPyCompiler/CPyCompiler.idc
 *.layout
-/CPyCompiler/.objs
+*.objs
 *.depend
 *.exe
+*.o
