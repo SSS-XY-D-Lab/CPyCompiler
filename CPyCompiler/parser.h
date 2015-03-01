@@ -62,9 +62,9 @@ namespace stnode
 	class id :public stnode
 	{
 	public:
-		id(std::string _name, dataType::type _type = dataType::ERROR){ name = _name; dtype = _type; };
+		id(std::string _name, dataType _type){ name = _name; dtype = _type; };
 		std::string name;
-		dataType::type dtype;
+		dataType dtype;
 		type getType() { return type::ID; };
 	};
 
@@ -72,7 +72,7 @@ namespace stnode
 	{
 		enum ops{
 			ERROR,
-			ARRAY_SUB, MEMBER,
+			ARRAY_SUB,
 			POSI, NEGA, INC_POST, DEC_POST, INC_PRE, DEC_PRE,
 			REF, DEREF, NOT, LGNOT,
 			DIV, MUL, MOD,
@@ -82,10 +82,9 @@ namespace stnode
 			EQU, NEQU,
 			AND, XOR, BOR, LGAND, LGOR,
 			ASSIGN, MODASS, DIVASS, MULASS, ADDASS, SUBASS, SHLASS, SHRASS, ANDASS, XORASS, BORASS,
-			COLONEXP
 		};
 
-		enum opType{ ARITHMETIC, ASSIGNMENT, CONDITIONAL, LOGICAL, POINTER, OTHER };
+		enum opType{ ARITHMETIC, ASSIGNMENT, LOGICAL, POINTER, OTHER };
 
 		class op :public stnode
 		{
@@ -97,7 +96,7 @@ namespace stnode
 			ops opVal;
 			int argCount;
 			stnode *arg[3];
-			dataType::type resType = dataType::ERROR;
+			dataType resType;
 			type getType(){ return type::OP; };
 
 			opType getOpType();
@@ -109,9 +108,9 @@ namespace stnode
 	class cast :public stnode
 	{
 	public:
-		cast(stnode *_node, dataType::type _vtype){ node = _node; vtype = _vtype; };
+		cast(stnode *_node, dataType _vtype){ node = _node; vtype = _vtype; };
 		stnode *node;
-		dataType::type vtype;
+		dataType vtype;
 		type getType(){ return type::CAST; };
 	};
 
@@ -120,7 +119,7 @@ namespace stnode
 	public:
 		std::string name;
 		std::list<id *> args;
-		dataType::type retType;
+		dataType retType;
 		stTree *block;
 		type getType(){ return type::FUNC; };
 	};

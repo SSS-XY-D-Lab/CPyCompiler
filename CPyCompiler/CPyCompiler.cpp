@@ -95,7 +95,16 @@ int main(int argc, char* argv[])
 		else
 		{
 			iCodeSeq ret3;
-			errInfo err = inter(ret2, ret3);
+			err = inter(ret2, ret3);
+			if (err.err != NULL)
+			{
+				cout << err.lineN << ':' << endl;
+				cout << lines[err.lineN - 1] << endl;
+				for (; err.pos > 1; err.pos--)
+					cout << ' ';
+				cout << '^' << endl;
+				cout << err.err << endl;
+			}
 		}
 	}
 #ifdef WIN32

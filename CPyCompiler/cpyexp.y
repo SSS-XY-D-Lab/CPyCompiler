@@ -6,34 +6,11 @@ int yylex();
 void yyerror(const char *);
 %}
 
-%token ID NUMBER CHARA STR DELIM VOID VOID_PTR SINT S8 S16 S32 S64 UINT U8 U16 U32 U64 SINT_PTR S8_PTR S16_PTR S32_PTR S64_PTR UINT_PTR U8_PTR U16_PTR U32_PTR U64_PTR COMMA SUB_LEFT SUB_RIGHT BRACKET_LEFT BRACKET_RIGHT MEMBER INC DEC NOT LGNOT DIV MUL MOD ADD SUB SHL SHR BIG BIGEQU LES LESEQU EQU NEQU AND XOR BOR LGAND LGOR ASSIGN MODASS DIVASS MULASS ADDASS SUBASS SHLASS SHRASS ANDASS XORASS BORASS QMARK COLON
+%token ID NUMBER CHARA STR DELIM DTYPE COMMA SUB_LEFT SUB_RIGHT BRACKET_LEFT BRACKET_RIGHT INC DEC NOT LGNOT DIV MUL MOD ADD SUB SHL SHR BIG BIGEQU LES LESEQU EQU NEQU AND XOR BOR LGAND LGOR ASSIGN MODASS DIVASS MULASS ADDASS SUBASS SHLASS SHRASS ANDASS XORASS BORASS QMARK COLON
 %start expr
 
 %%
 
-vtype : VOID
- | VOID_PTR
- | SINT
- | S8
- | S16
- | S32
- | S64
- | UINT
- | U8
- | U16
- | U32
- | U64
- | SINT_PTR
- | S8_PTR
- | S16_PTR
- | S32_PTR
- | S64_PTR
- | UINT_PTR
- | U8_PTR
- | U16_PTR
- | U32_PTR
- | U64_PTR
-;
 exp1 : ID
  | NUMBER
  | STR
@@ -44,7 +21,6 @@ exp2 : exp1
  | exp2 SUB_LEFT exp SUB_RIGHT { $$ = new stnode::op::op(stnode::op::ops::ARRAY_SUB, $1, $3); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; delete $4; }
  | ID BRACKET_LEFT BRACKET_RIGHT { $$ = new stnode::call(dynamic_cast<stnode::id*>($1)); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; delete $3; }
  | ID BRACKET_LEFT exp BRACKET_RIGHT { $$ = new stnode::call(dynamic_cast<stnode::id*>($1), $3); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; delete $4; }
- | exp2 MEMBER ID { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
  | exp2 INC { $$ = new stnode::op::op(stnode::op::ops::INC_POST, $1); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; }
  | exp2 DEC { $$ = new stnode::op::op(stnode::op::ops::DEC_POST, $1); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; }
 ;
@@ -59,7 +35,7 @@ exp3 : exp2
  | LGNOT exp4 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($1); op->arg[0] = $2; $$ = op; }
 ;
 exp4 : exp3
- | BRACKET_LEFT vtype BRACKET_RIGHT exp4 { stnode::cast *cast = dynamic_cast<stnode::cast*>($2); cast->node = $4; $$ = cast; }
+ | BRACKET_LEFT DTYPE BRACKET_RIGHT exp4 { stnode::cast *cast = dynamic_cast<stnode::cast*>($2); cast->node = $4; $$ = cast; delete $1; delete $3; }
 ;
 exp5 : exp4
  | exp5 MUL exp4 { $$ = new stnode::op::op(stnode::op::ops::MUL, $1, $3); $$->pos = $2->pos; $$->lineN = $2->lineN; delete $2; }
@@ -100,7 +76,7 @@ exp14 : exp13
  | exp14 LGOR exp13 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
 ;
 exp15 : exp14
- | exp14 QMARK exp COLON exp15 { $$ = new stnode::op::op(stnode::op::ops::COLONEXP, $1, $3, $5); $$->pos = $3->pos; delete $2; delete $4; }
+ | exp14 QMARK exp COLON exp15 { stnode::ifelse *cExp = new stnode::ifelse; cExp->pos = $2->pos; cExp->lineN = $2->lineN; cExp->exp = $1; cExp->blockTrue = new stTree; cExp->blockTrue->push_back($3); cExp->blockFalse = new stTree; cExp->blockFalse->push_back($5); delete $2; delete $4; $$ = cExp; }
 ;
 exp16 : exp15
  | exp3 ASSIGN exp16 { stnode::op::op *op = dynamic_cast<stnode::op::op*>($2); op->arg[0] = $1; op->arg[1] = $3; $$ = op; }
@@ -132,7 +108,7 @@ int yylex()
 		case token::type::ID:
 		{
 			token::id* tk = static_cast<token::id*>(*yacc_p);
-			yylval = new stnode::id(tk->str);
+			yylval = new stnode::id(tk->str, dataType());
 			ret = ID;
 			break;
 		}
@@ -182,10 +158,6 @@ int yylex()
 				case token::ops::opType::BRACKET_RIGHT:
 					ret = BRACKET_RIGHT;
 					newOP = stnode::op::ops::ERROR;
-					break;
-				case token::ops::opType::MEMBER:
-					ret = MEMBER;
-					newOP = stnode::op::ops::MEMBER;
 					break;
 				case token::ops::opType::INC:
 					ret = INC;
@@ -338,7 +310,6 @@ int yylex()
 				case stnode::op::ops::LGNOT:
 					opPtr = new stnode::op::op(newOP, NULL);
 					break;
-				case stnode::op::ops::MEMBER:
 				case stnode::op::ops::DIV:
 				case stnode::op::ops::MOD:
 				case stnode::op::ops::SHL:
@@ -367,7 +338,7 @@ int yylex()
 					opPtr = new stnode::op::op(newOP, NULL, NULL);
 					break;
 				default:
-					opPtr = new stnode::op::op(newOP, NULL);
+					opPtr = new stnode::op::op(newOP);
 			}
 			yylval = opPtr;
 			break;
@@ -375,64 +346,56 @@ int yylex()
 		case token::type::KEYWORD:
 		{
 			token::keyword* tk = static_cast<token::keyword*>(*yacc_p);
-			bool isPtr = false;
+			int ptrLvl = 0;
 			yacc_p++;
-			if (yacc_p == yacc_pEnd || (*yacc_p)->getType() != token::type::OP || static_cast<token::op *>(*yacc_p)->opType != token::ops::opType::MUL)
-				yacc_p--;
-			else
-				isPtr = true;
+			while (yacc_p != yacc_pEnd && (*yacc_p)->getType() == token::type::OP && static_cast<token::op *>(*yacc_p)->opType == token::ops::opType::MUL)
+			{
+				ptrLvl++;
+				yacc_p++;
+			}
 			dataType::type varType;
 			switch (tk->word)
 			{
 				case token::keywords::SINT:
-					if (isPtr){ varType = dataType::SINT_PTR; ret = SINT_PTR; }
-					else{ varType = dataType::SINT; ret = SINT; }
+					varType = dataType::SINT;
 					break;
 				case token::keywords::S8:
-					if (isPtr){ varType = dataType::S8_PTR; ret = S8_PTR; }
-					else{ varType = dataType::S8; ret = S8; }
+					varType = dataType::S8;
 					break;
 				case token::keywords::S16:
-					if (isPtr){ varType = dataType::S16_PTR; ret = S16_PTR; }
-					else{ varType = dataType::S16; ret = S16; }
+					varType = dataType::S16;
 					break;
 				case token::keywords::S32:
-					if (isPtr){ varType = dataType::S32_PTR; ret = S32_PTR; }
-					else{ varType = dataType::S32; ret = S32; }
+					varType = dataType::S32;
 					break;
 				case token::keywords::S64:
-					if (isPtr){ varType = dataType::S64_PTR; ret = S64_PTR; }
-					else{ varType = dataType::S64; ret = S64; }
+					varType = dataType::S64;
 					break;
 				case token::keywords::UINT:
-					if (isPtr){ varType = dataType::UINT_PTR; ret = UINT_PTR; }
-					else{ varType = dataType::UINT; ret = UINT; }
+					varType = dataType::UINT;
 					break;
 				case token::keywords::U8:
-					if (isPtr){ varType = dataType::U8_PTR; ret = U8_PTR; }
-					else{ varType = dataType::U8; ret = U8; }
+					varType = dataType::U8;
 					break;
 				case token::keywords::U16:
-					if (isPtr){ varType = dataType::U16_PTR; ret = U16_PTR; }
-					else{ varType = dataType::U16; ret = U16; }
+					varType = dataType::U16;
 					break;
 				case token::keywords::U32:
-					if (isPtr){ varType = dataType::U32_PTR; ret = U32_PTR; }
-					else{ varType = dataType::U32; ret = U32; }
+					varType = dataType::U32;
 					break;
 				case token::keywords::U64:
-					if (isPtr){ varType = dataType::U64_PTR; ret = U64_PTR; }
-					else{ varType = dataType::U64; ret = U64; }
+					varType = dataType::U64;
 					break;
 				case token::keywords::VOID:
-					if (isPtr){ varType = dataType::VOID_PTR; ret = VOID_PTR; }
-					else{ varType = dataType::VOID; ret = VOID; }
+					varType = dataType::VOID;
 					break;
 				default:
+					varType = dataType::ERROR;
 					yyerror("Illegal Token(Keyword)");
 					return -1;
 			}
-			yylval = new stnode::cast(NULL, varType);
+			yylval = new stnode::cast(NULL, dataType(varType, ptrLvl));
+			ret = DTYPE;
 			break;
 		}
 		case token::type::DELIM:

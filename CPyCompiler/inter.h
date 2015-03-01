@@ -12,8 +12,8 @@ namespace stnode
 	class id_inter :public stnode
 	{
 	public:
-		int id;
 		id_inter(int _id){ id = _id; };
+		int id;
 		type getType() { return type::ID_INTER; };
 	};
 
@@ -22,7 +22,7 @@ namespace stnode
 	public:
 		int funcID;
 		std::list<int> args;
-		dataType::type retType;
+		dataType retType;
 		stTree *block;
 		type getType() { return type::FUNC_INTER; };
 	};
@@ -30,9 +30,10 @@ namespace stnode
 	class call_inter :public stnode
 	{
 	public:
-		call_inter(int _funcID, stnode *_args = NULL){ funcID = _funcID; args = _args; };
+		call_inter(int _funcID, std::vector<stnode*> &_args){ funcID = _funcID; args = _args; };
+		call_inter(int _funcID, std::list<stnode*> &_args){ funcID = _funcID; for (std::list<stnode*>::iterator p = _args.begin(), pEnd = _args.end(); p != pEnd; p++) args.push_back(*p); };
 		int funcID;
-		stnode* args;
+		std::vector<stnode*> args;
 		type getType(){ return type::CALL_INTER; };
 	};
 
@@ -72,7 +73,6 @@ namespace iCode
 	{
 	public:
 		long long val;
-		dataType::type type;
 		argType getType(){ return argType::CONST; };
 	};
 
@@ -92,7 +92,7 @@ namespace iCode
 typedef std::list<iCode::code> iCodeSeq;
 
 errInfo stAnalyzer_build(stnode::stnode **node);
-errInfo stAnalyzer_type(stnode::stnode **node, dataType::type retType);
-errInfo inter(stTree sTree, iCodeSeq &ret);
+errInfo stAnalyzer_type(stnode::stnode **node, dataType retType);
+errInfo inter(stTree &sTree, iCodeSeq &ret);
 
 #endif

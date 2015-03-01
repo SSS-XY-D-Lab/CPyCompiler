@@ -26,7 +26,6 @@ namespace stnode
 			static const opItem opMap[] = {
 				ops::ERROR, "ERROR",
 				ops::ARRAY_SUB, "ARRAY_SUB",
-				ops::MEMBER, "MEMBER",
 				ops::POSI, "POSI",
 				ops::NEGA, "NEGA",
 				ops::INC_POST, "INC_POST",
@@ -77,7 +76,6 @@ namespace stnode
 			switch (opVal)
 			{
 				case ops::ARRAY_SUB:
-				case ops::MEMBER:
 				case ops::REF:
 				case ops::DEREF:
 					return opType::POINTER;
@@ -121,8 +119,6 @@ namespace stnode
 				case ops::XORASS:
 				case ops::BORASS:
 					return opType::ASSIGNMENT;
-				case ops::COLONEXP:
-					return opType::CONDITIONAL;
 				default:
 					return opType::OTHER;
 			}
@@ -151,48 +147,48 @@ namespace stnode
 	}
 }
 
-dataType::type getVarType(token::keywords::keywords kw, bool isPtr = false)
+dataType getVarType(token::keywords::keywords kw, int ptrLvl)
 {
 	dataType::type varType;
 	switch (kw)
 	{
 		case token::keywords::SINT:
-			varType = (isPtr ? dataType::SINT_PTR : dataType::SINT);
+			varType = dataType::SINT;
 			break;
 		case token::keywords::S8:
-			varType = (isPtr ? dataType::S8_PTR : dataType::S8);
+			varType = dataType::S8;
 			break;
 		case token::keywords::S16:
-			varType = (isPtr ? dataType::S16_PTR : dataType::S16);
+			varType = dataType::S16;
 			break;
 		case token::keywords::S32:
-			varType = (isPtr ? dataType::S32_PTR : dataType::S32);
+			varType = dataType::S32;
 			break;
 		case token::keywords::S64:
-			varType = (isPtr ? dataType::S64_PTR : dataType::S64);
+			varType = dataType::S64;
 			break;
 		case token::keywords::UINT:
-			varType = (isPtr ? dataType::UINT_PTR : dataType::UINT);
+			varType = dataType::UINT;
 			break;
 		case token::keywords::U8:
-			varType = (isPtr ? dataType::U8_PTR : dataType::U8);
+			varType = dataType::U8;
 			break;
 		case token::keywords::U16:
-			varType = (isPtr ? dataType::U16_PTR : dataType::U16);
+			varType = dataType::U16;
 			break;
 		case token::keywords::U32:
-			varType = (isPtr ? dataType::U32_PTR : dataType::U32);
+			varType = dataType::U32;
 			break;
 		case token::keywords::U64:
-			varType = (isPtr ? dataType::U64_PTR : dataType::U64);
+			varType = dataType::U64;
 			break;
 		case token::keywords::VOID:
-			varType = (isPtr ? dataType::VOID_PTR : dataType::VOID);
+			varType = dataType::VOID;
 			break;
 		default:
 			varType = dataType::ERROR;
 	}
-	return varType;
+	return dataType(varType, ptrLvl);
 }
 
 errInfo parser_exp(tokenList &tList, stnode::stnode **root, tokenList::iterator &p, int lineNumber)
@@ -226,15 +222,23 @@ errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterato
 		//type
 		token::keyword *type = static_cast<token::keyword *>(*p);
 		nextToken(;);
-		bool isPtr = false;
-		if ((*p)->getType() == token::type::OP && static_cast<token::op *>(*p)->opType == token::ops::opType::MUL)
+		int ptrLvl = 0;
+		while ((*p)->getType() == token::type::OP && static_cast<token::op *>(*p)->opType == token::ops::opType::MUL)
 		{
-			isPtr = true;
+			ptrLvl++;
 			nextToken(;);
 		}
-		dataType::type varType = getVarType(type->word, isPtr);
-		if (varType == dataType::ERROR || varType == dataType::VOID)
+		dataType varType = getVarType(type->word, ptrLvl);
+		if (varType.dType == dataType::ERROR || varType.dType == dataType::VOID)
+		{
+			prevToken;
+			while (ptrLvl)
+			{
+				ptrLvl--;
+				prevToken;
+			}
 			return errInfo(lineNumber, errPtr, "Invalid type");
+		}
 		stnode::id *newVar = NULL;
 		token::id *varName = NULL;
 		size_t subCount = 0;
@@ -260,8 +264,8 @@ errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterato
 				nextToken(;);
 			}
 			newVar = new stnode::id(varName->str, varType);
-			newVar->pos = varPos;
 			newVar->lineN = lineNumber;
+			newVar->pos = varPos;
 			if ((*p)->getType() == token::type::OP && static_cast<token::op *>(*p)->opType == token::ops::opType::ASSIGN)
 			{
 				//init val
@@ -333,6 +337,8 @@ errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterato
 							}
 						}
 					}
+					for (; i < subCount; i++)
+						initVal[i] = NULL;
 					allocPtr->var.push_back(stnode::allocUnit(newVar, initVal, subCount));
 				}
 			}
@@ -391,6 +397,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 					{
 						nextToken(;);
 						stnode::alloc *allocPtr = new stnode::alloc(true);
+						allocPtr->lineN = lineNumber;
 						allocPtr->pos = first->pos;
 						errInfo err = parser_dim(tList, allocPtr, p, lineNumber);
 						if (err.err != NULL)
@@ -405,6 +412,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 					{
 						nextToken(;);
 						stnode::alloc *allocPtr = new stnode::alloc(false);
+						allocPtr->lineN = lineNumber;
 						allocPtr->pos = first->pos;
 						errInfo err = parser_dim(tList, allocPtr, p, lineNumber);
 						if (err.err != NULL)
@@ -419,6 +427,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 						if (allowFunc)
 						{
 							stnode::func *funcPtr = new stnode::func;
+							funcPtr->lineN = lineNumber;
 							funcPtr->pos = first->pos;
 							nextToken(delete funcPtr;);
 							if ((*p)->getType() != token::type::KEYWORD)
@@ -428,19 +437,22 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 							}
 							token::keyword *type = static_cast<token::keyword *>(*p);
 							nextToken(delete funcPtr;);
-							bool isPtr = false;
-							if ((*p)->getType() == token::type::OP && static_cast<token::op *>(*p)->opType == token::ops::opType::MUL)
+							int ptrLvl = 0;
+							while ((*p)->getType() == token::type::OP && static_cast<token::op *>(*p)->opType == token::ops::opType::MUL)
 							{
-								isPtr = true;
-								nextToken(delete funcPtr;)
+								ptrLvl++;
+								nextToken(delete funcPtr;);
 							}
-							dataType::type varType = getVarType(type->word, isPtr);
-							if (varType == dataType::ERROR)
+							dataType varType = getVarType(type->word, ptrLvl);
+							if (varType.dType == dataType::ERROR)
 							{
 								delete funcPtr;
-								p--;
-								if (isPtr)
-									p--;
+								prevToken;
+								while (ptrLvl)
+								{
+									ptrLvl--;
+									prevToken;
+								}
 								return errInfo(lineNumber, errPtr, "Type expected");
 							}
 							funcPtr->retType = varType;
@@ -450,37 +462,47 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 								return errInfo(lineNumber, errPtr, "Function name expected");
 							}
 							funcPtr->name = static_cast<token::id *>(*p)->str;
-							nextToken(;);
+							nextToken(delete funcPtr;);
 							if ((*p)->getType() != token::type::OP || static_cast<token::op *>(*p)->opType != token::ops::opType::BRACKET_LEFT)
 							{
 								delete funcPtr;
 								return errInfo(lineNumber, errPtr, "( expected");
 							}
-							nextToken(;);
-							if ((*p)->getType() != token::type::KEYWORD)
+							nextToken(delete funcPtr;);
+							if ((*p)->getType() == token::type::OP && static_cast<token::op*>(*p)->opType == token::ops::opType::BRACKET_RIGHT)
 							{
-								delete funcPtr;
-								return errInfo(lineNumber, errPtr, "Parameter type expected");
+								nextToken(delete funcPtr;);
 							}
-							if (static_cast<token::keyword *>(*p)->word != token::keywords::keywords::VOID)
+							else
 							{
 								stnode::id *newVar;
 								std::string varName;
 								for (; p != pEnd;)
 								{
-									type = static_cast<token::keyword *>(*p);
-									nextToken(delete funcPtr;);
-									bool isPtr = false;
-									if ((*p)->getType() == token::type::OP && static_cast<token::op *>(*p)->opType == token::ops::opType::MUL)
-									{
-										isPtr = true;
-										nextToken(delete funcPtr;)
-									}
-									varType = getVarType(type->word, isPtr);
-									if (varType == dataType::ERROR || varType == dataType::VOID)
+									if ((*p)->getType() != token::type::KEYWORD)
 									{
 										delete funcPtr;
-										return errInfo(lineNumber, errPtr - (isPtr ? 2 : 1), "Parameter type expected");
+										return errInfo(lineNumber, errPtr, "Parameter type expected");
+									}
+									type = static_cast<token::keyword *>(*p);
+									nextToken(delete funcPtr;);
+									int ptrLvl = 0;
+									while ((*p)->getType() == token::type::OP && static_cast<token::op *>(*p)->opType == token::ops::opType::MUL)
+									{
+										ptrLvl++;
+										nextToken(delete funcPtr;);
+									}
+									varType = getVarType(type->word, ptrLvl);
+									if (varType.dType == dataType::ERROR || (varType.dType == dataType::VOID && ptrLvl == 0))
+									{
+										delete funcPtr;
+										prevToken;
+										while (ptrLvl)
+										{
+											ptrLvl--;
+											prevToken;
+										}
+										return errInfo(lineNumber, errPtr, "Parameter type expected");
 									}
 									if ((*p)->getType() != token::type::ID)
 									{
@@ -489,6 +511,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 									}
 									varName = static_cast<token::id *>(*p)->str;
 									newVar = new stnode::id(varName, varType);
+									newVar->lineN = lineNumber;
 									newVar->pos = (*p)->pos;
 									nextToken(delete funcPtr; delete newVar;)
 									funcPtr->args.push_back(newVar);
@@ -526,6 +549,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 					{
 						nextToken(;);
 						stnode::ret *retPtr = new stnode::ret;
+						retPtr->lineN = lineNumber;
 						retPtr->pos = first->pos;
 						if ((*p)->getType() == token::type::DELIM)
 						{
@@ -551,6 +575,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 						if (err.err != NULL)
 							return err;
 						stnode::ifelse *ifPtr = new stnode::ifelse;
+						ifPtr->lineN = lineNumber;
 						ifPtr->pos = first->pos;
 						ifPtr->exp = exp;
 						ifPtr->blockTrue = NULL;
@@ -618,5 +643,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 		if (ptr != NULL)
 			sTreeStk.back().sTree->push_back(ptr);
 	}
+	if (sTreeStk.size() > 1)
+		return errInfo(lineNumber, errPtr, "Missing code block ending");
 	return noErr;
 }

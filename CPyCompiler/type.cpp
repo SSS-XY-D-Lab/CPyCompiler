@@ -4,199 +4,142 @@
 
 const int uintLvl = static_cast<int>(log(intSize) / log(2)) * 4;
 
-dataType::type toPtr(dataType::type type)
+std::string type2Str(dataType type)
 {
-	switch (type)
+	std::string ret;
+	switch (type.dType)
 	{
 		case dataType::VOID:
-			return dataType::VOID_PTR;
+			ret = "VOID";
 		case dataType::SINT:
-			return dataType::SINT_PTR;
+			ret = "SINT";
 		case dataType::S8:
-			return dataType::S8_PTR;
+			ret = "S8";
 		case dataType::S16:
-			return dataType::S16_PTR;
+			ret = "S16";
 		case dataType::S32:
-			return dataType::S32_PTR;
+			ret = "S32";
 		case dataType::S64:
-			return dataType::S64_PTR;
+			ret = "S64";
 		case dataType::UINT:
-			return dataType::UINT_PTR;
+			ret = "UINT";
 		case dataType::U8:
-			return dataType::U8_PTR;
+			ret = "U8";
 		case dataType::U16:
-			return dataType::U16_PTR;
+			ret = "U16";
 		case dataType::U32:
-			return dataType::U32_PTR;
+			ret = "U32";
 		case dataType::U64:
-			return dataType::U64_PTR;
-		case dataType::VOID_PTR:
-			return dataType::VOID_PTR_2;
-		case dataType::SINT_PTR:
-			return dataType::SINT_PTR_2;
-		case dataType::S8_PTR:
-			return dataType::S8_PTR_2;
-		case dataType::S16_PTR:
-			return dataType::S16_PTR_2;
-		case dataType::S32_PTR:
-			return dataType::S32_PTR_2;
-		case dataType::S64_PTR:
-			return dataType::S64_PTR_2;
-		case dataType::UINT_PTR:
-			return dataType::UINT_PTR_2;
-		case dataType::U8_PTR:
-			return dataType::U8_PTR_2;
-		case dataType::U16_PTR:
-			return dataType::U16_PTR_2;
-		case dataType::U32_PTR:
-			return dataType::U32_PTR_2;
-		case dataType::U64_PTR:
-			return dataType::U64_PTR_2;
+			ret = "U64";
+		default:
+			return "";
 	}
-	return dataType::ERROR;
+	for (int i = 0; i < type.ptrLvl; i++)
+		ret.push_back('*');
+	return ret;
 }
 
-int typeSize(dataType::type type)
+dataType toRef(dataType type)
 {
-	switch (type)
+	type.ptrLvl++;
+	return type;
+}
+
+dataType deref(dataType type)
+{
+	type.ptrLvl--;
+	return type;
+}
+
+int typeSize(dataType type)
+{
+	if (type.ptrLvl > 0)
+		return intSize;
+	else
 	{
-		case dataType::VOID:
-			return 0;
-		case dataType::SINT:
-		case dataType::UINT:
-			return intSize;
-		case dataType::S8:
-		case dataType::U8:
-			return 1;
-		case dataType::S16:
-		case dataType::U16:
-			return 2;
-		case dataType::S32:
-		case dataType::U32:
-			return 4;
-		case dataType::S64:
-		case dataType::U64:
-			return 8;
-		case dataType::VOID_PTR:
-		case dataType::SINT_PTR:
-		case dataType::S8_PTR:
-		case dataType::S16_PTR:
-		case dataType::S32_PTR:
-		case dataType::S64_PTR:
-		case dataType::UINT_PTR:
-		case dataType::U8_PTR:
-		case dataType::U16_PTR:
-		case dataType::U32_PTR:
-		case dataType::U64_PTR:
-		case dataType::VOID_PTR_2:
-		case dataType::SINT_PTR_2:
-		case dataType::S8_PTR_2:
-		case dataType::S16_PTR_2:
-		case dataType::S32_PTR_2:
-		case dataType::S64_PTR_2:
-		case dataType::UINT_PTR_2:
-		case dataType::U8_PTR_2:
-		case dataType::U16_PTR_2:
-		case dataType::U32_PTR_2:
-		case dataType::U64_PTR_2:
-			return intSize;
+		switch (type.dType)
+		{
+			case dataType::VOID:
+				return 0;
+			case dataType::SINT:
+			case dataType::UINT:
+				return intSize;
+			case dataType::S8:
+			case dataType::U8:
+				return 1;
+			case dataType::S16:
+			case dataType::U16:
+				return 2;
+			case dataType::S32:
+			case dataType::U32:
+				return 4;
+			case dataType::S64:
+			case dataType::U64:
+				return 8;
+		}
 	}
 	return -1;
 }
 
-bool isUnsigned(dataType::type type)
+bool isUnsigned(dataType type)
 {
-	switch (type)
+	if (type.ptrLvl > 0)
+		return true;
+	else
 	{
-		case dataType::SINT:
-		case dataType::S8:
-		case dataType::S16:
-		case dataType::S32:
-		case dataType::S64:
-			return false;
-		case dataType::UINT:
-		case dataType::U8:
-		case dataType::U16:
-		case dataType::U32:
-		case dataType::U64:
-		case dataType::VOID:
-		case dataType::VOID_PTR:
-		case dataType::SINT_PTR:
-		case dataType::S8_PTR:
-		case dataType::S16_PTR:
-		case dataType::S32_PTR:
-		case dataType::S64_PTR:
-		case dataType::UINT_PTR:
-		case dataType::U8_PTR:
-		case dataType::U16_PTR:
-		case dataType::U32_PTR:
-		case dataType::U64_PTR:
-		case dataType::VOID_PTR_2:
-		case dataType::SINT_PTR_2:
-		case dataType::S8_PTR_2:
-		case dataType::S16_PTR_2:
-		case dataType::S32_PTR_2:
-		case dataType::S64_PTR_2:
-		case dataType::UINT_PTR_2:
-		case dataType::U8_PTR_2:
-		case dataType::U16_PTR_2:
-		case dataType::U32_PTR_2:
-		case dataType::U64_PTR_2:
-			return true;
+		switch (type.dType)
+		{
+			case dataType::SINT:
+			case dataType::S8:
+			case dataType::S16:
+			case dataType::S32:
+			case dataType::S64:
+				return false;
+			case dataType::UINT:
+			case dataType::U8:
+			case dataType::U16:
+			case dataType::U32:
+			case dataType::U64:
+			case dataType::VOID:
+				return true;
+		}
 	}
 	return false;
 }
 
-int typeLvl(dataType::type type)
+int typeLvl(dataType type)
 {
-	switch(type)
+	if (type.ptrLvl > 0)
+		return true;
+	else
 	{
-		case dataType::VOID:
-			return 0;
-		case dataType::S8:
-			return 1;
-		case dataType::U8:
-			return 2;
-		case dataType::S16:
-			return 3;
-		case dataType::U16:
-			return 4;
-		case dataType::S32:
-			return 5;
-		case dataType::U32:
-			return 6;
-		case dataType::S64:
-			return 7;
-		case dataType::U64:
-			return 8;
-		case dataType::SINT:
-			return uintLvl - 1;
-		case dataType::UINT:
-		case dataType::VOID_PTR:
-		case dataType::SINT_PTR:
-		case dataType::S8_PTR:
-		case dataType::S16_PTR:
-		case dataType::S32_PTR:
-		case dataType::S64_PTR:
-		case dataType::UINT_PTR:
-		case dataType::U8_PTR:
-		case dataType::U16_PTR:
-		case dataType::U32_PTR:
-		case dataType::U64_PTR:
-		case dataType::VOID_PTR_2:
-		case dataType::SINT_PTR_2:
-		case dataType::S8_PTR_2:
-		case dataType::S16_PTR_2:
-		case dataType::S32_PTR_2:
-		case dataType::S64_PTR_2:
-		case dataType::UINT_PTR_2:
-		case dataType::U8_PTR_2:
-		case dataType::U16_PTR_2:
-		case dataType::U32_PTR_2:
-		case dataType::U64_PTR_2:
-			return uintLvl;
+		switch (type.dType)
+		{
+			case dataType::VOID:
+				return 0;
+			case dataType::S8:
+				return 1;
+			case dataType::U8:
+				return 2;
+			case dataType::S16:
+				return 3;
+			case dataType::U16:
+				return 4;
+			case dataType::S32:
+				return 5;
+			case dataType::U32:
+				return 6;
+			case dataType::S64:
+				return 7;
+			case dataType::U64:
+				return 8;
+			case dataType::SINT:
+				return uintLvl - 1;
+			case dataType::UINT:
+				return uintLvl;
+		}
 	}
-	return false;
+	return -1;
 }
 
 dataType::type minNum(long long num)

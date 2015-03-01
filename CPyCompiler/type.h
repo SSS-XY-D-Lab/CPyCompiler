@@ -3,20 +3,25 @@
 #ifndef _H_TYPE
 #define _H_TYPE
 
-namespace dataType
+struct dataType
 {
-	enum type{ 
-		ERROR, CONST, 
-		VOID, SINT, S8, S16, S32, S64, UINT, U8, U16, U32, U64, 
-		VOID_PTR, SINT_PTR, S8_PTR, S16_PTR, S32_PTR, S64_PTR, UINT_PTR, U8_PTR, U16_PTR, U32_PTR, U64_PTR, 
-		VOID_PTR_2, SINT_PTR_2, S8_PTR_2, S16_PTR_2, S32_PTR_2, S64_PTR_2, UINT_PTR_2, U8_PTR_2, U16_PTR_2, U32_PTR_2, U64_PTR_2 
+	enum type{
+		ERROR,
+		VOID, SINT, S8, S16, S32, S64, UINT, U8, U16, U32, U64,
 	};
-}
+	dataType(){ dType = dataType::ERROR; ptrLvl = 0; isConst = false; };
+	dataType(type _dType, int _ptrLvl, bool _isConst = false){ dType = _dType; ptrLvl = _ptrLvl; if (ptrLvl == 0){ isConst = _isConst; } else{ isConst = false; } };
+	type dType;
+	int ptrLvl;
+	bool isConst;
+};
 
-dataType::type toPtr(dataType::type type);
-int typeSize(dataType::type type);
-int typeLvl(dataType::type type);
-bool isUnsigned(dataType::type type);
+std::string type2Str(dataType type);
+dataType toRef(dataType type);
+dataType deref(dataType type);
+int typeSize(dataType type);
+int typeLvl(dataType type);
+bool isUnsigned(dataType type);
 dataType::type minNum(long long num);
 const int intSize = 2;
 
