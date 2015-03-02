@@ -83,7 +83,9 @@ int main(int argc, char* argv[])
 		if (err.err != NULL)
 		{
 			cout << err.lineN << ':' << endl;
-			cout << lines[err.lineN - 1] << endl;
+			if (err.lineN < static_cast<int>(lines.size()))
+				cout << lines[err.lineN - 1];
+			cout << endl;
 			for (; err.pos > 1; err.pos--)
 				cout << ' ';
 			cout << '^' << endl;

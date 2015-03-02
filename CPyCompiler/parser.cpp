@@ -229,7 +229,7 @@ errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterato
 			nextToken(;);
 		}
 		dataType varType = getVarType(type->word, ptrLvl);
-		if (varType.dType == dataType::ERROR || varType.dType == dataType::VOID)
+		if (varType.dType == dataType::ERROR || (varType.dType == dataType::VOID && varType.ptrLvl == 0))
 		{
 			prevToken;
 			while (ptrLvl)
@@ -502,7 +502,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 											ptrLvl--;
 											prevToken;
 										}
-										return errInfo(lineNumber, errPtr, "Parameter type expected");
+										return errInfo(lineNumber, errPtr, "Invalid type");
 									}
 									if ((*p)->getType() != token::type::ID)
 									{
@@ -644,6 +644,6 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 			sTreeStk.back().sTree->push_back(ptr);
 	}
 	if (sTreeStk.size() > 1)
-		return errInfo(lineNumber, errPtr, "Missing code block ending");
+		return errInfo(lineNumber + 1, 0, "Missing code block ending");
 	return noErr;
 }

@@ -305,75 +305,80 @@ errInfo stAnalyzer_build(stnode::stnode **node)
 errInfo getNodeType(stnode::stnode **node, dataType &type, dataType retType)
 {
 	stnode::stnode *ptr = *node;
-	switch (ptr->getType())
+	if (ptr == NULL)
+		type = dataType(dataType::VOID, 0);
+	else
 	{
-		case stnode::type::NUMBER:
+		switch (ptr->getType())
 		{
-			type = dataType(minNum(static_cast<stnode::number*>(ptr)->val), 0, true);
-			break;
-		}
-		case stnode::type::CHARA:
-		{
-			type = dataType(dataType::S8, 0, true);
-			break;
-		}
-		case stnode::type::STR:
-		{
-			type = dataType(dataType::S8, 1);
-			break;
-		}
-		case stnode::type::ID:
-		{
-			return errInfo(ptr->lineN, ptr->pos, "stAnalyzer_build not executed");
-			break;
-		}
-		case stnode::type::ID_INTER:
-		{
-			type = idTable[static_cast<stnode::id_inter*>(ptr)->id].type;
-			break;
-		}
-		case stnode::type::OP:
-		{
-			stnode::op::op* opPtr = static_cast<stnode::op::op*>(ptr);
-			if (opPtr->resType.dType != dataType::ERROR)
+			case stnode::type::NUMBER:
 			{
-				type = opPtr->resType;
+				type = dataType(minNum(static_cast<stnode::number*>(ptr)->val), 0, true);
+				break;
 			}
-			else
+			case stnode::type::CHARA:
 			{
-				errInfo err = stAnalyzer_type(node, retType);
-				if (err.err != NULL)
-					return err;
-				return getNodeType(node, type, retType);
+				type = dataType(dataType::S8, 0, true);
+				break;
 			}
-			break;
-		}
-		case stnode::type::CAST:
-		{
-			type = static_cast<stnode::cast*>(ptr)->vtype;
-			break;
-		}
-		case stnode::type::CALL:
-		{
-			return errInfo(ptr->lineN, ptr->pos, "stAnalyzer_build not executed");
-			break;
-		}
-		case stnode::type::CALL_INTER:
-		{
-			idItem funcItem = idTable[static_cast<stnode::call_inter*>(ptr)->funcID];
-			if (funcItem.funcID == -1)
-				return errInfo(ptr->lineN, ptr->pos, "Call of non-function");
-			type = funcTable[funcItem.funcID].retType;
-			break;
-		}
-		case stnode::type::TREE:
-		{
-			return getNodeType(&(static_cast<stnode::expTree*>(ptr)->exp), type, retType);
-			break;
-		}
-		default:
-		{
-			return errInfo(ptr->lineN, ptr->pos, "It shouldn't be here");
+			case stnode::type::STR:
+			{
+				type = dataType(dataType::S8, 1);
+				break;
+			}
+			case stnode::type::ID:
+			{
+				return errInfo(ptr->lineN, ptr->pos, "stAnalyzer_build not executed");
+				break;
+			}
+			case stnode::type::ID_INTER:
+			{
+				type = idTable[static_cast<stnode::id_inter*>(ptr)->id].type;
+				break;
+			}
+			case stnode::type::OP:
+			{
+				stnode::op::op* opPtr = static_cast<stnode::op::op*>(ptr);
+				if (opPtr->resType.dType != dataType::ERROR)
+				{
+					type = opPtr->resType;
+				}
+				else
+				{
+					errInfo err = stAnalyzer_type(node, retType);
+					if (err.err != NULL)
+						return err;
+					return getNodeType(node, type, retType);
+				}
+				break;
+			}
+			case stnode::type::CAST:
+			{
+				type = static_cast<stnode::cast*>(ptr)->vtype;
+				break;
+			}
+			case stnode::type::CALL:
+			{
+				return errInfo(ptr->lineN, ptr->pos, "stAnalyzer_build not executed");
+				break;
+			}
+			case stnode::type::CALL_INTER:
+			{
+				idItem funcItem = idTable[static_cast<stnode::call_inter*>(ptr)->funcID];
+				if (funcItem.funcID == -1)
+					return errInfo(ptr->lineN, ptr->pos, "Call of non-function");
+				type = funcTable[funcItem.funcID].retType;
+				break;
+			}
+			case stnode::type::TREE:
+			{
+				return getNodeType(&(static_cast<stnode::expTree*>(ptr)->exp), type, retType);
+				break;
+			}
+			default:
+			{
+				return errInfo(ptr->lineN, ptr->pos, "It shouldn't be here");
+			}
 		}
 	}
 	return noErr;
@@ -409,7 +414,7 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
 						{
 							if (types[i].ptrLvl != type.ptrLvl || (types[i].dType == dataType::VOID && types[i].ptrLvl == 0))
 							{
-								return errInfo(opNode->arg[i]->lineN, opNode->arg[i]->pos, str2cstr(std::string("Invalid cast from ") + type2Str(types[i]) + "to" + type2Str(type)));
+								return errInfo(opNode->arg[i]->lineN, opNode->arg[i]->pos, str2cstr(std::string("Invalid cast from ") + type2Str(types[i]) + " to " + type2Str(type)));
 							}
 							if (typeLvl(types[i]) < typeLvl(type))
 							{
@@ -429,14 +434,16 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
 					errInfo err = getNodeType(&opNode->arg[1], type2, retType);
 					if (err.err != NULL)
 						return err;
+					if (type2.dType == dataType::VOID && type2.ptrLvl == 0)
+						return errInfo(opNode->arg[1]->lineN, opNode->arg[1]->pos, str2cstr(std::string("Invalid cast from ") + type2Str(type2) + " to " + type2Str(type1)));
 					if (type2.isConst == false)
 					{
 						err = getNodeType(&opNode->arg[0], type1, retType);
 						if (err.err != NULL)
 							return err;
-						if (type1.ptrLvl != type2.ptrLvl || (type2.dType == dataType::VOID && type2.ptrLvl == 0))
+						if (type1.ptrLvl != type2.ptrLvl || (type1.dType == dataType::VOID && type1.ptrLvl == 0))
 						{
-							return errInfo(opNode->arg[1]->lineN, opNode->arg[1]->pos, str2cstr(std::string("Invalid cast from ") + type2Str(type2) + "to" + type2Str(type1)));
+							return errInfo(opNode->arg[1]->lineN, opNode->arg[1]->pos, str2cstr(std::string("Invalid cast from ") + type2Str(type2) + " to " + type2Str(type1)));
 						}
 						if (type2.dType != type1.dType)
 						{
@@ -539,11 +546,13 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
 			errInfo err = getNodeType(&(retNode->retVal), valType, retType);
 			if (err.err != NULL)
 				return err;
+			if ((valType.dType == dataType::VOID && valType.ptrLvl == 0) ^ (retType.dType == dataType::VOID && retType.ptrLvl == 0))
+				return errInfo(retNode->lineN, retNode->pos, str2cstr(std::string("Invalid cast from ") + type2Str(valType) + " to " + type2Str(retType)));
 			if (valType.isConst == false)
 			{
-				if (retType.ptrLvl != valType.ptrLvl || (valType.dType == dataType::VOID && valType.ptrLvl == 0))
+				if (retType.ptrLvl != valType.ptrLvl)
 				{
-					return errInfo(retNode->lineN, retNode->pos, str2cstr(std::string("Invalid cast from ") + type2Str(valType) + "to" + type2Str(retType)));
+					return errInfo(retNode->lineN, retNode->pos, str2cstr(std::string("Invalid cast from ") + type2Str(valType) + " to " + type2Str(retType)));
 				}
 				if (retType.dType != valType.dType)
 				{
@@ -603,7 +612,7 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
 							return err;
 						if (type1.ptrLvl != type2.ptrLvl || (type2.dType == dataType::VOID && type2.ptrLvl == 0))
 						{
-							return errInfo((*(p->val))->lineN, (*(p->val))->pos, str2cstr(std::string("Invalid cast from ") + type2Str(type2) + "to" + type2Str(type1)));
+							return errInfo((*(p->val))->lineN, (*(p->val))->pos, str2cstr(std::string("Invalid cast from ") + type2Str(type2) + " to " + type2Str(type1)));
 						}
 						if (type2.dType != type1.dType)
 						{
@@ -625,7 +634,7 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
 								return err;
 							if (type1.ptrLvl != type2.ptrLvl || (type2.dType == dataType::VOID && type2.ptrLvl == 0))
 							{
-								return errInfo(p->val[i]->lineN, p->val[i]->pos, str2cstr(std::string("Invalid cast from ") + type2Str(type2) + "to" + type2Str(type1)));
+								return errInfo(p->val[i]->lineN, p->val[i]->pos, str2cstr(std::string("Invalid cast from ") + type2Str(type2) + " to " + type2Str(type1)));
 							}
 							if (type2.dType != type1.dType)
 							{

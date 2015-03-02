@@ -11,26 +11,37 @@ std::string type2Str(dataType type)
 	{
 		case dataType::VOID:
 			ret = "VOID";
+			break;
 		case dataType::SINT:
 			ret = "SINT";
+			break;
 		case dataType::S8:
 			ret = "S8";
+			break;
 		case dataType::S16:
 			ret = "S16";
+			break;
 		case dataType::S32:
 			ret = "S32";
+			break;
 		case dataType::S64:
 			ret = "S64";
+			break;
 		case dataType::UINT:
 			ret = "UINT";
+			break;
 		case dataType::U8:
 			ret = "U8";
+			break;
 		case dataType::U16:
 			ret = "U16";
+			break;
 		case dataType::U32:
 			ret = "U32";
+			break;
 		case dataType::U64:
 			ret = "U64";
+			break;
 		default:
 			return "";
 	}
