@@ -12,7 +12,7 @@ struct errInfo
 	int lineN, pos;
 	const char* err;
 };
-#define noErr (errInfo(-1, -1, NULL))
+const errInfo noErr = errInfo(-1, -1, NULL);
 
 namespace stnode
 {
@@ -127,8 +127,8 @@ namespace stnode
 	class call :public stnode
 	{
 	public:
-		call(id *_id, stnode *_args = NULL){ id = _id; args = _args; };
-		id* id;
+		call(id *_funcID, stnode *_args = NULL){ funcID = _funcID; args = _args; };
+		id* funcID;
 		stnode* args;
 		type getType(){ return type::CALL; };
 	};
