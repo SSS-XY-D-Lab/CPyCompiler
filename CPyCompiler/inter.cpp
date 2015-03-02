@@ -191,12 +191,12 @@ errInfo stAnalyzer_build(stnode::stnode **node)
 		case stnode::type::CALL:
 		{
 			stnode::call *callNode = static_cast<stnode::call*>(*node);
-			stnode::stnode *tmpPtr = callNode->id;
+			stnode::stnode *tmpPtr = callNode->funcID;
 			errInfo err = stAnalyzer_build(&tmpPtr);
 			if (err.err != NULL)
 				return err;
 			if (tmpPtr->getType() != stnode::type::ID_INTER)
-				return errInfo(callNode->id->lineN, callNode->id->pos, getDbgLineNStr("Internal error:Please contact developer", __LINE__));
+				return errInfo(callNode->funcID->lineN, callNode->funcID->pos, getDbgLineNStr("Internal error:Please contact developer", __LINE__));
 			
 			err = stAnalyzer_build(&(callNode->args));
 			if (err.err != NULL)
@@ -649,6 +649,16 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
 			break;
 		}
 	}
+	return noErr;
+}
+
+errInfo inter_gen_ret(stnode::stnode* node, iCodeSeq &ret, iCode::arg &retVal)
+{
+	return noErr;
+}
+
+errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret)
+{
 	return noErr;
 }
 
