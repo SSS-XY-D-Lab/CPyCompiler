@@ -30,6 +30,9 @@
     <ClInclude Include="type.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="st_inter.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -51,6 +54,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="type.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="stAnalyzer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

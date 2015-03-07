@@ -4,8 +4,6 @@
 #define _H_INTER
 
 #include "parser.h"
-#include <unordered_map>
-#include <vector>
 
 namespace stnode
 {
@@ -62,6 +60,7 @@ namespace iCode
 {
 	enum argType{ ERROR, CONST, ID };
 	enum opType{ ADD, SUB, MUL, DIV, MOD, SHL, SHR, R_ADD, I_ADD };
+	enum codeType{ _ERROR, NORMAL, LABEL, JUMP };
 
 	class arg
 	{
@@ -83,16 +82,36 @@ namespace iCode
 		argType getType(){ return argType::ID; };
 	};
 
-	struct code
+	class iCode
 	{
+	public:
+		virtual codeType getType(){ return codeType::_ERROR; };
+	};
+
+	class code :public iCode
+	{
+	public:
 		opType op;
 		arg *ret, *arg1, *arg2;
+		codeType getType(){ return codeType::NORMAL; };
+	};
+
+	class label :public iCode
+	{
+	public:
+		int labelNo;
+		codeType getType(){ return codeType::LABEL; };
+	};
+
+	class jump :public iCode
+	{
+	public:
+		int labelNo;
+		codeType getType(){ return codeType::JUMP; };
 	};
 }
-typedef std::list<iCode::code> iCodeSeq;
+typedef std::list<iCode::iCode*> iCodeSeq;
 
-errInfo stAnalyzer_build(stnode::stnode **node);
-errInfo stAnalyzer_type(stnode::stnode **node, dataType retType);
 errInfo inter(stTree &sTree, iCodeSeq &ret);
 
 #endif

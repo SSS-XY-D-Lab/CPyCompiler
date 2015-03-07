@@ -90,6 +90,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <CreateHotPatchableImage>Enabled</CreateHotPatchableImage>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -150,6 +151,7 @@
     <ClInclude Include="lexer.h" />
     <ClInclude Include="inter.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="st_inter.h" />
     <ClInclude Include="type.h" />
   </ItemGroup>
   <ItemGroup>
@@ -158,6 +160,7 @@
     <ClCompile Include="parser_yacc.cpp" />
     <ClCompile Include="lexer.cpp" />
     <ClCompile Include="inter.cpp" />
+    <ClCompile Include="stAnalyzer.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

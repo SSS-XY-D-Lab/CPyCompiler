@@ -3,10 +3,6 @@
 #ifndef _H_SCANNER
 #define _H_SCANNER
 
-#include <list>
-#include <string>
-#include <sstream>
-
 namespace token
 {
 	enum type{ ERROR, NUMBER, CHARA, STR, ID, OP, KEYWORD, BEGIN, DELIM };
