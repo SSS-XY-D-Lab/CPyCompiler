@@ -71,13 +71,23 @@ namespace iCode
 	class con :public arg
 	{
 	public:
+		con(long long _val){ val = _val; }
 		long long val;
+		argType getType(){ return argType::CONST; };
+	};
+
+	class str :public arg
+	{
+	public:
+		str(int _strID){ strID = _strID; }
+		int strID;
 		argType getType(){ return argType::CONST; };
 	};
 
 	class id :public arg
 	{
 	public:
+		id(int _sn){ sn = _sn; }
 		int sn;
 		argType getType(){ return argType::ID; };
 	};
@@ -91,6 +101,7 @@ namespace iCode
 	class code :public iCode
 	{
 	public:
+		code(opType _op, arg *_ret, arg *_arg1, arg *_arg2 = NULL){ op = _op; ret = _ret; arg1 = _arg1; arg2 = _arg2; };
 		opType op;
 		arg *ret, *arg1, *arg2;
 		codeType getType(){ return codeType::NORMAL; };
@@ -99,6 +110,7 @@ namespace iCode
 	class label :public iCode
 	{
 	public:
+		label(int _labelNo){ labelNo = _labelNo; }
 		int labelNo;
 		codeType getType(){ return codeType::LABEL; };
 	};
@@ -106,12 +118,13 @@ namespace iCode
 	class jump :public iCode
 	{
 	public:
+		jump(int _labelNo){ labelNo = _labelNo; }
 		int labelNo;
 		codeType getType(){ return codeType::JUMP; };
 	};
 }
 typedef std::list<iCode::iCode*> iCodeSeq;
 
-errInfo inter(stTree &sTree, iCodeSeq &ret);
+errInfo inter(stTree &sTree, iCodeSeq &ret, dataType retType);
 
 #endif

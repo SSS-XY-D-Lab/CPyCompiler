@@ -10,6 +10,7 @@ stnode::stnode *yacc_result;
 tokenList::iterator yacc_p, yacc_pEnd;
 const char *yacc_err;
 int yacc_lineN;
+std::mutex yacc_mutex;
 
 namespace stnode
 {
@@ -198,6 +199,7 @@ errInfo parser_exp(tokenList &tList, stnode::stnode **root, tokenList::iterator 
 		if ((*p)->getType() == token::type::DELIM)
 			break;
 	p++;
+	yacc_mutex.lock();
 	yacc_result = NULL;
 	yacc_err = NULL;
 	yacc_p = pBeg;
@@ -208,9 +210,11 @@ errInfo parser_exp(tokenList &tList, stnode::stnode **root, tokenList::iterator 
 	{
 		if (yacc_p == pEnd)
 			yacc_p--;
+		yacc_mutex.unlock();
 		return errInfo(lineNumber, (*yacc_p)->pos, yacc_err);
 	}
 	*root = yacc_result;
+	yacc_mutex.unlock();
 	return noErr;
 }
 
@@ -400,7 +404,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 						allocPtr->lineN = lineNumber;
 						allocPtr->pos = first->pos;
 						errInfo err = parser_dim(tList, allocPtr, p, lineNumber);
-						if (err.err != NULL)
+						if (err.err)
 						{
 							delete allocPtr;
 							return err;
@@ -415,7 +419,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 						allocPtr->lineN = lineNumber;
 						allocPtr->pos = first->pos;
 						errInfo err = parser_dim(tList, allocPtr, p, lineNumber);
-						if (err.err != NULL)
+						if (err.err)
 						{
 							delete allocPtr;
 							return err;
@@ -560,7 +564,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 						{
 							stnode::stnode *exp;
 							errInfo err = parser_exp(tList, &exp, p, lineNumber);
-							if (err.err != NULL)
+							if (err.err)
 								return err;
 							retPtr->retVal = exp;
 						}
@@ -572,7 +576,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 						stnode::stnode *exp;
 						nextToken(;);
 						errInfo err = parser_exp(tList, &exp, p, lineNumber);
-						if (err.err != NULL)
+						if (err.err)
 							return err;
 						stnode::ifelse *ifPtr = new stnode::ifelse;
 						ifPtr->lineN = lineNumber;
@@ -635,7 +639,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 			{
 				stnode::stnode *ptrExp = NULL;
 				errInfo err = parser_exp(tList, &ptrExp, p, lineNumber);
-				if (err.err != NULL)
+				if (err.err)
 					return err;
 				ptr = ptrExp;
 			}

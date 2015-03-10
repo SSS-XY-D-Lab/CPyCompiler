@@ -1,14 +1,84 @@
 #include "stdafx.h"
 #include "st_inter.h"
 
-errInfo stAnalyzer_build(stnode::stnode **node)
+int getID(std::string name, idHashTableTp &idHashTable)
+{
+	idHashTableTp::reverse_iterator pItr, pEnd = idHashTable.rend();
+	idHashLayerTp::iterator pRes;
+	for (pItr = idHashTable.rbegin(); pItr != pEnd; pItr++)
+	{
+		pRes = (*pItr)->find(name);
+		if (pRes != (*pItr)->end())
+			return pRes->second;
+	}
+	return -1;
+}
+
+const int ERR_NEWID_NOLAYER = -1;
+const int ERR_NEWID_REDEFINE = -2;
+const char* ERR_NEWID_MSG[3] = {
+	NULL,
+	"Internal Error:No Hash Layer, Please report",
+	"Redefinition",
+};
+
+idTableTp idTable;
+funcTableTp funcTable;
+std::mutex idMutex, funcMutex;
+
+int newID(std::string name, dataType type, idHashTableTp &idHashTable, bool isConst = false)
+{
+	idMutex.lock();
+	if (idHashTable.empty())
+		return ERR_NEWID_NOLAYER;
+	idHashLayerTp *topLayer = idHashTable.back();
+	if (topLayer->count(name) > 0)
+		return ERR_NEWID_REDEFINE;
+	int id = static_cast<int>(idTable.size());
+	topLayer->emplace(name, id);
+	idTable.push_back(idItem(type, isConst));
+	idMutex.unlock();
+	return id;
+}
+
+int newID(std::string name, int funcID, idHashTableTp &idHashTable)
+{
+	idMutex.lock();
+	if (idHashTable.empty())
+		return ERR_NEWID_NOLAYER;
+	idHashLayerTp *topLayer = idHashTable.back();
+	if (topLayer->count(name) > 0)
+		return ERR_NEWID_REDEFINE;
+	int id = static_cast<int>(idTable.size());
+	topLayer->emplace(name, id);
+	idTable.push_back(idItem(funcID));
+	idMutex.unlock();
+	return id;
+}
+
+int newFuncID(std::string name, dataType retType, std::vector<dataType> &argType, idHashTableTp &idHashTable)
+{
+	funcMutex.lock();
+	if (idHashTable.empty())
+		return ERR_NEWID_NOLAYER;
+	idHashLayerTp *topLayer = idHashTable.back();
+	if (topLayer->count(name) > 0)
+		return ERR_NEWID_REDEFINE;
+	int funcID = static_cast<int>(funcTable.size());
+	funcTable.push_back(funcItem(retType, argType));
+	int id = newID(name, funcID, idHashTable);
+	funcMutex.unlock();
+	return id;
+}
+
+errInfo stAnalyzer_build(stnode::stnode **node, idHashTableTp &idHashTable)
 {
 	switch ((*node)->getType())
 	{
 		case stnode::type::ID:
 		{
 			stnode::id *oldNode = static_cast<stnode::id*>(*node);
-			int id = getID(oldNode->name);
+			int id = getID(oldNode->name, idHashTable);
 			if (id == -1)
 				return errInfo(oldNode->lineN, oldNode->pos, "Undefined Variant");
 			stnode::id_inter *newNode = new stnode::id_inter(id);
@@ -23,8 +93,8 @@ errInfo stAnalyzer_build(stnode::stnode **node)
 			stnode::op::op *opNode = static_cast<stnode::op::op*>(*node);
 			for (int i = 0; i < opNode->argCount; i++)
 			{
-				errInfo err = stAnalyzer_build(&opNode->arg[i]);
-				if (err.err != NULL)
+				errInfo err = stAnalyzer_build(&opNode->arg[i], idHashTable);
+				if (err.err)
 					return err;
 			}
 			break;
@@ -45,7 +115,7 @@ errInfo stAnalyzer_build(stnode::stnode **node)
 				int argID;
 				for (p = oldNode->args.begin(); p != pEnd; p++)
 				{
-					argID = newID((*p)->name, (*p)->dtype, true);
+					argID = newID((*p)->name, (*p)->dtype, idHashTable, true);
 					if (argID < 0)
 						return errInfo((*p)->lineN, (*p)->pos, ERR_NEWID_MSG[-argID]);
 					argType.push_back((*p)->dtype);
@@ -61,15 +131,15 @@ errInfo stAnalyzer_build(stnode::stnode **node)
 				for (p = block->begin(); p != pEnd; p++)
 				{
 					ptr = *p;
-					err = stAnalyzer_build(&ptr);
-					if (err.err != NULL)
+					err = stAnalyzer_build(&ptr, idHashTable);
+					if (err.err)
 						return err;
 					*p = ptr;
 				}
 				newNode->block = block;
 			}
 
-			int funcID = newFuncID(oldNode->name, oldNode->retType, argType);
+			int funcID = newFuncID(oldNode->name, oldNode->retType, argType, idHashTable);
 			if (funcID < 0)
 				return errInfo(oldNode->lineN, oldNode->pos, ERR_NEWID_MSG[-funcID]);
 			newNode->funcID = funcID;
@@ -84,14 +154,14 @@ errInfo stAnalyzer_build(stnode::stnode **node)
 		{
 			stnode::call *callNode = static_cast<stnode::call*>(*node);
 			stnode::stnode *tmpPtr = callNode->funcID;
-			errInfo err = stAnalyzer_build(&tmpPtr);
-			if (err.err != NULL)
+			errInfo err = stAnalyzer_build(&tmpPtr, idHashTable);
+			if (err.err)
 				return err;
 			if (tmpPtr->getType() != stnode::type::ID_INTER)
-				return errInfo(callNode->funcID->lineN, callNode->funcID->pos, getDbgLineNStr("Internal error:Please contact developer", __LINE__));
+				return errInfo(callNode->funcID->lineN, callNode->funcID->pos, getDbgLineNStr("Internal error:Please contact developer", __FILE__, __LINE__));
 
-			err = stAnalyzer_build(&(callNode->args));
-			if (err.err != NULL)
+			err = stAnalyzer_build(&(callNode->args), idHashTable);
+			if (err.err)
 				return err;
 			std::list<stnode::stnode*> argList;
 			stnode::stnode* ptr = callNode->args;
@@ -113,8 +183,8 @@ errInfo stAnalyzer_build(stnode::stnode **node)
 			stnode::ret *retNode = static_cast<stnode::ret*>(*node);
 			if (retNode->retVal != NULL)
 			{
-				errInfo err = stAnalyzer_build(&(retNode->retVal));
-				if (err.err != NULL)
+				errInfo err = stAnalyzer_build(&(retNode->retVal), idHashTable);
+				if (err.err)
 					return err;
 			}
 			break;
@@ -124,8 +194,8 @@ errInfo stAnalyzer_build(stnode::stnode **node)
 			stnode::ifelse *ifNode = static_cast<stnode::ifelse*>(*node);
 			idHashTable.push_back(new idHashLayerTp);
 
-			errInfo err = stAnalyzer_build(&(ifNode->exp));
-			if (err.err != NULL)
+			errInfo err = stAnalyzer_build(&(ifNode->exp), idHashTable);
+			if (err.err)
 				return err;
 
 			stTree::iterator p, pEnd;
@@ -135,7 +205,7 @@ errInfo stAnalyzer_build(stnode::stnode **node)
 			for (p = ifNode->blockTrue->begin(); p != pEnd; p++)
 			{
 				ptr = *p;
-				err = stAnalyzer_build(&ptr);
+				err = stAnalyzer_build(&ptr, idHashTable);
 				*p = ptr;
 			}
 
@@ -145,7 +215,7 @@ errInfo stAnalyzer_build(stnode::stnode **node)
 				for (p = ifNode->blockFalse->begin(); p != pEnd; p++)
 				{
 					ptr = *p;
-					err = stAnalyzer_build(&ptr);
+					err = stAnalyzer_build(&ptr, idHashTable);
 					*p = ptr;
 				}
 			}
@@ -164,9 +234,9 @@ errInfo stAnalyzer_build(stnode::stnode **node)
 			for (p = oldNode->var.begin(); p != pEnd; p++)
 			{
 				if (p->subCount > 0)
-					varID = newID(p->var->name, toRef(p->var->dtype));
+					varID = newID(p->var->name, toRef(p->var->dtype), idHashTable);
 				else
-					varID = newID(p->var->name, p->var->dtype);
+					varID = newID(p->var->name, p->var->dtype, idHashTable);
 				if (varID < 0)
 					return errInfo(oldNode->lineN, oldNode->pos, ERR_NEWID_MSG[-varID]);
 				if (p->init)
@@ -185,11 +255,11 @@ errInfo stAnalyzer_build(stnode::stnode **node)
 		case stnode::type::TREE:
 		{
 			stnode::expTree *treeNode = static_cast<stnode::expTree*>(*node);
-			errInfo err = stAnalyzer_build(&(treeNode->exp));
-			if (err.err != NULL)
+			errInfo err = stAnalyzer_build(&(treeNode->exp), idHashTable);
+			if (err.err)
 				return err;
-			err = stAnalyzer_build(&(treeNode->prev));
-			if (err.err != NULL)
+			err = stAnalyzer_build(&(treeNode->prev), idHashTable);
+			if (err.err)
 				return err;
 			break;
 		}
@@ -197,7 +267,7 @@ errInfo stAnalyzer_build(stnode::stnode **node)
 	return noErr;
 }
 
-errInfo getNodeType(stnode::stnode **node, dataType &type, dataType retType)
+errInfo getNodeType(stnode::stnode **node, dataType &type, dataType retType, idHashTableTp &idHashTable)
 {
 	stnode::stnode *ptr = *node;
 	if (ptr == NULL)
@@ -240,10 +310,10 @@ errInfo getNodeType(stnode::stnode **node, dataType &type, dataType retType)
 				}
 				else
 				{
-					errInfo err = stAnalyzer_type(node, retType);
-					if (err.err != NULL)
+					errInfo err = stAnalyzer_type(node, retType, idHashTable);
+					if (err.err)
 						return err;
-					return getNodeType(node, type, retType);
+					return getNodeType(node, type, retType, idHashTable);
 				}
 				break;
 			}
@@ -267,7 +337,7 @@ errInfo getNodeType(stnode::stnode **node, dataType &type, dataType retType)
 			}
 			case stnode::type::TREE:
 			{
-				return getNodeType(&(static_cast<stnode::expTree*>(ptr)->exp), type, retType);
+				return getNodeType(&(static_cast<stnode::expTree*>(ptr)->exp), type, retType, idHashTable);
 				break;
 			}
 			default:
@@ -279,7 +349,7 @@ errInfo getNodeType(stnode::stnode **node, dataType &type, dataType retType)
 	return noErr;
 }
 
-errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
+errInfo stAnalyzer_type(stnode::stnode **node, dataType retType, idHashTableTp &idHashTable)
 {
 	switch ((*node)->getType())
 	{
@@ -295,8 +365,8 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
 					//Get dataType of the args
 					for (i = 0; i < opNode->argCount; i++)
 					{
-						errInfo err = getNodeType(&(opNode->arg[i]), typeRet, retType);
-						if (err.err != NULL)
+						errInfo err = getNodeType(&(opNode->arg[i]), typeRet, retType, idHashTable);
+						if (err.err)
 							return err;
 						types[i] = typeRet;
 						if (typeLvl(type) < typeLvl(typeRet))
@@ -326,15 +396,15 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
 					if (opNode->argCount != 2)
 						return errInfo(opNode->lineN, opNode->pos, "Assignment operator must have 2 arg");
 					dataType type1, type2;
-					errInfo err = getNodeType(&opNode->arg[1], type2, retType);
-					if (err.err != NULL)
+					errInfo err = getNodeType(&opNode->arg[1], type2, retType, idHashTable);
+					if (err.err)
 						return err;
 					if (type2.dType == dataType::VOID && type2.ptrLvl == 0)
 						return errInfo(opNode->arg[1]->lineN, opNode->arg[1]->pos, str2cstr(std::string("Invalid cast from ") + type2Str(type2) + " to " + type2Str(type1)));
 					if (type2.isConst == false)
 					{
-						err = getNodeType(&opNode->arg[0], type1, retType);
-						if (err.err != NULL)
+						err = getNodeType(&opNode->arg[0], type1, retType, idHashTable);
+						if (err.err)
 							return err;
 						if (type1.ptrLvl != type2.ptrLvl || (type1.dType == dataType::VOID && type1.ptrLvl == 0))
 						{
@@ -362,8 +432,8 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
 						{
 							if (opNode->argCount != 2)
 								return errInfo(opNode->lineN, opNode->pos, "Operator must have 2 arg");
-							errInfo err = getNodeType(&opNode->arg[0], type, retType);
-							if (err.err != NULL)
+							errInfo err = getNodeType(&opNode->arg[0], type, retType, idHashTable);
+							if (err.err)
 								return err;
 							if (type.ptrLvl < 1)
 								return errInfo(opNode->arg[1]->lineN, opNode->arg[1]->pos, "Need a pointer");
@@ -374,8 +444,8 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
 						{
 							if (opNode->argCount != 1)
 								return errInfo(opNode->lineN, opNode->pos, "Operator must have 1 arg");
-							errInfo err = getNodeType(&opNode->arg[0], type, retType);
-							if (err.err != NULL)
+							errInfo err = getNodeType(&opNode->arg[0], type, retType, idHashTable);
+							if (err.err)
 								return err;
 							if (type.ptrLvl < 1)
 								return errInfo(opNode->arg[1]->lineN, opNode->arg[1]->pos, "Need a pointer");
@@ -386,8 +456,8 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
 						{
 							if (opNode->argCount != 1)
 								return errInfo(opNode->lineN, opNode->pos, "Operator must have 1 arg");
-							errInfo err = getNodeType(&opNode->arg[0], type, retType);
-							if (err.err != NULL)
+							errInfo err = getNodeType(&opNode->arg[0], type, retType, idHashTable);
+							if (err.err)
 								return err;
 							opNode->resType = toRef(type);
 							break;
@@ -410,8 +480,8 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
 			for (p = block->begin(); p != pEnd; p++)
 			{
 				ptr = *p;
-				err = stAnalyzer_type(&ptr, newRetType);
-				if (err.err != NULL)
+				err = stAnalyzer_type(&ptr, newRetType, idHashTable);
+				if (err.err)
 					return err;
 				*p = ptr;
 			}
@@ -438,8 +508,8 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
 		{
 			stnode::ret *retNode = static_cast<stnode::ret*>(*node);
 			dataType valType;
-			errInfo err = getNodeType(&(retNode->retVal), valType, retType);
-			if (err.err != NULL)
+			errInfo err = getNodeType(&(retNode->retVal), valType, retType, idHashTable);
+			if (err.err)
 				return err;
 			if ((valType.dType == dataType::VOID && valType.ptrLvl == 0) ^ (retType.dType == dataType::VOID && retType.ptrLvl == 0))
 				return errInfo(retNode->retVal->lineN, retNode->retVal->pos, str2cstr(std::string("Invalid cast from ") + type2Str(valType) + " to " + type2Str(retType)));
@@ -460,8 +530,8 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
 		{
 			stnode::ifelse *ifNode = static_cast<stnode::ifelse*>(*node);
 
-			errInfo err = stAnalyzer_type(&(ifNode->exp), retType);
-			if (err.err != NULL)
+			errInfo err = stAnalyzer_type(&(ifNode->exp), retType, idHashTable);
+			if (err.err)
 				return err;
 
 			stTree::iterator p, pEnd;
@@ -471,7 +541,7 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
 			for (p = ifNode->blockTrue->begin(); p != pEnd; p++)
 			{
 				ptr = *p;
-				err = stAnalyzer_type(&ptr, retType);
+				err = stAnalyzer_type(&ptr, retType, idHashTable);
 				*p = ptr;
 			}
 
@@ -481,7 +551,7 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
 				for (p = ifNode->blockFalse->begin(); p != pEnd; p++)
 				{
 					ptr = *p;
-					err = stAnalyzer_type(&ptr, retType);
+					err = stAnalyzer_type(&ptr, retType, idHashTable);
 					*p = ptr;
 				}
 			}
@@ -498,12 +568,12 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
 				{
 					if (p->subCount == 0)
 					{
-						errInfo err = stAnalyzer_type(p->val, retType);
-						if (err.err != NULL)
+						errInfo err = stAnalyzer_type(p->val, retType, idHashTable);
+						if (err.err)
 							return err;
 						dataType type1 = idTable[p->varID].type, type2;
-						err = getNodeType(p->val, type2, retType);
-						if (err.err != NULL)
+						err = getNodeType(p->val, type2, retType, idHashTable);
+						if (err.err)
 							return err;
 						if (type1.ptrLvl != type2.ptrLvl || (type2.dType == dataType::VOID && type2.ptrLvl == 0))
 						{
@@ -520,12 +590,12 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
 						dataType type1, type2;
 						for (size_t i = 0; i < p->subCount; i++)
 						{
-							err = stAnalyzer_type(p->val + i, retType);
-							if (err.err != NULL)
+							err = stAnalyzer_type(p->val + i, retType, idHashTable);
+							if (err.err)
 								return err;
 							type1 = idTable[p->varID].type;
-							err = getNodeType(p->val + i, type2, retType);
-							if (err.err != NULL)
+							err = getNodeType(p->val + i, type2, retType, idHashTable);
+							if (err.err)
 								return err;
 							if (type1.ptrLvl != type2.ptrLvl || (type2.dType == dataType::VOID && type2.ptrLvl == 0))
 							{
@@ -544,11 +614,11 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
 		case stnode::type::TREE:
 		{
 			stnode::expTree *treeNode = static_cast<stnode::expTree*>(*node);
-			errInfo err = stAnalyzer_type(&(treeNode->exp), retType);
-			if (err.err != NULL)
+			errInfo err = stAnalyzer_type(&(treeNode->exp), retType, idHashTable);
+			if (err.err)
 				return err;
-			err = stAnalyzer_type(&(treeNode->prev), retType);
-			if (err.err != NULL)
+			err = stAnalyzer_type(&(treeNode->prev), retType, idHashTable);
+			if (err.err)
 				return err;
 			break;
 		}

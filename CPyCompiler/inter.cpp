@@ -1,10 +1,29 @@
 #include "stdafx.h"
 #include "st_inter.h"
 
-idTableTp idTable;
-funcTableTp funcTable;
+strTableTp strTable;
 //constTableTp constTable;
-idHashTableTp idHashTable;
+
+std::mutex strMutex, labelMutex;
+int labelCount = 0;
+
+int newStr(const std::string &str)
+{
+	strMutex.lock();
+	int id = static_cast<int>(strTable.size());
+	strTable.push_back(str);
+	strMutex.unlock();
+	return id;
+}
+
+int newLbl()
+{
+	labelMutex.lock();
+	int id = labelCount;
+	labelCount++;
+	labelMutex.unlock();
+	return id;
+}
 
 char* str2cstr(std::string arg)
 {
@@ -27,85 +46,69 @@ std::string num2str(long long n)
 	return ret;
 }
 
-char* getDbgLineNStr(const char* msg, int line)
+char* getDbgLineNStr(const char* msg, const char* file, int line)
 {
-	std::string retBuf("inter.cpp:");
+	std::string retBuf;
 	std::stringstream sstr;
 	sstr << line;
 	sstr >> retBuf;
+	retBuf = file + ':' + retBuf;
 	retBuf.push_back(':');
 	retBuf = retBuf + msg;
 	return str2cstr(retBuf);
 }
 
-int getID(std::string name)
-{
-	idHashTableTp::reverse_iterator pItr, pEnd = idHashTable.rend();
-	idHashLayerTp::iterator pRes;
-	for (pItr = idHashTable.rbegin(); pItr != pEnd; pItr++)
-	{
-		pRes = (*pItr)->find(name);
-		if (pRes != (*pItr)->end())
-			return pRes->second;
-	}
-	return -1;
-}
-
-const char* ERR_NEWID_MSG[3] = {
-	NULL,
-	"Internal Error:No Hash Layer, Please report",
-	"Redefinition",
-};
-
-int newID(std::string name, dataType type, bool isConst)
-{
-	if (idHashTable.empty())
-		return ERR_NEWID_NOLAYER;
-	idHashLayerTp *topLayer = idHashTable.back();
-	if (topLayer->count(name) > 0)
-		return ERR_NEWID_REDEFINE;
-	int id = static_cast<int>(idTable.size());
-	topLayer->emplace(name, id);
-	idTable.push_back(idItem(type, isConst));
-	return id;
-}
-
-int newFuncID(std::string name, dataType retType, std::vector<dataType> &argType)
-{
-	if (idHashTable.empty())
-		return ERR_NEWID_NOLAYER;
-	idHashLayerTp *topLayer = idHashTable.back();
-	if (topLayer->count(name) > 0)
-		return ERR_NEWID_REDEFINE;
-	int funcID = static_cast<int>(funcTable.size());
-	funcTable.push_back(funcItem(retType, argType));
-	int id = static_cast<int>(idTable.size());
-	idTable.push_back(idItem(funcID));
-	topLayer->emplace(name, id);
-	return id;
-}
-
-errInfo inter_gen_ret(stnode::stnode* node, iCodeSeq &ret, iCode::arg &retVal)
-{
-
-	return noErr;
-}
-
-errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret)
+errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, iCode::arg **retVal)
 {
 	switch (node->getType())
 	{
-#ifdef _DEBUG
-		case stnode::type::FUNC:
+		case stnode::type::NUMBER:
 		{
-			return errInfo(node->lineN, node->pos, "stAnalyzer_build not executed");
+			*retVal = new iCode::con(static_cast<stnode::number *>(node)->val);
 			break;
 		}
-#endif
+		case stnode::type::CHARA:
+		{
+			*retVal = new iCode::con(static_cast<stnode::chara *>(node)->ch);
+			break;
+		}
+		case stnode::type::STR:
+		{
+			int id = newStr(static_cast<stnode::str *>(node)->strr);
+			*retVal = new iCode::con(static_cast<stnode::chara *>(node)->ch);
+			break;
+		}
+		case stnode::type::ID_INTER:
+		{
+			*retVal = new iCode::id(static_cast<stnode::id_inter *>(node)->id);
+			break;
+		}
+		case stnode::type::OP:
+		{
+			stnode::op::op *opNode = static_cast<stnode::op::op *>(node);
+			switch (opNode->opVal)
+			{
+				case stnode::op::ops::ADD:
+
+					break;
+			}
+		}
 		case stnode::type::FUNC_INTER:
 		{
-
+			stnode::func_inter *funcNode = static_cast<stnode::func_inter *>(node);
+			stTree *block = funcNode->block;
+			stTree::iterator p = block->begin(), pEnd = block->end();
+			iCode::arg *retVal;
+			ret.push_back(new iCode::label(funcNode->funcID));
+			for (; p != pEnd; p++)
+			{
+				errInfo err = inter_gen(*p, ret, &retVal);
+				if (err.err)
+					return err;
+			}
+			break;
 		}
+		
 	}
 	return noErr;
 }
@@ -115,12 +118,13 @@ errInfo inter(stTree &sTree, iCodeSeq &ret, dataType retType)
 	stTree::iterator p, pEnd = sTree.end();
 	stnode::stnode *pCur;
 
+	idHashTableTp idHashTable;
 	idHashTable.push_back(new idHashLayerTp);
 	for (p = sTree.begin(); p != pEnd; p++)
 	{
 		pCur = *p;
-		errInfo err = stAnalyzer_build(&pCur);
-		if (err.err != NULL)
+		errInfo err = stAnalyzer_build(&pCur, idHashTable);
+		if (err.err)
 			return err;
 		*p = pCur;
 	}
@@ -130,8 +134,8 @@ errInfo inter(stTree &sTree, iCodeSeq &ret, dataType retType)
 	for (p = sTree.begin(); p != pEnd; p++)
 	{
 		pCur = *p;
-		errInfo err = stAnalyzer_type(&pCur, retType);
-		if (err.err != NULL)
+		errInfo err = stAnalyzer_type(&pCur, retType, idHashTable);
+		if (err.err)
 			return err;
 		*p = pCur;
 	}

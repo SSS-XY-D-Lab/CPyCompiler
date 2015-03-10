@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
 			}
 		}
 		errInfo err = parser(ret, &ret2);
-		if (err.err != NULL)
+		if (err.err)
 		{
 			cout << err.lineN << ':' << endl;
 			if (err.lineN < static_cast<int>(lines.size()))
@@ -89,20 +89,20 @@ int main(int argc, char* argv[])
 			for (; err.pos > 1; err.pos--)
 				cout << ' ';
 			cout << '^' << endl;
-			cout << err.err << endl;
+			cout << err.info << endl;
 		}
 		else
 		{
 			iCodeSeq ret3;
-			err = inter(ret2, ret3);
-			if (err.err != NULL)
+			err = inter(ret2, ret3, dataType(dataType::VOID, 0));
+			if (err.err)
 			{
 				cout << err.lineN << ':' << endl;
 				cout << lines[err.lineN - 1] << endl;
 				for (; err.pos > 1; err.pos--)
 					cout << ' ';
 				cout << '^' << endl;
-				cout << err.err << endl;
+				cout << err.info << endl;
 			}
 		}
 	}

@@ -25,26 +25,20 @@ struct funcItem
 typedef std::vector<funcItem> funcTableTp;
 extern funcTableTp funcTable;
 
+typedef std::vector<std::string> strTableTp;
+extern strTableTp strTable;
+
 typedef std::unordered_map<int, int> constTableTp;
 //extern constTableTp constTable;
 
 typedef std::unordered_map<std::string, int> idHashLayerTp;
 typedef std::list<idHashLayerTp*> idHashTableTp;
-extern idHashTableTp idHashTable;
 
 char* str2cstr(std::string arg);
 std::string num2str(long long n);
-char* getDbgLineNStr(const char* msg, int line);
+char* getDbgLineNStr(const char* msg, const char* file, int line);
 
-int getID(std::string name);
-int newID(std::string name, dataType type, bool isConst = false);
-int newFuncID(std::string name, dataType retType, std::vector<dataType> &argType);
-
-errInfo stAnalyzer_build(stnode::stnode **node);
-errInfo stAnalyzer_type(stnode::stnode **node, dataType retType);
-
-const int ERR_NEWID_NOLAYER = -1;
-const int  ERR_NEWID_REDEFINE = -2;
-extern const char* ERR_NEWID_MSG[3];
+errInfo stAnalyzer_build(stnode::stnode **node, idHashTableTp &idHashTable);
+errInfo stAnalyzer_type(stnode::stnode **node, dataType retType, idHashTableTp &idHashTable);
 
 #endif

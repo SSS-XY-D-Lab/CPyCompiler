@@ -8,11 +8,13 @@
 
 struct errInfo
 {
-	errInfo(int _lineN, int _pos, const char *_err){ lineN = _lineN; pos = _pos; err = _err; };
+	errInfo(){ err = false; info = NULL; }
+	errInfo(int _lineN, int _pos, const char *_info){ err = true; lineN = _lineN; pos = _pos; info = _info; };
+	bool err;
 	int lineN, pos;
-	const char* err;
+	const char* info;
 };
-const errInfo noErr = errInfo(-1, -1, NULL);
+const errInfo noErr = errInfo();
 
 namespace stnode
 {
