@@ -21,7 +21,7 @@ namespace stnode
 	enum type{ 
 		ERROR, 
 		NUMBER, CHARA, STR, ID, OP, CAST, FUNC, CALL, RETURN, IF, ALLOC, TREE, DELIM,
-		ID_INTER, FUNC_INTER, CALL_INTER, ALLOC_INTER
+		ID_GLOBAL, ID_LOCAL, FUNC_INTER, CALL_INTER, ALLOC_GLOBAL, ALLOC_LOCAL
 	};
 
 	class stnode
@@ -163,10 +163,10 @@ namespace stnode
 	class alloc :public stnode
 	{
 	public:
-		alloc(bool _isConst){ isConst = _isConst; convert = false; };
+		alloc(bool _isConst, bool _isGlobal){ isConst = _isConst; isGlobal = _isGlobal; convert = false; };
 		~alloc();
 		std::list<allocUnit> var;
-		bool isConst;
+		bool isConst, isGlobal;
 		bool convert;
 		type getType(){ return type::ALLOC; };
 	};

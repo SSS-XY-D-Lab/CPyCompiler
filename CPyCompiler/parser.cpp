@@ -397,10 +397,41 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 				token::keyword *kw = static_cast<token::keyword *>(first);
 				switch (kw->word)
 				{
+					case token::keywords::keywords::GLOBAL:
+					{
+						nextToken(;);
+						bool isConst;
+						if ((*p)->getType() != token::type::KEYWORD)
+							return errInfo(lineNumber, errPtr, "dim or const expected");
+						kw = static_cast<token::keyword*>(*p);
+						switch (kw->word)
+						{
+							case token::keywords::keywords::CONST:
+								isConst = true;
+								break;
+							case token::keywords::keywords::DIM:
+								isConst = false;
+								break;
+							default:
+								return errInfo(lineNumber, errPtr, "dim or const expected");
+						}
+						nextToken(;);
+						stnode::alloc *allocPtr = new stnode::alloc(isConst, true);
+						allocPtr->lineN = lineNumber;
+						allocPtr->pos = first->pos;
+						errInfo err = parser_dim(tList, allocPtr, p, lineNumber);
+						if (err.err)
+						{
+							delete allocPtr;
+							return err;
+						}
+						ptr = allocPtr;
+						break;
+					}
 					case token::keywords::keywords::CONST:
 					{
 						nextToken(;);
-						stnode::alloc *allocPtr = new stnode::alloc(true);
+						stnode::alloc *allocPtr = new stnode::alloc(true, false);
 						allocPtr->lineN = lineNumber;
 						allocPtr->pos = first->pos;
 						errInfo err = parser_dim(tList, allocPtr, p, lineNumber);
@@ -415,7 +446,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 					case token::keywords::keywords::DIM:
 					{
 						nextToken(;);
-						stnode::alloc *allocPtr = new stnode::alloc(false);
+						stnode::alloc *allocPtr = new stnode::alloc(false, false);
 						allocPtr->lineN = lineNumber;
 						allocPtr->pos = first->pos;
 						errInfo err = parser_dim(tList, allocPtr, p, lineNumber);

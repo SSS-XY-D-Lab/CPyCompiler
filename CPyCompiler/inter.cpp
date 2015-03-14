@@ -7,10 +7,10 @@ strTableTp strTable;
 std::mutex strMutex, labelMutex;
 int labelCount = 0;
 
-int newStr(const std::string &str)
+size_t newStr(const std::string &str)
 {
 	strMutex.lock();
-	int id = static_cast<int>(strTable.size());
+	size_t id = strTable.size();
 	strTable.push_back(str);
 	strMutex.unlock();
 	return id;
@@ -58,38 +58,196 @@ char* getDbgLineNStr(const char* msg, const char* file, int line)
 	return str2cstr(retBuf);
 }
 
-errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, iCode::arg **retVal)
+struct retValTp
 {
+	iCode::arg *val;
+	dataType type;
+};
+
+errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, retValTp &retVal)
+{
+	if (node == NULL)
+		return errInfo(0, 0, "NULL Pointer");
 	switch (node->getType())
 	{
 		case stnode::type::NUMBER:
 		{
-			*retVal = new iCode::con(static_cast<stnode::number *>(node)->val);
+			retVal.val = new iCode::con(static_cast<stnode::number *>(node)->val);
 			break;
 		}
 		case stnode::type::CHARA:
 		{
-			*retVal = new iCode::con(static_cast<stnode::chara *>(node)->ch);
+			retVal.val = new iCode::con(static_cast<stnode::chara *>(node)->ch);
 			break;
 		}
 		case stnode::type::STR:
 		{
-			int id = newStr(static_cast<stnode::str *>(node)->strr);
-			*retVal = new iCode::con(static_cast<stnode::chara *>(node)->ch);
+			size_t id = newStr(static_cast<stnode::str *>(node)->strr);
+			retVal.val = new iCode::str(id);
 			break;
 		}
+		/*
 		case stnode::type::ID_INTER:
 		{
-			*retVal = new iCode::id(static_cast<stnode::id_inter *>(node)->id);
+			retVal.val = new iCode::id(static_cast<stnode::id_inter *>(node)->id);
 			break;
 		}
+		*/
 		case stnode::type::OP:
 		{
 			stnode::op::op *opNode = static_cast<stnode::op::op *>(node);
+			int needArg = 3;
+			iCode::opType op = iCode::opType::NUL;
+
 			switch (opNode->opVal)
 			{
+				case stnode::op::ops::ARRAY_SUB:
+					needArg = 2;
+					op = iCode::opType::R_ADD;
+					break;
+				case stnode::op::ops::POSI:
+					needArg = 1;
+					op = iCode::opType::ADD;
+					break;
+				case stnode::op::ops::NEGA:
+					needArg = 1;
+					op = iCode::opType::SUB;
+					break;
+				case stnode::op::ops::INC_POST:
+					needArg = 1;
+					op = iCode::opType::ADD;
+					break;
+				case stnode::op::ops::DEC_POST:
+					needArg = 1;
+					op = iCode::opType::SUB;
+					break;
+				case stnode::op::ops::INC_PRE:
+					needArg = 1;
+					op = iCode::opType::ADD;
+					break;
+				case stnode::op::ops::DEC_PRE:
+					needArg = 1;
+					op = iCode::opType::SUB;
+					break;
+				case stnode::op::ops::REF:
+					needArg = 1;
+					op = iCode::opType::G_ADD;
+					break;
+				case stnode::op::ops::DEREF:
+					needArg = 1;
+					op = iCode::opType::I_ADD;
+					break;
+				case stnode::op::ops::NOT:
+					needArg = 1;
+					op = iCode::opType::NOT;
+					break;
+				case stnode::op::ops::LGNOT:
+					needArg = 1;
+					op = iCode::opType::LGAND;
+					break;
+				case stnode::op::ops::DIV:
+					needArg = 2;
+					op = iCode::opType::DIV;
+					break;
+				case stnode::op::ops::MUL:
+					needArg = 2;
+					op = iCode::opType::MUL;
+					break;
+				case stnode::op::ops::MOD:
+					needArg = 2;
+					op = iCode::opType::MOD;
+					break;
 				case stnode::op::ops::ADD:
+					needArg = 2;
+					op = iCode::opType::ADD;
+					break;
+				case stnode::op::ops::SUB:
+					needArg = 2;
+					op = iCode::opType::SUB;
+					break;
+				case stnode::op::ops::SHL:
+					needArg = 2;
+					op = iCode::opType::SHL;
+					break;
+				case stnode::op::ops::SHR:
+					needArg = 2;
+					op = iCode::opType::SHR;
+					break;
+				case stnode::op::ops::AND:
+					needArg = 2;
+					op = iCode::opType::AND;
+					break;
+				case stnode::op::ops::XOR:
+					needArg = 2;
+					op = iCode::opType::XOR;
+					break;
+				case stnode::op::ops::BOR:
+					needArg = 2;
+					op = iCode::opType::BOR;
+					break;
+				case stnode::op::ops::LGAND:
+					needArg = 2;
+					op = iCode::opType::LGAND;
+					break;
+				case stnode::op::ops::LGOR:
+					needArg = 2;
+					op = iCode::opType::LGOR;
+					break;
+				case stnode::op::ops::ASSIGN:
+					needArg = 2;
+					op = iCode::opType::NUL;
+					break;
+				case stnode::op::ops::MODASS:
+					needArg = 2;
+					op = iCode::opType::MOD;
+					break;
+				case stnode::op::ops::DIVASS:
+					needArg = 2;
+					op = iCode::opType::DIV;
+					break;
+				case stnode::op::ops::MULASS:
+					needArg = 2;
+					op = iCode::opType::NUL;
+					break;
+				case stnode::op::ops::ADDASS:
+					needArg = 2;
+					op = iCode::opType::ADD;
+					break;
+				case stnode::op::ops::SUBASS:
+					needArg = 2;
+					op = iCode::opType::SUB;
+					break;
+				case stnode::op::ops::SHLASS:
+					needArg = 2;
+					op = iCode::opType::SHL;
+					break;
+				case stnode::op::ops::SHRASS:
+					needArg = 2;
+					op = iCode::opType::SHR;
+					break;
+				case stnode::op::ops::ANDASS:
+					needArg = 2;
+					op = iCode::opType::AND;
+					break;
+				case stnode::op::ops::XORASS:
+					needArg = 2;
+					op = iCode::opType::XOR;
+					break;
+				case stnode::op::ops::BORASS:
+					needArg = 2;
+					op = iCode::opType::BOR;
+					break;
+			}
 
+			switch (opNode->opVal)
+			{
+				case stnode::op::ops::POSI:
+				case stnode::op::ops::NEGA:
+					
+				case stnode::op::ops::INC_POST:
+				case stnode::op::ops::DEC_POST:
+				case stnode::op::ops::INC_PRE:
+				case stnode::op::ops::DEC_PRE:
 					break;
 			}
 		}
@@ -98,11 +256,11 @@ errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, iCode::arg **retVal)
 			stnode::func_inter *funcNode = static_cast<stnode::func_inter *>(node);
 			stTree *block = funcNode->block;
 			stTree::iterator p = block->begin(), pEnd = block->end();
-			iCode::arg *retVal;
+			retValTp retVal;
 			ret.push_back(new iCode::label(funcNode->funcID));
 			for (; p != pEnd; p++)
 			{
-				errInfo err = inter_gen(*p, ret, &retVal);
+				errInfo err = inter_gen(*p, ret, retVal);
 				if (err.err)
 					return err;
 			}
@@ -118,23 +276,23 @@ errInfo inter(stTree &sTree, iCodeSeq &ret, dataType retType)
 	stTree::iterator p, pEnd = sTree.end();
 	stnode::stnode *pCur;
 
-	idHashTableTp idHashTable;
-	idHashTable.push_back(new idHashLayerTp);
+	idTableTp idTable;
+	idTable.push_back(new idLayerTp);
 	for (p = sTree.begin(); p != pEnd; p++)
 	{
 		pCur = *p;
-		errInfo err = stAnalyzer_build(&pCur, idHashTable);
+		errInfo err = stAnalyzer_build(&pCur, idTable);
 		if (err.err)
 			return err;
 		*p = pCur;
 	}
-	delete idHashTable.back();
-	idHashTable.pop_back();
+	delete idTable.back();
+	idTable.pop_back();
 
 	for (p = sTree.begin(); p != pEnd; p++)
 	{
 		pCur = *p;
-		errInfo err = stAnalyzer_type(&pCur, retType, idHashTable);
+		errInfo err = stAnalyzer_type(&pCur, retType);
 		if (err.err)
 			return err;
 		*p = pCur;
