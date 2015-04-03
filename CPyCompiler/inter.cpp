@@ -214,6 +214,8 @@ errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, retValTp &retVal)
 				ret.push_back(code);
 				size_t yesLabel = newLbl(), noLabel = newLbl();
 				errInfo err = inter_if(node, ret, yesLabel, noLabel);
+				if (err.err)
+					return err;
 				ret.push_back(new iCode::label(yesLabel));
 				code = new iCode::code(iCode::SET, tmpArg, new iCode::con(1));
 				tmpArg->pCode.push_back(code);
@@ -459,10 +461,12 @@ errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, retValTp &retVal)
 		case stnode::type::FUNC_INTER:
 		{
 			stnode::func_inter *funcNode = static_cast<stnode::func_inter *>(node);
+			size_t funcLabel = newLbl();
+			funcTable[funcNode->funcID].labelNo = funcLabel;
 			stTree *block = funcNode->block;
 			stTree::iterator p = block->begin(), pEnd = block->end();
 			retValTp retVar;
-			ret.push_back(new iCode::label(funcNode->funcID));
+			ret.push_back(new iCode::label(funcLabel));
 			for (; p != pEnd; p++)
 			{
 				errInfo err = inter_gen(*p, ret, retVar);
@@ -503,7 +507,59 @@ errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, retValTp &retVal)
 		}
 		case stnode::type::IF:
 		{
+			stnode::ifelse *ifNode = static_cast<stnode::ifelse *>(node);
 
+			size_t yesLabel = newLbl(), noLabel = newLbl();
+			errInfo err = inter_if(ifNode->exp, ret, yesLabel, noLabel);
+			if (err.err)
+				return err;
+			if (ifNode->blockFalse != NULL)
+			{
+				size_t endLabel = newLbl();
+				ret.push_back(new iCode::label(yesLabel));
+
+				stTree *block = ifNode->blockTrue;
+				stTree::iterator p = block->begin(), pEnd = block->end();
+				retValTp retVar;
+				for (; p != pEnd; p++)
+				{
+					errInfo err = inter_gen(*p, ret, retVar);
+					if (err.err)
+						return err;
+				}
+
+				ret.push_back(new iCode::jump(endLabel));
+				ret.push_back(new iCode::label(noLabel));
+
+				block = ifNode->blockFalse;
+				p = block->begin(), pEnd = block->end();
+				for (; p != pEnd; p++)
+				{
+					errInfo err = inter_gen(*p, ret, retVar);
+					if (err.err)
+						return err;
+				}
+
+				ret.push_back(new iCode::label(endLabel));
+			}
+			else
+			{
+				ret.push_back(new iCode::label(yesLabel));
+
+				stTree *block = ifNode->blockTrue;
+				stTree::iterator p = block->begin(), pEnd = block->end();
+				retValTp retVar;
+				for (; p != pEnd; p++)
+				{
+					errInfo err = inter_gen(*p, ret, retVar);
+					if (err.err)
+						return err;
+				}
+
+				ret.push_back(new iCode::label(noLabel));
+			}
+
+			break;
 		}
 		case stnode::type::RETURN:
 		{

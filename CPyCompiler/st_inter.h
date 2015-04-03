@@ -30,6 +30,7 @@ struct funcItem
 	funcItem(dataType _retType, std::vector<dataType> &_argType){ retType = _retType; argType = _argType; };
 	dataType retType;
 	std::vector<dataType> argType;
+	size_t labelNo;
 };
 typedef std::vector<funcItem> funcTableTp;
 extern funcTableTp funcTable;
