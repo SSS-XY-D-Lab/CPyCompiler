@@ -5,7 +5,7 @@ strTableTp strTable;
 //constTableTp constTable;
 
 std::mutex strMutex, labelMutex;
-int labelCount = 0;
+size_t labelCount = 0;
 
 size_t newStr(const std::string &str)
 {
@@ -16,10 +16,10 @@ size_t newStr(const std::string &str)
 	return id;
 }
 
-int newLbl()
+size_t newLbl()
 {
 	labelMutex.lock();
-	int id = labelCount;
+	size_t id = labelCount;
 	labelCount++;
 	labelMutex.unlock();
 	return id;
@@ -208,7 +208,17 @@ errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, retValTp &retVal)
 
 			if (opNode->getOpType() == stnode::op::opType::LOGICAL)
 			{
-				
+				iCode::temp *tmpArg = new iCode::temp;
+				iCode::code *code = new iCode::code(iCode::SET, tmpArg, new iCode::con(0));
+				tmpArg->pCode.push_back(code);
+				ret.push_back(code);
+				size_t yesLabel = newLbl(), noLabel = newLbl();
+				errInfo err = inter_if(node, ret, yesLabel, noLabel);
+				ret.push_back(new iCode::label(yesLabel));
+				code = new iCode::code(iCode::SET, tmpArg, new iCode::con(1));
+				tmpArg->pCode.push_back(code);
+				ret.push_back(code);
+				ret.push_back(new iCode::label(noLabel));
 			}
 			else
 			{
@@ -365,7 +375,7 @@ errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, retValTp &retVal)
 						iCode::temp *tmpArg = new iCode::temp;
 						code = new iCode::code(iCode::opType::SET, tmpArg, args[0]);
 						ret.push_back(code);
-						tmpArg->pCode = code;
+						tmpArg->pCode.push_back(code);
 						retVal.val = tmpArg;
 						break;
 					}
@@ -374,7 +384,7 @@ errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, retValTp &retVal)
 						iCode::temp *tmpArg = new iCode::temp;
 						code = new iCode::code(iCode::opType::SUB, tmpArg, new iCode::con(0), args[0]);
 						ret.push_back(code);
-						tmpArg->pCode = code;
+						tmpArg->pCode.push_back(code);
 						retVal.val = tmpArg;
 						break;
 					}
@@ -384,7 +394,7 @@ errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, retValTp &retVal)
 						iCode::temp *tmpArg = new iCode::temp;
 						code = new iCode::code(op, tmpArg, args[0], new iCode::con(1));
 						ret.push_back(code);
-						tmpArg->pCode = code;
+						tmpArg->pCode.push_back(code);
 						retVal.val = args[0];
 						break;
 					}
@@ -394,7 +404,7 @@ errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, retValTp &retVal)
 						iCode::temp *tmpArg = new iCode::temp;
 						code = new iCode::code(op, tmpArg, args[0], new iCode::con(1));
 						ret.push_back(code);
-						tmpArg->pCode = code;
+						tmpArg->pCode.push_back(code);
 						retVal.val = tmpArg;
 						break;
 					}
@@ -405,7 +415,7 @@ errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, retValTp &retVal)
 							iCode::temp *tmpArg = new iCode::temp;
 							code = new iCode::code(op, tmpArg, args[0]);
 							ret.push_back(code);
-							tmpArg->pCode = code;
+							tmpArg->pCode.push_back(code);
 							retVal.val = tmpArg;
 						}
 						else if (needArg == 2)
@@ -422,6 +432,12 @@ errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, retValTp &retVal)
 									code = new iCode::code(op, args[0], args[0], args[1]);
 									ret.push_back(code);
 								}
+								if (args[0]->getType() == iCode::argType::TEMP)
+								{
+									iCode::temp *tmpArg = static_cast<iCode::temp*>(args[0]);
+									tmpArg->ref--;
+									tmpArg->pCode.push_back(code);
+								}
 								retVal.val = args[0];
 							}
 							else
@@ -429,7 +445,7 @@ errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, retValTp &retVal)
 								iCode::temp *tmpArg = new iCode::temp;
 								code = new iCode::code(op, tmpArg, args[0], args[1]);
 								ret.push_back(code);
-								tmpArg->pCode = code;
+								tmpArg->pCode.push_back(code);
 								retVal.val = tmpArg;
 							}
 						}
@@ -478,7 +494,7 @@ errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, retValTp &retVal)
 			iCode::code *code = new iCode::code(iCode::opType::SET, tmpArg, argRet.val);
 			code->argType = argRet.type;
 			code->retType = castNode->vtype;
-			tmpArg->pCode = code;
+			tmpArg->pCode.push_back(code);
 			ret.push_back(code);
 			
 			retVal.val = tmpArg;

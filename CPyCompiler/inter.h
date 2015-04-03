@@ -146,7 +146,7 @@ namespace iCode
 	{
 	public:
 		temp(){ ref = 0; };
-		iCode *pCode;
+		std::list<iCode*> pCode;
 		int ref;
 		argType getType(){ return argType::TEMP; };
 	};
