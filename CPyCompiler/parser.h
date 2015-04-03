@@ -3,8 +3,8 @@
 #ifndef _H_ANALYZER
 #define _H_ANALYZER
 
-#include "lexer.h"
 #include "type.h"
+#include "lexer.h"
 
 struct errInfo
 {
@@ -36,7 +36,7 @@ typedef std::list<stnode::stnode*> stTree;
 
 namespace stnode
 {
-	class number:public stnode
+	class number :public stnode
 	{
 	public:
 		number(long long _val){ val = _val; };

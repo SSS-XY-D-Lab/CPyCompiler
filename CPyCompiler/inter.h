@@ -87,15 +87,16 @@ namespace stnode
 
 namespace iCode
 {
-	enum argType{ ERROR, CONST, STR, ID };
+	enum argType{ ERROR, CONST, STR, ID_GLOBAL, ID_LOCAL, TEMP };
 	enum opType{ 
-		NUL,
+		NUL, SET,
 		ADD, SUB, MUL, DIV, MOD, SHL, SHR, AND, BOR, XOR, NOT, 
-		LGNOT, LGOR, LGAND,
-		R_ADD, I_ADD, G_ADD, 
-		IFE, IFN, IFG, IFA, IFL, IFU 
+		R_ADD, I_ADD, G_ADD
 	};
-	enum codeType{ _ERROR, NORMAL, LABEL, JUMP };
+	enum ifType{
+		IFE, IFN, IFG, IFGE, IFL, IFLE
+	};
+	enum codeType{ _ERROR, NORMAL, LABEL, JUMP, JUMP_IF };
 
 	class arg
 	{
@@ -119,12 +120,20 @@ namespace iCode
 		argType getType(){ return argType::STR; };
 	};
 
-	class id :public arg
+	class id_global :public arg
 	{
 	public:
-		id(size_t _sn){ sn = _sn; }
+		id_global(size_t _sn){ sn = _sn; }
 		size_t sn;
-		argType getType(){ return argType::ID; };
+		argType getType(){ return argType::ID_GLOBAL; };
+	};
+
+	class id_local :public arg
+	{
+	public:
+		id_local(size_t _shift){ shift = _shift; }
+		size_t shift;
+		argType getType(){ return argType::ID_LOCAL; };
 	};
 
 	class iCode
@@ -133,12 +142,22 @@ namespace iCode
 		virtual codeType getType(){ return codeType::_ERROR; };
 	};
 
+	class temp :public arg
+	{
+	public:
+		temp(){ ref = 0; };
+		iCode *pCode;
+		int ref;
+		argType getType(){ return argType::TEMP; };
+	};
+
 	class code :public iCode
 	{
 	public:
 		code(opType _op, arg *_ret, arg *_arg1, arg *_arg2 = NULL){ op = _op; ret = _ret; arg1 = _arg1; arg2 = _arg2; };
 		opType op;
 		arg *ret, *arg1, *arg2;
+		dataType retType, argType;
 		codeType getType(){ return codeType::NORMAL; };
 	};
 
@@ -156,6 +175,16 @@ namespace iCode
 		jump(size_t _labelNo){ labelNo = _labelNo; }
 		size_t labelNo;
 		codeType getType(){ return codeType::JUMP; };
+	};
+
+	class jump_if :public iCode
+	{
+	public:
+		jump_if(ifType _op, size_t _labelNo, arg *_arg1, arg *_arg2){ op = _op; arg1 = _arg1; arg2 = _arg2; labelNo = _labelNo; }
+		ifType op;
+		arg *arg1, *arg2;
+		size_t labelNo;
+		codeType getType(){ return codeType::JUMP_IF; };
 	};
 }
 typedef std::list<iCode::iCode*> iCodeSeq;

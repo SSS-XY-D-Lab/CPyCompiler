@@ -94,12 +94,6 @@ namespace stnode
 				case ops::SUB:
 				case ops::SHL:
 				case ops::SHR:
-				case ops::BIG:
-				case ops::BIGEQU:
-				case ops::LES:
-				case ops::LESEQU:
-				case ops::EQU:
-				case ops::NEQU:
 				case ops::AND:
 				case ops::XOR:
 				case ops::BOR:
@@ -107,6 +101,12 @@ namespace stnode
 				case ops::LGNOT:
 				case ops::LGAND:
 				case ops::LGOR:
+				case ops::BIG:
+				case ops::BIGEQU:
+				case ops::LES:
+				case ops::LESEQU:
+				case ops::EQU:
+				case ops::NEQU:
 					return opType::LOGICAL;
 				case ops::ASSIGN:
 				case ops::MODASS:
