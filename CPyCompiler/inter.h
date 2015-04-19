@@ -87,16 +87,17 @@ namespace stnode
 
 namespace iCode
 {
-	enum argType{ ERROR, CONST, STR, ID_GLOBAL, ID_LOCAL, TEMP };
-	enum opType{ 
+	enum argType{ ERROR, CONST, STR, ID_GLOBAL, ID_LOCAL, CSHIFT, TEMP };
+	enum opType{
 		NUL, SET,
-		ADD, SUB, MUL, DIV, MOD, SHL, SHR, AND, BOR, XOR, NOT, 
-		R_ADD, I_ADD, G_ADD
+		ADD, SUB, MUL, DIV, MOD, SHL, SHR, AND, BOR, XOR, NOT,
+		R_ADD, I_ADD, G_ADD,
+		PUSH, POP, PEEK, SP_ADD, SP_SUB
 	};
 	enum ifType{
 		IFE, IFN, IFG, IFGE, IFL, IFLE
 	};
-	enum codeType{ _ERROR, NORMAL, LABEL, JUMP, JUMP_IF };
+	enum codeType{ _ERROR, NORMAL, LABEL, JUMP, JUMP_IF, CALL, RET };
 
 	class arg
 	{
@@ -134,6 +135,15 @@ namespace iCode
 		id_local(size_t _shift){ shift = _shift; }
 		size_t shift;
 		argType getType(){ return argType::ID_LOCAL; };
+	};
+
+	class cshift :public arg
+	{
+	public:
+		cshift(arg *_base, size_t _shift){ base = _base; shift = _shift; }
+		arg *base;
+		size_t shift;
+		argType getType(){ return argType::CSHIFT; };
 	};
 
 	class iCode
@@ -185,6 +195,23 @@ namespace iCode
 		arg *arg1, *arg2;
 		size_t labelNo;
 		codeType getType(){ return codeType::JUMP_IF; };
+	};
+
+	class call :public iCode
+	{
+	public:
+		call(size_t _labelNo, arg *_ret){ labelNo = _labelNo; ret = _ret; }
+		size_t labelNo;
+		arg *ret;
+		codeType getType(){ return codeType::CALL; };
+	};
+
+	class ret :public iCode
+	{
+	public:
+		ret(arg *_val = NULL){ val = _val; }
+		arg *val;
+		codeType getType(){ return codeType::RET; };
 	};
 }
 typedef std::list<iCode::iCode*> iCodeSeq;

@@ -6,7 +6,7 @@
 struct dataType
 {
 	enum type{
-		ERROR, ANY,
+		ERROR,
 		VOID, SINT, S8, S16, S32, S64, UINT, U8, U16, U32, U64,
 	};
 	dataType(){ dType = dataType::ERROR; ptrLvl = 0; isConst = false; };

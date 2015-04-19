@@ -64,9 +64,9 @@ struct retValTp
 	dataType type;
 };
 
-errInfo inter_gen(stnode::stnode*, iCodeSeq &, retValTp &);
+errInfo inter_gen(stnode::stnode*, iCodeSeq &, size_t &, size_t, retValTp &);
 
-errInfo inter_if(stnode::stnode* node, iCodeSeq &ret, size_t yesLabel, size_t noLabel)
+errInfo inter_if(stnode::stnode* node, iCodeSeq &ret, size_t &sp, size_t spOrigin, size_t yesLabel, size_t noLabel)
 {
 	if (node == NULL)
 		return errInfo(0, 0, "NULL Pointer");
@@ -79,26 +79,26 @@ errInfo inter_if(stnode::stnode* node, iCodeSeq &ret, size_t yesLabel, size_t no
 		{
 			case stnode::op::ops::LGNOT:
 				if (exp->argCount != 1) return errInfo(exp->lineN, exp->pos, "Need 1 arg");
-				err = inter_if(exp->arg[0], ret, noLabel, yesLabel);
+				err = inter_if(exp->arg[0], ret, sp, spOrigin, noLabel, yesLabel);
 				if (err.err)
 					return err;
 				break;
 			case stnode::op::ops::LGAND:
 				if (exp->argCount != 2) return errInfo(exp->lineN, exp->pos, "Need 2 args");
-				err = inter_if(exp->arg[0], ret, NULL, noLabel);
+				err = inter_if(exp->arg[0], ret, sp, spOrigin, NULL, noLabel);
 				if (err.err)
 					return err;
-				err = inter_if(exp->arg[1], ret, NULL, noLabel);
+				err = inter_if(exp->arg[1], ret, sp, spOrigin, NULL, noLabel);
 				if (err.err)
 					return err;
 				ret.push_back(new iCode::jump(yesLabel));
 				break;
 			case stnode::op::ops::LGOR:
 				if (exp->argCount != 2) return errInfo(exp->lineN, exp->pos, "Need 2 args");
-				err = inter_if(exp->arg[0], ret, yesLabel, NULL);
+				err = inter_if(exp->arg[0], ret, sp, spOrigin, yesLabel, NULL);
 				if (err.err)
 					return err;
-				err = inter_if(exp->arg[1], ret, yesLabel, NULL);
+				err = inter_if(exp->arg[1], ret, sp, spOrigin, yesLabel, NULL);
 				if (err.err)
 					return err;
 				ret.push_back(new iCode::jump(noLabel));
@@ -127,7 +127,7 @@ errInfo inter_if(stnode::stnode* node, iCodeSeq &ret, size_t yesLabel, size_t no
 					retValTp argRet;
 					for (int i = 0; i < 2; i++)
 					{
-						err = inter_gen(exp->arg[i], ret, argRet);
+						err = inter_gen(exp->arg[i], ret, sp, spOrigin, argRet);
 						if (err.err)
 							return err;
 						args[i] = argRet.val;
@@ -141,9 +141,11 @@ errInfo inter_if(stnode::stnode* node, iCodeSeq &ret, size_t yesLabel, size_t no
 			default:
 			{
 				retValTp retVal;
-				errInfo err = inter_gen(node, ret, retVal);
+				errInfo err = inter_gen(node, ret, sp, spOrigin, retVal);
 				if (err.err)
 					return err;
+				if (retVal.val->getType() == iCode::argType::TEMP)
+					static_cast<iCode::temp*>(retVal.val)->ref++;
 				ret.push_back(new iCode::jump_if(iCode::IFN, yesLabel, retVal.val, new iCode::con(0)));
 				ret.push_back(new iCode::jump(noLabel));
 			}
@@ -152,16 +154,18 @@ errInfo inter_if(stnode::stnode* node, iCodeSeq &ret, size_t yesLabel, size_t no
 	else
 	{
 		retValTp retVal;
-		errInfo err = inter_gen(node, ret, retVal);
+		errInfo err = inter_gen(node, ret, sp, spOrigin, retVal);
 		if (err.err)
 			return err;
+		if (retVal.val->getType() == iCode::argType::TEMP)
+			static_cast<iCode::temp*>(retVal.val)->ref++;
 		ret.push_back(new iCode::jump_if(iCode::IFN, yesLabel, retVal.val, new iCode::con(0)));
 		ret.push_back(new iCode::jump(noLabel));
 	}
 	return noErr;
 }
 
-errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, retValTp &retVal)
+errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, size_t &sp, size_t spOrigin, retValTp &retVal)
 {
 	if (node == NULL)
 		return errInfo(0, 0, "NULL Pointer");
@@ -169,8 +173,9 @@ errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, retValTp &retVal)
 	{
 		case stnode::type::NUMBER:
 		{
-			retVal.val = new iCode::con(static_cast<stnode::number *>(node)->val);
-			retVal.type = dataType(dataType::ANY, 0);
+			long long val = static_cast<stnode::number *>(node)->val;
+			retVal.val = new iCode::con(val);
+			retVal.type = dataType(minNum(val), 0, true);;
 			break;
 		}
 		case stnode::type::CHARA:
@@ -196,7 +201,7 @@ errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, retValTp &retVal)
 		case stnode::type::ID_LOCAL:
 		{
 			stnode::id_local *idNode = static_cast<stnode::id_local *>(node);
-			iCode::id_local *newIDNode = new iCode::id_local(idNode->shift);
+			iCode::id_local *newIDNode = new iCode::id_local(sp - idNode->shift - typeSize(idNode->dtype) + 1);
 			retVal.val = newIDNode;
 			retVal.type = idNode->dtype;
 			break;
@@ -213,7 +218,7 @@ errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, retValTp &retVal)
 				tmpArg->pCode.push_back(code);
 				ret.push_back(code);
 				size_t yesLabel = newLbl(), noLabel = newLbl();
-				errInfo err = inter_if(node, ret, yesLabel, noLabel);
+				errInfo err = inter_if(node, ret, sp, spOrigin, yesLabel, noLabel);
 				if (err.err)
 					return err;
 				ret.push_back(new iCode::label(yesLabel));
@@ -360,7 +365,7 @@ errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, retValTp &retVal)
 				retValTp argRet;
 				for (int i = 0; i < needArg; i++)
 				{
-					errInfo err = inter_gen(opNode->arg[i], ret, argRet);
+					errInfo err = inter_gen(opNode->arg[i], ret, sp, spOrigin, argRet);
 					if (err.err)
 						return err;
 					args[i] = argRet.val;
@@ -467,9 +472,10 @@ errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, retValTp &retVal)
 			stTree::iterator p = block->begin(), pEnd = block->end();
 			retValTp retVar;
 			ret.push_back(new iCode::label(funcLabel));
+			size_t spO = sp;
 			for (; p != pEnd; p++)
 			{
-				errInfo err = inter_gen(*p, ret, retVar);
+				errInfo err = inter_gen(*p, ret, sp, spO, retVar);
 				if (err.err)
 					return err;
 			}
@@ -480,7 +486,161 @@ errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, retValTp &retVal)
 		case stnode::type::CALL_INTER:
 		{
 			stnode::call_inter *callNode = static_cast<stnode::call_inter *>(node);
-			
+			funcItem &funcInfo = funcTable[callNode->funcID];
+
+			retValTp argRet;
+			iCode::code *newCode;
+			errInfo err;
+			size_t i = 0, argSize = 0;
+			std::for_each(callNode->args.begin(), callNode->args.end(), [&](stnode::stnode *node){
+				err = inter_gen(node, ret, sp, spOrigin, argRet);
+				if (argRet.val->getType() == iCode::argType::TEMP)
+					static_cast<iCode::temp*>(argRet.val)->ref++;
+				newCode = new iCode::code(iCode::opType::PUSH, NULL, argRet.val);
+				newCode->argType = funcInfo.argType[i];
+				ret.push_back(newCode);
+				argSize += typeSize(funcInfo.argType[i]);
+				i++;
+			});
+			if (funcInfo.retType.dType == dataType::VOID && funcInfo.retType.ptrLvl == 0)
+				ret.push_back(new iCode::jump(funcInfo.labelNo));
+			else
+			{
+				iCode::temp *tmpNode = new iCode::temp;
+				iCode::call *code = new iCode::call(funcInfo.labelNo, tmpNode);
+				ret.push_back(code);
+				tmpNode->pCode.push_back(code);
+			}
+
+			ret.push_back(new iCode::code(iCode::opType::SP_SUB, NULL, new iCode::con(argSize)));
+			break;
+		}
+		case stnode::type::RETURN:
+		{
+			stnode::ret *retNode = static_cast<stnode::ret *>(node);
+			retValTp argRet;
+
+			if (retNode->retVal == NULL)
+				argRet.val = NULL;
+			else
+			{
+				errInfo err = inter_gen(retNode->retVal, ret, sp, spOrigin, argRet);
+				if (err.err)
+					return err;
+				if (argRet.val->getType() == iCode::argType::TEMP)
+					static_cast<iCode::temp*>(argRet.val)->ref++;
+			}
+
+			ret.push_back(new iCode::code(iCode::opType::SP_SUB, NULL, new iCode::con(sp - spOrigin)));
+			ret.push_back(new iCode::ret(argRet.val));
+
+			break;
+		}
+		case stnode::type::ALLOC_GLOBAL:
+		{
+			stnode::alloc_global *allocNode = static_cast<stnode::alloc_global *>(node);
+			std::list<stnode::allocUnit_global>::iterator p = allocNode->var.begin(), pEnd = allocNode->var.end();
+			size_t i;
+			for (; p != pEnd; p++)
+			{
+				if (p->init)
+				{
+					retValTp argRet;
+					errInfo err;
+					if (p->subCount == 0)
+					{
+						err = inter_gen(*(p->val), ret, sp, spOrigin, argRet);
+						if (err.err)
+							return err;
+						if (argRet.val->getType() == iCode::argType::TEMP)
+							static_cast<iCode::temp*>(argRet.val)->ref++;
+						ret.push_back(new iCode::code(iCode::opType::SET, new iCode::id_global(p->varID), argRet.val));
+					}
+					else
+					{
+						int tSize = typeSize(idGlobal.table[p->varID].type);
+						size_t shift = 0;
+						for (i = 0; i < p->subCount; i++)
+						{
+							if (p->val[i] == NULL)
+								break;
+							err = inter_gen(p->val[i], ret, sp, spOrigin, argRet);
+							if (err.err)
+								return err;
+							if (argRet.val->getType() == iCode::argType::TEMP)
+								static_cast<iCode::temp*>(argRet.val)->ref++;
+							ret.push_back(new iCode::code(iCode::opType::SET, new iCode::cshift(new iCode::id_global(p->varID), shift), argRet.val));
+							shift += tSize;
+						}
+					}
+				}
+			}
+			break;
+		}
+		case stnode::type::ALLOC_LOCAL:
+		{
+			stnode::alloc_local *allocNode = static_cast<stnode::alloc_local *>(node);
+			std::list<stnode::allocUnit_local>::iterator p = allocNode->var.begin(), pEnd = allocNode->var.end();
+			size_t i, sp_add = 0;
+			for (; p != pEnd; p++)
+			{
+				retValTp argRet;
+				errInfo err;
+				if (p->subCount == 0)
+				{
+					if (p->init)
+					{
+						if (sp_add != 0)
+						{
+							ret.push_back(new iCode::code(iCode::opType::SP_ADD, NULL, new iCode::con(sp_add)));
+							sp_add = 0;
+						}
+						err = inter_gen(*p->val, ret, sp, spOrigin, argRet);
+						if (err.err)
+							return err;
+						if (argRet.val->getType() == iCode::argType::TEMP)
+							static_cast<iCode::temp*>(argRet.val)->ref++;
+						iCode::code *newCode = new iCode::code(iCode::opType::PUSH, NULL, argRet.val);
+						newCode->argType = p->dtype;
+						ret.push_back(newCode);
+					}
+					else
+						sp_add += typeSize(p->dtype);
+					sp += typeSize(p->dtype);
+				}
+				else
+				{
+					int tSize = typeSize(p->dtype);
+					size_t shift = sp;
+					sp += tSize * p->subCount;
+					if (p->init)
+					{
+						if (sp_add != 0)
+						{
+							ret.push_back(new iCode::code(iCode::opType::SP_ADD, NULL, new iCode::con(sp_add)));
+							sp_add = 0;
+						}
+						for (i = 0; i < p->subCount; i++)
+						{
+							if (p->val[i] == NULL)
+								break;
+							err = inter_gen(p->val[i], ret, sp, spOrigin, argRet);
+							if (err.err)
+								return err;
+							if (argRet.val->getType() == iCode::argType::TEMP)
+								static_cast<iCode::temp*>(argRet.val)->ref++;
+							iCode::code *newCode = new iCode::code(iCode::opType::PUSH, NULL, argRet.val);
+							newCode->argType = p->dtype;
+							ret.push_back(newCode);
+							shift += tSize;
+						}
+					}
+					else
+						sp_add += tSize * p->subCount;
+				}
+			}
+			if (sp_add != 0)
+				ret.push_back(new iCode::code(iCode::opType::SP_ADD, NULL, new iCode::con(sp_add)));
 			break;
 		}
 		case stnode::type::CAST:
@@ -488,7 +648,7 @@ errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, retValTp &retVal)
 			stnode::cast *castNode = static_cast<stnode::cast *>(node);
 
 			retValTp argRet;
-			errInfo err = inter_gen(castNode->node, ret, argRet);
+			errInfo err = inter_gen(castNode->node, ret, sp, spOrigin, argRet);
 			if (err.err)
 				return err;
 			if (argRet.val->getType()==iCode::argType::TEMP)
@@ -510,7 +670,7 @@ errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, retValTp &retVal)
 			stnode::ifelse *ifNode = static_cast<stnode::ifelse *>(node);
 
 			size_t yesLabel = newLbl(), noLabel = newLbl();
-			errInfo err = inter_if(ifNode->exp, ret, yesLabel, noLabel);
+			errInfo err = inter_if(ifNode->exp, ret, sp, spOrigin, yesLabel, noLabel);
 			if (err.err)
 				return err;
 			if (ifNode->blockFalse != NULL)
@@ -523,7 +683,7 @@ errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, retValTp &retVal)
 				retValTp retVar;
 				for (; p != pEnd; p++)
 				{
-					errInfo err = inter_gen(*p, ret, retVar);
+					errInfo err = inter_gen(*p, ret, sp, spOrigin, retVar);
 					if (err.err)
 						return err;
 				}
@@ -535,7 +695,7 @@ errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, retValTp &retVal)
 				p = block->begin(), pEnd = block->end();
 				for (; p != pEnd; p++)
 				{
-					errInfo err = inter_gen(*p, ret, retVar);
+					errInfo err = inter_gen(*p, ret, sp, spOrigin, retVar);
 					if (err.err)
 						return err;
 				}
@@ -551,7 +711,7 @@ errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, retValTp &retVal)
 				retValTp retVar;
 				for (; p != pEnd; p++)
 				{
-					errInfo err = inter_gen(*p, ret, retVar);
+					errInfo err = inter_gen(*p, ret, sp, spOrigin, retVar);
 					if (err.err)
 						return err;
 				}
@@ -560,10 +720,6 @@ errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, retValTp &retVal)
 			}
 
 			break;
-		}
-		case stnode::type::RETURN:
-		{
-
 		}
 		case stnode::type::TREE:
 		{
@@ -601,9 +757,10 @@ errInfo inter(stTree &sTree, iCodeSeq &ret, dataType retType)
 	}
 
 	retValTp retVal;
+	size_t sp = -1;
 	for (p = sTree.begin(); p != pEnd; p++)
 	{
-		errInfo err = inter_gen(*p, ret, retVal);
+		errInfo err = inter_gen(*p, ret, sp, 0, retVal);
 		if (err.err)
 			return err;
 	}

@@ -456,7 +456,7 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
 							{
 								return errInfo(opNode->arg[i]->lineN, opNode->arg[i]->pos, str2cstr(std::string("Invalid cast from ") + type2Str(types[i]) + " to " + type2Str(type)));
 							}
-							if (typeLvl(types[i]) < typeLvl(type))
+							if (typeLvl(types[i]) < typeLvl(type) && types[i].isConst == false)
 							{
 								opNode->arg[i] = new stnode::cast(opNode->arg[i], type);
 							}
@@ -485,7 +485,7 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
 						{
 							return errInfo(opNode->arg[1]->lineN, opNode->arg[1]->pos, str2cstr(std::string("Invalid cast from ") + type2Str(type2) + " to " + type2Str(type1)));
 						}
-						if (type2.dType != type1.dType)
+						if (type2.dType != type1.dType && type2.isConst == false)
 						{
 							opNode->arg[1] = new stnode::cast(opNode->arg[1], type1);
 						}
@@ -594,7 +594,7 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
 				{
 					return errInfo(retNode->retVal->lineN, retNode->retVal->pos, str2cstr(std::string("Invalid cast from ") + type2Str(valType) + " to " + type2Str(retType)));
 				}
-				if (retType.dType != valType.dType)
+				if (retType.dType != valType.dType && valType.isConst == false)
 				{
 					retNode->retVal = new stnode::cast(retNode->retVal, retType);
 				}
@@ -654,7 +654,7 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
 						{
 							return errInfo((*(p->val))->lineN, (*(p->val))->pos, str2cstr(std::string("Invalid cast from ") + type2Str(type2) + " to " + type2Str(type1)));
 						}
-						if (type2.dType != type1.dType)
+						if (type2.dType != type1.dType && type2.isConst == false)
 						{
 							*(p->val) = new stnode::cast(*(p->val), type1);
 						}
@@ -676,7 +676,7 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
 							{
 								return errInfo(p->val[i]->lineN, p->val[i]->pos, str2cstr(std::string("Invalid cast from ") + type2Str(type2) + " to " + type2Str(type1)));
 							}
-							if (type2.dType != type1.dType)
+							if (type2.dType != type1.dType && type2.isConst == false)
 							{
 								p->val[i] = new stnode::cast(p->val[i], type1);
 							}
@@ -707,7 +707,7 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
 						{
 							return errInfo((*(p->val))->lineN, (*(p->val))->pos, str2cstr(std::string("Invalid cast from ") + type2Str(type2) + " to " + type2Str(type1)));
 						}
-						if (type2.dType != type1.dType)
+						if (type2.dType != type1.dType && type2.isConst == false)
 						{
 							*(p->val) = new stnode::cast(*(p->val), type1);
 						}
@@ -729,7 +729,7 @@ errInfo stAnalyzer_type(stnode::stnode **node, dataType retType)
 							{
 								return errInfo(p->val[i]->lineN, p->val[i]->pos, str2cstr(std::string("Invalid cast from ") + type2Str(type2) + " to " + type2Str(type1)));
 							}
-							if (type2.dType != type1.dType)
+							if (type2.dType != type1.dType && type2.isConst == false)
 							{
 								p->val[i] = new stnode::cast(p->val[i], type1);
 							}
