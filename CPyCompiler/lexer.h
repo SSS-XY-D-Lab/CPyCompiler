@@ -3,10 +3,6 @@
 #ifndef _H_SCANNER
 #define _H_SCANNER
 
-#include <list>
-#include <string>
-#include <sstream>
-
 namespace token
 {
 	enum type{ ERROR, NUMBER, CHARA, STR, ID, OP, KEYWORD, BEGIN, DELIM };
@@ -97,7 +93,7 @@ namespace token
 
 	namespace keywords
 	{
-		enum keywords{ ERROR, SINT, S8, S16, S32, S64, UINT, U8, U16, U32, U64, VOID, CONST, DIM, END, FUNCTION, RETURN, IF, ELSE };
+		enum keywords{ ERROR, SINT, S8, S16, S32, S64, UINT, U8, U16, U32, U64, VOID, CONST, GLOBAL, DIM, END, FUNCTION, RETURN, IF, ELSE };
 
 		struct keywordItem
 		{

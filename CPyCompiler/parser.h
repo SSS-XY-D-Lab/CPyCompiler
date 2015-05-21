@@ -3,23 +3,25 @@
 #ifndef _H_ANALYZER
 #define _H_ANALYZER
 
-#include "lexer.h"
 #include "type.h"
+#include "lexer.h"
 
 struct errInfo
 {
-	errInfo(int _lineN, int _pos, const char *_err){ lineN = _lineN; pos = _pos; err = _err; };
+	errInfo(){ err = false; info = NULL; }
+	errInfo(int _lineN, int _pos, const char *_info){ err = true; lineN = _lineN; pos = _pos; info = _info; };
+	bool err;
 	int lineN, pos;
-	const char* err;
+	const char* info;
 };
-const errInfo noErr = errInfo(-1, -1, NULL);
+const errInfo noErr = errInfo();
 
 namespace stnode
 {
 	enum type{ 
 		ERROR, 
 		NUMBER, CHARA, STR, ID, OP, CAST, FUNC, CALL, RETURN, IF, ALLOC, TREE, DELIM,
-		ID_INTER, FUNC_INTER, CALL_INTER, ALLOC_INTER
+		ID_GLOBAL, ID_LOCAL, FUNC_INTER, CALL_INTER, ALLOC_GLOBAL, ALLOC_LOCAL
 	};
 
 	class stnode
@@ -34,7 +36,7 @@ typedef std::list<stnode::stnode*> stTree;
 
 namespace stnode
 {
-	class number:public stnode
+	class number :public stnode
 	{
 	public:
 		number(long long _val){ val = _val; };
@@ -161,10 +163,10 @@ namespace stnode
 	class alloc :public stnode
 	{
 	public:
-		alloc(bool _isConst){ isConst = _isConst; convert = false; };
+		alloc(bool _isConst, bool _isGlobal){ isConst = _isConst; isGlobal = _isGlobal; convert = false; };
 		~alloc();
 		std::list<allocUnit> var;
-		bool isConst;
+		bool isConst, isGlobal;
 		bool convert;
 		type getType(){ return type::ALLOC; };
 	};
