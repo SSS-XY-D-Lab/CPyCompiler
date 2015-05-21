@@ -66,7 +66,35 @@ struct retValTp
 
 errInfo inter_gen(stnode::stnode*, iCodeSeq &, size_t &, size_t, retValTp &);
 
-errInfo inter_if(stnode::stnode* node, iCodeSeq &ret, size_t &sp, size_t spOrigin, size_t yesLabel, size_t noLabel)
+struct label_if
+{
+	label_if(){ valid = false; }
+	label_if(size_t _id){ valid = true; id = _id; }
+	bool valid;
+	size_t id;
+};
+
+iCode::ifType operator~(iCode::ifType arg)
+{
+	switch (arg)
+	{
+		case iCode::ifType::IFE:
+			return iCode::ifType::IFN;
+		case iCode::ifType::IFN:
+			return iCode::ifType::IFE;
+		case iCode::ifType::IFG:
+			return iCode::ifType::IFLE;
+		case iCode::ifType::IFGE:
+			return iCode::ifType::IFL;
+		case iCode::ifType::IFL:
+			return iCode::ifType::IFGE;
+		case iCode::ifType::IFLE:
+			return iCode::ifType::IFG;
+	}
+	return iCode::ifType::IFE;
+}
+
+errInfo inter_if(stnode::stnode* node, iCodeSeq &ret, size_t &sp, size_t spOrigin, label_if yesLabel, label_if noLabel)
 {
 	if (node == NULL)
 		return errInfo(0, 0, "NULL Pointer");
@@ -85,26 +113,28 @@ errInfo inter_if(stnode::stnode* node, iCodeSeq &ret, size_t &sp, size_t spOrigi
 				break;
 			case stnode::op::ops::LGAND:
 				if (exp->argCount != 2) return errInfo(exp->lineN, exp->pos, "Need 2 args");
-				err = inter_if(exp->arg[0], ret, sp, spOrigin, NULL, noLabel);
+				err = inter_if(exp->arg[0], ret, sp, spOrigin, label_if(), noLabel);
 				if (err.err)
 					return err;
-				err = inter_if(exp->arg[1], ret, sp, spOrigin, NULL, noLabel);
+				err = inter_if(exp->arg[1], ret, sp, spOrigin, label_if(), noLabel);
 				if (err.err)
 					return err;
-				ret.push_back(new iCode::jump(yesLabel));
+				if (yesLabel.valid)
+					ret.push_back(new iCode::jump(yesLabel.id));
 				break;
 			case stnode::op::ops::LGOR:
 				if (exp->argCount != 2) return errInfo(exp->lineN, exp->pos, "Need 2 args");
-				err = inter_if(exp->arg[0], ret, sp, spOrigin, yesLabel, NULL);
+				err = inter_if(exp->arg[0], ret, sp, spOrigin, yesLabel, label_if());
 				if (err.err)
 					return err;
-				err = inter_if(exp->arg[1], ret, sp, spOrigin, yesLabel, NULL);
+				err = inter_if(exp->arg[1], ret, sp, spOrigin, yesLabel, label_if());
 				if (err.err)
 					return err;
-				ret.push_back(new iCode::jump(noLabel));
+				if (noLabel.valid)
+					ret.push_back(new iCode::jump(noLabel.id));
 				break;
 			case stnode::op::ops::BIG:
-				ifOp = iCode::IFG;
+				ifOp = iCode::ifType::IFG;
 				goto process_if;
 			case stnode::op::ops::BIGEQU:
 				ifOp = iCode::IFGE;
@@ -134,8 +164,16 @@ errInfo inter_if(stnode::stnode* node, iCodeSeq &ret, size_t &sp, size_t spOrigi
 						if (argRet.val->getType() == iCode::argType::TEMP)
 							static_cast<iCode::temp*>(argRet.val)->ref++;
 					}
-					ret.push_back(new iCode::jump_if(ifOp, yesLabel, args[0], args[1]));
-					ret.push_back(new iCode::jump(noLabel));
+					if (yesLabel.valid)
+					{
+						ret.push_back(new iCode::jump_if(ifOp, yesLabel.id, args[0], args[1]));
+						if (noLabel.valid)
+							ret.push_back(new iCode::jump(noLabel.id));
+					}
+					else if (noLabel.valid)
+					{
+						ret.push_back(new iCode::jump_if(~ifOp, noLabel.id, args[0], args[1]));
+					}
 				}
 				break;
 			default:
@@ -146,8 +184,16 @@ errInfo inter_if(stnode::stnode* node, iCodeSeq &ret, size_t &sp, size_t spOrigi
 					return err;
 				if (retVal.val->getType() == iCode::argType::TEMP)
 					static_cast<iCode::temp*>(retVal.val)->ref++;
-				ret.push_back(new iCode::jump_if(iCode::IFN, yesLabel, retVal.val, new iCode::con(0)));
-				ret.push_back(new iCode::jump(noLabel));
+				if (yesLabel.valid)
+				{
+					ret.push_back(new iCode::jump_if(iCode::IFN, yesLabel.id, retVal.val, new iCode::con(0)));
+					if (noLabel.valid)
+						ret.push_back(new iCode::jump(noLabel.id));
+				}
+				else if (noLabel.valid)
+				{
+					ret.push_back(new iCode::jump_if(iCode::IFE, noLabel.id, retVal.val, new iCode::con(0)));
+				}
 			}
 		}
 	}
@@ -159,8 +205,16 @@ errInfo inter_if(stnode::stnode* node, iCodeSeq &ret, size_t &sp, size_t spOrigi
 			return err;
 		if (retVal.val->getType() == iCode::argType::TEMP)
 			static_cast<iCode::temp*>(retVal.val)->ref++;
-		ret.push_back(new iCode::jump_if(iCode::IFN, yesLabel, retVal.val, new iCode::con(0)));
-		ret.push_back(new iCode::jump(noLabel));
+		if (yesLabel.valid)
+		{
+			ret.push_back(new iCode::jump_if(iCode::IFN, yesLabel.id, retVal.val, new iCode::con(0)));
+			if (noLabel.valid)
+				ret.push_back(new iCode::jump(noLabel.id));
+		}
+		else if (noLabel.valid)
+		{
+			ret.push_back(new iCode::jump_if(iCode::IFE, noLabel.id, retVal.val, new iCode::con(0)));
+		}
 	}
 	return noErr;
 }
@@ -217,12 +271,11 @@ errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, size_t &sp, size_t spOrig
 				iCode::code *code = new iCode::code(iCode::SET, tmpArg, new iCode::con(0));
 				tmpArg->pCode.push_back(code);
 				ret.push_back(code);
-				size_t yesLabel = newLbl(), noLabel = newLbl();
-				errInfo err = inter_if(node, ret, sp, spOrigin, yesLabel, noLabel);
+				size_t noLabel = newLbl();
+				errInfo err = inter_if(node, ret, sp, spOrigin, label_if(), noLabel);
 				if (err.err)
 					return err;
-				ret.push_back(new iCode::label(yesLabel));
-				code = new iCode::code(iCode::SET, tmpArg, new iCode::con(1));
+				code = new iCode::code(iCode::SET, tmpArg, new iCode::con(-1));
 				tmpArg->pCode.push_back(code);
 				ret.push_back(code);
 				ret.push_back(new iCode::label(noLabel));
@@ -723,7 +776,15 @@ errInfo inter_gen(stnode::stnode* node, iCodeSeq &ret, size_t &sp, size_t spOrig
 		}
 		case stnode::type::TREE:
 		{
-
+			stnode::expTree *treeNode = static_cast<stnode::expTree *>(node);
+			retValTp retVar;
+			errInfo err = inter_gen(treeNode->prev, ret, sp, spOrigin, retVar);
+			if (err.err)
+				return err;
+			err = inter_gen(treeNode->exp, ret, sp, spOrigin, retVar);
+			if (err.err)
+				return err;
+			retVal = retVar;
 		}
 	}
 	return noErr;
