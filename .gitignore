@@ -197,3 +197,6 @@ CPyCompiler/CPyCompiler.idc
 *.depend
 *.exe
 *.o
+
+# Xcode project files
+CPyCompiler/CPyCompiler.xcodeproj
