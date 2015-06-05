@@ -64,7 +64,8 @@ int newGlobalID(std::string name, dataType type, size_t &ret, bool isConst = fal
 	idGlobal.hash.emplace(name, id);
 	idGlobal.table.push_back(idItem(type, isConst));
 	idMutex.unlock();
-	return id;
+	ret = id;
+	return 0;
 }
 
 int newGlobalID(std::string name, size_t funcID, size_t &ret)
@@ -76,7 +77,8 @@ int newGlobalID(std::string name, size_t funcID, size_t &ret)
 	idGlobal.hash.emplace(name, id);
 	idGlobal.table.push_back(idItem(funcID));
 	idMutex.unlock();
-	return id;
+	ret = id;
+	return 0;
 }
 
 int newFuncID(std::string name, dataType retType, std::vector<dataType> &argType, size_t &ret)
