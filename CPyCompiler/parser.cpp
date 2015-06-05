@@ -10,6 +10,7 @@ stnode::stnode *yacc_result;
 tokenList::iterator yacc_p, yacc_pEnd;
 const char *yacc_err;
 int yacc_lineN;
+std::mutex yacc_mutex;
 
 namespace stnode
 {
@@ -93,12 +94,6 @@ namespace stnode
 				case ops::SUB:
 				case ops::SHL:
 				case ops::SHR:
-				case ops::BIG:
-				case ops::BIGEQU:
-				case ops::LES:
-				case ops::LESEQU:
-				case ops::EQU:
-				case ops::NEQU:
 				case ops::AND:
 				case ops::XOR:
 				case ops::BOR:
@@ -106,6 +101,12 @@ namespace stnode
 				case ops::LGNOT:
 				case ops::LGAND:
 				case ops::LGOR:
+				case ops::BIG:
+				case ops::BIGEQU:
+				case ops::LES:
+				case ops::LESEQU:
+				case ops::EQU:
+				case ops::NEQU:
 					return opType::LOGICAL;
 				case ops::ASSIGN:
 				case ops::MODASS:
@@ -198,6 +199,7 @@ errInfo parser_exp(tokenList &tList, stnode::stnode **root, tokenList::iterator 
 		if ((*p)->getType() == token::type::DELIM)
 			break;
 	p++;
+	yacc_mutex.lock();
 	yacc_result = NULL;
 	yacc_err = NULL;
 	yacc_p = pBeg;
@@ -208,9 +210,11 @@ errInfo parser_exp(tokenList &tList, stnode::stnode **root, tokenList::iterator 
 	{
 		if (yacc_p == pEnd)
 			yacc_p--;
+		yacc_mutex.unlock();
 		return errInfo(lineNumber, (*yacc_p)->pos, yacc_err);
 	}
 	*root = yacc_result;
+	yacc_mutex.unlock();
 	return noErr;
 }
 
@@ -229,7 +233,7 @@ errInfo parser_dim(tokenList &tList, stnode::alloc *allocPtr, tokenList::iterato
 			nextToken(;);
 		}
 		dataType varType = getVarType(type->word, ptrLvl);
-		if (varType.dType == dataType::ERROR || varType.dType == dataType::VOID)
+		if (varType.dType == dataType::ERROR || (varType.dType == dataType::VOID && varType.ptrLvl == 0))
 		{
 			prevToken;
 			while (ptrLvl)
@@ -393,14 +397,45 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 				token::keyword *kw = static_cast<token::keyword *>(first);
 				switch (kw->word)
 				{
-					case token::keywords::keywords::CONST:
+					case token::keywords::keywords::GLOBAL:
 					{
 						nextToken(;);
-						stnode::alloc *allocPtr = new stnode::alloc(true);
+						bool isConst;
+						if ((*p)->getType() != token::type::KEYWORD)
+							return errInfo(lineNumber, errPtr, "dim or const expected");
+						kw = static_cast<token::keyword*>(*p);
+						switch (kw->word)
+						{
+							case token::keywords::keywords::CONST:
+								isConst = true;
+								break;
+							case token::keywords::keywords::DIM:
+								isConst = false;
+								break;
+							default:
+								return errInfo(lineNumber, errPtr, "dim or const expected");
+						}
+						nextToken(;);
+						stnode::alloc *allocPtr = new stnode::alloc(isConst, true);
 						allocPtr->lineN = lineNumber;
 						allocPtr->pos = first->pos;
 						errInfo err = parser_dim(tList, allocPtr, p, lineNumber);
-						if (err.err != NULL)
+						if (err.err)
+						{
+							delete allocPtr;
+							return err;
+						}
+						ptr = allocPtr;
+						break;
+					}
+					case token::keywords::keywords::CONST:
+					{
+						nextToken(;);
+						stnode::alloc *allocPtr = new stnode::alloc(true, false);
+						allocPtr->lineN = lineNumber;
+						allocPtr->pos = first->pos;
+						errInfo err = parser_dim(tList, allocPtr, p, lineNumber);
+						if (err.err)
 						{
 							delete allocPtr;
 							return err;
@@ -411,11 +446,11 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 					case token::keywords::keywords::DIM:
 					{
 						nextToken(;);
-						stnode::alloc *allocPtr = new stnode::alloc(false);
+						stnode::alloc *allocPtr = new stnode::alloc(false, false);
 						allocPtr->lineN = lineNumber;
 						allocPtr->pos = first->pos;
 						errInfo err = parser_dim(tList, allocPtr, p, lineNumber);
-						if (err.err != NULL)
+						if (err.err)
 						{
 							delete allocPtr;
 							return err;
@@ -502,7 +537,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 											ptrLvl--;
 											prevToken;
 										}
-										return errInfo(lineNumber, errPtr, "Parameter type expected");
+										return errInfo(lineNumber, errPtr, "Invalid type");
 									}
 									if ((*p)->getType() != token::type::ID)
 									{
@@ -560,7 +595,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 						{
 							stnode::stnode *exp;
 							errInfo err = parser_exp(tList, &exp, p, lineNumber);
-							if (err.err != NULL)
+							if (err.err)
 								return err;
 							retPtr->retVal = exp;
 						}
@@ -572,7 +607,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 						stnode::stnode *exp;
 						nextToken(;);
 						errInfo err = parser_exp(tList, &exp, p, lineNumber);
-						if (err.err != NULL)
+						if (err.err)
 							return err;
 						stnode::ifelse *ifPtr = new stnode::ifelse;
 						ifPtr->lineN = lineNumber;
@@ -635,7 +670,7 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 			{
 				stnode::stnode *ptrExp = NULL;
 				errInfo err = parser_exp(tList, &ptrExp, p, lineNumber);
-				if (err.err != NULL)
+				if (err.err)
 					return err;
 				ptr = ptrExp;
 			}
@@ -644,6 +679,6 @@ errInfo parser(tokenList &tList, stTree *_sTree)
 			sTreeStk.back().sTree->push_back(ptr);
 	}
 	if (sTreeStk.size() > 1)
-		return errInfo(lineNumber, errPtr, "Missing code block ending");
+		return errInfo(lineNumber + 1, 0, "Missing code block ending");
 	return noErr;
 }
